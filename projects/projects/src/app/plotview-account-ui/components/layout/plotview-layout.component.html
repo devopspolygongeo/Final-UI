@@ -1,0 +1,71 @@
+<!-- NAVBAR HEADER -->
+<header class="header">
+  <div class="left">
+    <img
+      src="assets/images/logo_original_64x64.png"
+      alt="Plotview Logo"
+      class="logo"
+    />
+    <span class="brand-text">plotview</span>
+  </div>
+
+  <nav class="center">
+    <a routerLink="/plotview-account-ui/dashboard" routerLinkActive="active"
+      >Dashboard</a
+    >
+
+    <!-- Temporarily hidden -->
+  <!--
+    <a routerLink="/plotview-account-ui/subscription" routerLinkActive="active"
+      >Subscriptions</a
+    >
+    <a routerLink="/plotview-account-ui/invoices" routerLinkActive="active"
+      >Invoices</a
+    >
+    <a routerLink="/plotview-account-ui/support" routerLinkActive="active"
+      >Support</a
+    >  -->
+    <a routerLink="/plotview-account-ui/account" routerLinkActive="active"
+      >Account</a
+    >
+  </nav>
+
+  <div class="right">
+    <div class="user-dropdown-wrapper" (click)="toggleDropdown($event)">
+      <img
+        src="assets/admin-dashboard/admin-profile-inactive.png"
+        alt="User Icon"
+        class="user-icon"
+      />
+      <span class="user-name">Rajasekhar</span>
+      <svg
+        class="dropdown-arrow"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        ></path>
+      </svg>
+
+      <div  class="dropdown-menu" [class.show]="dropdownOpen" [class.hidden]="!dropdownOpen">
+        <div class="dropdown-item" (click)="goToAccount($event)">
+          <img
+            src="assets/admin-dashboard/admin-profile-active.png"
+            class="icon"
+          />
+          <span>My Account</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CONTENT OUTLET -->
+<div class="content-wrapper">
+  <router-outlet></router-outlet>
+</div>

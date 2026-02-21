@@ -1,0 +1,113 @@
+<div class="row">
+    <div class="col-md-4">
+        <div style="border: solid 1px; border-radius: 5px; border-color: grey; height: 80vh;">
+            <div class="card-header" style="text-align: center; padding: 5%;">
+                <div style="height: 100px; width: 100px; border: solid 1px; border-radius: 100%; background-color: black; margin: auto;"></div>
+                <h5>Rayapati rajsekhar</h5>
+            </div>
+            <hr>
+            <div class="tab-container">
+                <div class="tab">
+                    <span (click)="setActiveTab('profile')" [class.active]="activeTab === 'profile'" style="cursor: pointer; margin-left: 8%;">
+                        <i class="fa-solid fa-user"></i> My Profile
+                    </span>
+                    <hr>
+                    <span (click)="setActiveTab('change-password')" [class.active]="activeTab === 'change-password'" style="cursor: pointer; margin-left: 8%;">
+                        <i class="fa-solid fa-lock"></i> Change Password
+                    </span>
+                    <hr>
+                    <span (click)="setActiveTab('organization-details')" [class.active]="activeTab === 'organization-details'" style="cursor: pointer; margin-left: 8%;">
+                        <i class="fa-regular fa-building"></i> Organization Details
+                    </span>
+                    <hr>
+                    <span (click)="setActiveTab('user-management')" [class.active]="activeTab === 'user-management'" style="cursor: pointer; margin-left: 8%;">
+                        <i class="fa-solid fa-users"></i> User Management
+                    </span>
+                    <hr>
+                    <span (click)="setActiveTab('logout')" [class.active]="activeTab === 'logout'" style="cursor: pointer; margin-left: 8%;">
+                        <i class="fa-solid fa-power-off"></i> Logout
+                    </span>
+                    <hr>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div style="border: solid 1px; border-radius: 5px; border-color: grey; height: 80vh;">
+            <div class="tab-content">
+                <div *ngIf="activeTab === 'profile'">
+                    <div style="padding: 5%; display: flex;">
+                        <div style="height: 80px; width: 80px; border: solid 1px; border-radius: 100%; background-color: black;"></div>
+                        <div style="margin-left: 5%;">
+                            <span style="font-weight: 500;">Rayapati rajsekhar</span><br>
+                            <span style="font-size: smaller;">Accepted file type .png. Less than 1MB</span>
+                            <input type="file" class="form-control">
+                        </div>
+                    </div>
+                    <hr>
+                    <div>
+                        <div style="display: flex; gap: 10%; padding: 5%; flex-wrap: wrap;">
+                            <div class="mb-3">
+                                <label for="">First Name</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="">Last Name</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="">Email</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="">Mobile</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="">Designation</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="activeTab === 'change-password'">
+                    <div style="padding: 5%;">
+                        <div class="mb-3">
+                            <label for="">Password</label>
+                            <input type="text" class="form-control" style="width: 50%;">
+                        </div>
+
+                        <div>
+                            <label for="">Confirm password</label>
+                            <input type="text" class="form-control" style="width: 50%;">
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="activeTab === 'organization-details'">
+                    <h3>Organization Details</h3>
+                    <p>Content for Organization Details.</p>
+                </div>
+                <div *ngIf="activeTab === 'user-management'">
+                    <h3>User Management</h3>
+                    <p>Content for User Management.</p>
+                </div>
+                <div *ngIf="activeTab === 'logout'">
+                    <h3>Logout</h3>
+                    <p>Content for Logout.</p>
+                </div>
+            </div>
+            
+            <div style="padding: 2%;">
+                <div class="btn btn-sm btn-primary" style="float: right;">Save Changes</div>
+            </div>
+        </div>
+        
+
+
+
+
+        
+    </div>
+</div>

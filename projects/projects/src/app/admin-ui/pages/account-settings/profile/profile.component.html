@@ -1,0 +1,98 @@
+<div class="profile-container">
+  <!-- Profile Photo Section -->
+  <div class="profile-photo-section">
+    <div class="photo-upload">
+      <div class="photo-placeholder">
+        <svg
+          width="60"
+          height="60"
+          viewBox="0 0 24 24"
+          fill="#ccc"
+          stroke="none"
+        >
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <div class="photo-info">
+        <h3>Profile Photo</h3>
+        <p class="file-info">Accepted file type .png. Less than 1MB</p>
+        <div class="file-input-wrapper">
+          <input
+            type="file"
+            id="profilePhoto"
+            accept=".png"
+            (change)="onFileSelected($event)"
+            class="file-input"
+          />
+          <label for="profilePhoto" class="file-input-label">Choose file</label>
+          <span class="file-name">{{ fileName }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Fields -->
+  <div class="form-section">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input
+          type="text"
+          id="firstName"
+          [(ngModel)]="profileData.firstName"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input
+          type="text"
+          id="lastName"
+          [(ngModel)]="profileData.lastName"
+          class="form-input"
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="profileData.email"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="mobile">Mobile</label>
+        <input
+          type="tel"
+          id="mobile"
+          [(ngModel)]="profileData.mobile"
+          class="form-input"
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full-width">
+        <label for="designation">Designation</label>
+        <input
+          type="text"
+          id="designation"
+          [(ngModel)]="profileData.designation"
+          class="form-input"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Button -->
+  <div class="save-section">
+    <button type="button" class="save-btn" (click)="onSaveChanges()">
+      Save Changes
+    </button>
+  </div>
+</div>

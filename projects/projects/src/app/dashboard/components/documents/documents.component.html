@@ -1,0 +1,20 @@
+<h5 class="mt-4 ms-4">
+    <span>Documents </span>
+    <!-- <span class="close-btn-nav" (click)="closeButton($event)"><i class="icon-close"></i></span> -->
+
+</h5>
+<div class="mt-4 container">
+    <div class="d-flex flex-md-wrap ">
+        <ng-container *ngIf="documents && documents.length; else emptyDocumentMessage">
+            <div class="m-4 pdf-wrapper" *ngFor="let document of documents" (mousedown)="onClickDocument(document)">
+                <!-- <iframe [src]="document.url | sanitizeUrl" (click)="onClickDocument($event, document)"></iframe> -->
+                <object class="document pe-none" [data]="document.url | sanitizeUrl"></object>
+            </div>
+        </ng-container>
+
+    </div>
+</div>
+
+<ng-template #emptyDocumentMessage let-message=" message">
+    <div class="ms-4 mb-5">No Documents</div>
+</ng-template>

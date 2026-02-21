@@ -1,0 +1,46 @@
+<h5 class="mt-4 ms-4">
+    <span>Gallery </span>
+    <!-- <span class="close-btn-nav" (click)="closeButton($event)"><i class="icon-close"></i></span> -->
+</h5>
+<div class="vh-50 y-scroll">
+    <div class="d-flex mt-4 heading">
+        <span class="ms-4 pt-1"><strong>Images</strong></span>
+        <span class="mx-5 w-100">
+            <hr class="hr-tag">
+        </span>
+    </div>
+    <div class="container">
+        <div class="d-flex flex-md-wrap">
+            <ng-container *ngIf="images && images.length;else emptyImagesMessage">
+                <div class="m-3 flex-fill" *ngFor="let image of images">
+                    <img class="image" [src]="image.url" height="200px" (click)="onClickImage(image)" />
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+<div class="vh-50 y-scroll">
+    <div class="d-flex mt-4 heading">
+        <span class="ms-4 pt-1"><strong>Videos</strong></span>
+        <span class="mx-5 w-100">
+            <hr class="hr-tag">
+        </span>
+    </div>
+    <div class="container">
+        <div class="d-flex flex-md-wrap justify-content-between">
+            <ng-container *ngIf="videos && videos.length;else emptyVideosMessage;">
+                <div class="m-3" *ngFor="let video of videos">
+                    <video class="video" [src]="video.url" (click)="onClickVideo($event,video)">
+                        <source [src]="video.url" type="/video/mp4">
+                    </video>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+<ng-template #emptyVideosMessage let-message="message">
+    <div class="ms-4 mb-5">No Videos</div>
+</ng-template>
+<ng-template #emptyImagesMessage let-message="message">
+    <div class="ms-4 mb-5">No Images</div>
+</ng-template>

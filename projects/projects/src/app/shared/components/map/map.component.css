@@ -1,0 +1,179 @@
+.match-parent {
+  width: 100%;
+  height: 100%;
+}
+
+.custom-mapbox-ctrl {
+  position: absolute;
+  right: 0.6rem;
+  top: 21rem;
+  margin-right: 10px;
+}
+
+.custom-mapbox-ctrl.top {
+  top: 5rem;
+}
+
+.custom-mapbox-ctrl button {
+  padding-top: 0.2rem;
+  height: 26px;
+  width: 26px;
+  margin: 4px;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.map-view-toggle {
+  background-image: url("../../../../assets/images/menu/street_toggle_black.png");
+}
+
+.layout-toggle {
+  background-image: url("../../../../assets/images/menu/layout_toggle_black.png");
+}
+
+.layout-toggle:hover,
+.layout-toggle.active {
+  background-image: url("../../../../assets/images/menu/layout_toggle.png");
+}
+
+.location-reset {
+  background-image: url("../../../../assets/images/menu/location_reset_black.png");
+}
+
+::ng-deep .mapboxgl-ctrl-group button {
+  width: 26px !important;
+  height: 26px !important;
+  margin: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* Measurement Panel Styles */
+.measurement-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+  min-width: 150px;
+}
+
+.measurement-value {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.measurement-value:last-child {
+  margin-bottom: 0;
+}
+
+/* map.component.css */
+/* Make host fill whatever size the parent gives it */
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The inner container must fill host 100% */
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* make the <app-map> host stretch */
+:host {
+  display: block;
+  height: 100%;
+}
+
+/* the div Mapbox attaches to */
+.map-root,
+#map {
+  height: 100%;
+  min-height: 520px; /* so it’s visible even on small screens */
+}
+
+/* ensure the Mapbox wrapper inside also fills */
+:host ::ng-deep .mapboxgl-map {
+  height: 100% !important;
+}
+
+.volume-assessment {
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.volume-assessment:hover {
+  background: #f2f2f2;
+}
+
+.volume-assessment span {
+  font-size: 18px;
+}
+
+.volume-tool-panel {
+  position: absolute;
+  top: 120px;   /* adjust this value */
+  right: 20px;
+  z-index: 10;
+
+  background: #ffffff;
+  padding: 10px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+
+  font-size: 13px;
+
+  max-height: 80vh;
+  overflow-y: auto;   /* scroll if it grows */
+}
+
+.volume-tool-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.volume-tool-panel input {
+  width: 160px;
+  padding: 4px 6px;
+}
+
+.volume-result {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.volume-result h6 {
+  margin: 0 0 6px;
+  color: #38bdf8;
+}
+
+
+.volume-assessment {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #ffffff;   /* SAME color as other icons */
+}
+
+.volume-icon {
+  width: 22px;
+  height: 22px;
+}

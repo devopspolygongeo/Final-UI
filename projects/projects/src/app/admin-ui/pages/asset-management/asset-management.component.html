@@ -1,0 +1,361 @@
+<div class="admin-asset-container">
+  <div
+    class="admin-asset-main-content"
+    [class.with-sidebar]="showAddProjectSidebar"
+  >
+    <!-- Header -->
+    <div class="admin-asset-header">
+      <h2 class="admin-asset-title">Polygon Geospatial / Projects</h2>
+      <button class="admin-asset-add-btn" (click)="addProject()">
+        Add Project
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="admin-asset-filter-container">
+      <div class="admin-asset-search-container">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="admin-asset-search-icon"
+        />
+        <input
+          class="admin-asset-search-input"
+          placeholder="Search projects..."
+          [(ngModel)]="searchTerm"
+          (input)="filterAssets()"
+        />
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="admin-asset-table-container">
+      <table class="admin-asset-table">
+        <!-- Updated table headers with better text wrapping structure -->
+        <thead>
+          <tr>
+            <th (click)="sortBy('id')">
+              <div class="header-cell">
+                <span class="header-text">Project&nbsp;ID</span>
+                <img
+                  [src]="getSortIcon('id')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('categoryId')">
+              <div class="header-cell">
+                <span class="header-text">Category&nbsp;ID</span>
+                <img
+                  [src]="getSortIcon('categoryId')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('clientId')">
+              <div class="header-cell">
+                <span class="header-text">Client</span>
+                <img
+                  [src]="getSortIcon('clientId')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('satelliteMapId')">
+              <div class="header-cell">
+                <span class="header-text">Satellite Map&nbsp;ID</span>
+                <img
+                  [src]="getSortIcon('satelliteMapId')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('streetMapId')">
+              <div class="header-cell">
+                <span class="header-text">Street Map&nbsp;ID</span>
+                <img
+                  [src]="getSortIcon('streetMapId')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('name')">
+              <div class="header-cell">
+                <span class="header-text">Project Name</span>
+                <img
+                  [src]="getSortIcon('name')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('location')">
+              <div class="header-cell">
+                <span class="header-text">Location</span>
+                <img
+                  [src]="getSortIcon('location')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('area')">
+              <div class="header-cell">
+                <span class="header-text">Area</span>
+                <img
+                  [src]="getSortIcon('area')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('description')">
+              <div class="header-cell">
+                <span class="header-text">Description</span>
+                <img
+                  [src]="getSortIcon('description')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+
+            <th (click)="sortBy('frequency')">
+              <div class="header-cell">
+                <span class="header-text">Frequency</span>
+                <img
+                  [src]="getSortIcon('frequency')"
+                  class="admin-asset-sort-icon"
+                  alt="Sort"
+                />
+              </div>
+            </th>
+             
+
+            <th>
+              <span>Client Ops</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let asset of paginatedAssets">
+            <td>{{ asset.id }}</td>
+            <td>{{ getCategoryNameById(asset.categoryId) }}</td>
+            <td>{{ getClientNameById(asset.clientId) }}</td>
+            <td>{{ getBasemapDescriptionById(asset.satelliteMapId) }}</td>
+            <td>{{ getBasemapDescriptionById(asset.streetMapId) }}</td>
+            <td>{{ asset.name }}</td>
+            <td>{{ asset.location }}</td>
+            <td>{{ asset.area }}</td>
+            <td>{{ asset.description }}</td>
+            <td>{{ asset.frequency }}</td>
+            
+            <td>
+              <button
+                class="admin-asset-action-btn view-btn"
+                (click)="goToDetail(asset)"
+              >
+                <img
+                  src="assets/admin-dashboard/admin-asset-ops.png"
+                  alt="View"
+                />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="admin-asset-footer">
+      <div class="entries-count">
+        Showing
+        {{ paginatedAssets.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}
+        to {{ (currentPage - 1) * pageSize + paginatedAssets.length }} of
+        {{ filteredAssets.length }} entries
+      </div>
+      <div class="admin-asset-pagination">
+        <button
+          class="admin-asset-pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="navigateToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="admin-asset-pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.ellipsis]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && navigateToPage(+page)"
+        >
+          {{ page }}
+        </button>
+        <button
+          class="admin-asset-pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="navigateToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Right Sidebar Panel -->
+  <div class="admin-asset-sidebar" [class.show]="showAddProjectSidebar">
+    <div class="admin-asset-sidebar-header">
+      <h3>{{ newProject.id === 0 ? "Add Project" : "Edit Project" }}</h3>
+      <button class="admin-asset-close-sidebar-btn" (click)="closeSidebar()">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <form
+      class="admin-asset-form"
+      (ngSubmit)="submitProject()"
+      #projectForm="ngForm"
+    >
+      <div class="admin-asset-form-group">
+        <label for="name">Project Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="newProject.name"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="categoryId">Category ID</label>
+        <select
+          id="categoryId"
+          name="categoryId"
+          [(ngModel)]="newProject.categoryId"
+          required
+        >
+          <option [ngValue]="-1" disabled selected>Select a category</option>
+          <option
+            *ngFor="let category of categories"
+            [ngValue]="category.categoryid"
+          >
+            {{ category.categoryname }}
+          </option>
+        </select>
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="clientId">Client</label>
+        <select
+          id="clientId"
+          name="clientId"
+          [(ngModel)]="newProject.clientId"
+          required
+        >
+          <option [ngValue]="-1" disabled selected>Select a client</option>
+          <option *ngFor="let client of clients" [ngValue]="client.clientid">
+            {{ client.clientname }}
+          </option>
+        </select>
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="satelliteMapId">Satellite Map ID</label>
+        <select
+          id="satelliteMapId"
+          name="satelliteMapId"
+          [(ngModel)]="newProject.satelliteMapId"
+        >
+          <option [ngValue]="-1" disabled selected>
+            Select Satellite Basemap
+          </option>
+          <option *ngFor="let map of satelliteMaps" [ngValue]="map.mapid">
+            {{ map.mapdescription }}
+          </option>
+        </select>
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="streetMapId">Street Map ID</label>
+        <select
+          id="streetMapId"
+          name="streetMapId"
+          [(ngModel)]="newProject.streetMapId"
+        >
+          <option [ngValue]="-1" disabled selected>
+            Select Street Basemap
+          </option>
+          <option *ngFor="let map of streetMaps" [ngValue]="map.mapid">
+            {{ map.mapdescription }}
+          </option>
+        </select>
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          [(ngModel)]="newProject.location"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="area">Area</label>
+        <input
+          type="number"
+          id="area"
+          name="area"
+          [(ngModel)]="newProject.area"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="description">Description</label>
+        <input
+          type="text"
+          id="description"
+          name="description"
+          [(ngModel)]="newProject.description"
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="frequency">Frequency</label>
+        <input
+          type="text"
+          id="frequency"
+          name="frequency"
+          [(ngModel)]="newProject.frequency"
+        />
+      </div>
+      
+
+
+      
+      <button type="submit" class="admin-asset-submit-btn">
+        {{ newProject.id === 0 ? "Add Project" : "Update Project" }}
+      </button>
+    </form>
+  </div>
+</div>
+<!-- Child routes render here (survey / details) -->
+<router-outlet></router-outlet>
+

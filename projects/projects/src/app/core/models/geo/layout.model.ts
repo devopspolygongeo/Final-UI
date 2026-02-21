@@ -1,0 +1,21 @@
+export interface Layout {
+    id: number,
+    name: string,
+    surveyId: number,
+    area: string,
+    city: string,
+    state: string,
+    desc: string,
+    approval: string,
+    priceRange: string,
+    sizes: string,
+    noOfPlots: string,
+    owner: string,
+    development: string,
+    infrastructure: string,
+    location: string,
+    layoutDate: string,
+    status: string,
+    hoverAttributes: string,
+    clickAttributes: string
+}

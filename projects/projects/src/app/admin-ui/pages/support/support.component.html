@@ -1,0 +1,299 @@
+<div class="support-management-container">
+  <!-- Main Content -->
+  <div class="main-content with-sidebar">
+    <!-- Header -->
+    <div class="header">
+      <h2 class="title">Support - Issues</h2>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs-container">
+      <div class="nav-tabs">
+        <button class="nav-tab-btn active">All</button>
+        <button class="nav-tab-btn">Ongoing Issues</button>
+        <button class="nav-tab-btn">Closed Issues</button>
+      </div>
+    </div>
+
+    <!-- Filter and Search Container -->
+    <div class="filter-search-container">
+      <div class="filter-tabs">
+        <button class="tab-btn active">All</button>
+        <button class="tab-btn">Active</button>
+        <button class="tab-btn">Inactive</button>
+      </div>
+
+      <div class="search-container">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter issue ID or description"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="support-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('serialNo')">
+              <span>Sl No</span>
+              <img
+                [src]="getSortIcon('serialNo')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('issueId')">
+              <span>Issue ID</span>
+              <img
+                [src]="getSortIcon('issueId')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('issueCategory')">
+              <span>Category</span>
+              <img
+                [src]="getSortIcon('issueCategory')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('issueType')">
+              <span>Type</span>
+              <img
+                [src]="getSortIcon('issueType')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('description')">
+              <span>Description</span>
+              <img
+                [src]="getSortIcon('description')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('date')">
+              <span>Date</span>
+              <img [src]="getSortIcon('date')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('status')">
+              <span>Status</span>
+              <img [src]="getSortIcon('status')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('assetName')">
+              <span>Asset</span>
+              <img
+                [src]="getSortIcon('assetName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let issue of paginatedIssues" class="source-row">
+            <td>{{ issue.serialNo }}</td>
+            <td class="issue-id">{{ issue.issueId }}</td>
+            <td>{{ issue.issueCategory }}</td>
+            <td>{{ issue.issueType }}</td>
+            <td class="truncate">{{ issue.description }}</td>
+            <td>{{ issue.date }}</td>
+            <td class="text-center">
+              <span
+                class="status-badge"
+                [class.inprogress]="issue.status === 'Inprogress'"
+                [class.resolved]="issue.status === 'Resolved'"
+                [class.pending]="issue.status === 'Pending'"
+              >
+                {{ issue.status }}
+              </span>
+            </td>
+            <td class="asset-name">{{ issue.assetName }}</td>
+            <td class="text-center">
+              <div class="actions-container">
+                <button
+                  class="action-btn edit-btn"
+                  (click)="selectIssue(issue)"
+                  title="Edit"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-edit.png"
+                    alt="Edit"
+                  />
+                </button>
+                <button
+                  class="action-btn delete-btn"
+                  (click)="deleteIssue(issue)"
+                  title="Delete"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-delete.png"
+                    alt="Delete"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredIssues.length === 0" class="no-results">
+        <p>No issues found matching your criteria.</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        <span
+          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ getTotalFilteredItems() }} entries</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+
+        <button
+          *ngFor="let page of getVisiblePages()"
+          class="pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.dots]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="goToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar - Always Visible -->
+  <!-- Right Sidebar - Always Visible -->
+  <div class="right-sidebar show">
+    <div class="sidebar-header">
+      <h3>Issue Details</h3>
+    </div>
+
+    <form class="support-form" (ngSubmit)="saveIssue()">
+      <div class="form-group">
+        <label for="issueId">Issue ID</label>
+        <input
+          type="text"
+          id="issueId"
+          [(ngModel)]="newIssue.issueId"
+          name="issueId"
+          placeholder="Auto-generated"
+          readonly
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="assetName">Asset Name</label>
+        <input
+          type="text"
+          id="assetName"
+          [(ngModel)]="newIssue.assetName"
+          name="assetName"
+          placeholder="Enter asset name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="issueCategory">Issue Category</label>
+        <select
+          id="issueCategory"
+          [(ngModel)]="newIssue.issueCategory"
+          name="issueCategory"
+          required
+        >
+          <option value="Onboarding">Onboarding</option>
+          <option value="Subscriptions">Subscriptions</option>
+          <option value="Payments & invoices">Payments & invoices</option>
+          <option value="Technical">Technical</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="issueType">Issue Type</label>
+        <input
+          type="text"
+          id="issueType"
+          [(ngModel)]="newIssue.issueType"
+          name="issueType"
+          placeholder="Enter issue type"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date Submitted</label>
+        <input
+          type="text"
+          id="date"
+          [(ngModel)]="newIssue.date"
+          name="date"
+          placeholder="Enter date"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select
+          id="status"
+          [(ngModel)]="newIssue.status"
+          name="status"
+          required
+        >
+          <option value="Inprogress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Closed">Closed</option>
+          <option value="Pending">Pending</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          [(ngModel)]="newIssue.description"
+          name="description"
+          placeholder="Enter issue description"
+          required
+        ></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">Save Changes</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,403 @@
+<!-- payment-invoice.component.html -->
+<div
+  class="invoice-preview-overlay"
+  [class.show]="showPreview"
+  (click)="closePreview()"
+>
+  <div class="invoice-preview-modal" (click)="$event.stopPropagation()">
+    <button class="close-preview-btn" (click)="closePreview()">×</button>
+
+    <div class="invoice-preview-container">
+      <div class="invoice-header">
+        <h1>Invoice Preview</h1>
+        <div class="invoice-number">
+          Invoice # {{ previewInvoice.invoiceId }}
+        </div>
+      </div>
+
+      <div class="invoice-from">
+        <h2>Minia</h2>
+        <p>1874 County Line Road City, FL 33566</p>
+        <p><a href="mailto:abc@123.com">abc123.com</a></p>
+        <p>012-345-6789</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="invoice-details-grid">
+        <div class="invoice-to">
+          <h3>Billed To:</h3>
+          <p>
+            <strong>{{ previewInvoice.clientName }}</strong>
+          </p>
+          <p>1208 Sherwood Circle Lafayette, LA 70506</p>
+          <p>
+            <a href="mailto:{{ previewInvoice.clientName }}@example.com"
+              >{{ previewInvoice.clientName }}example.com</a
+            >
+          </p>
+          <p>337-256-9134</p>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-row">
+            <h4>Order Date:</h4>
+            <p>{{ previewInvoice.date }}</p>
+          </div>
+          <div class="detail-row">
+            <h4>Payment Method:</h4>
+            <p>Visa ending *** 4242</p>
+            <p>{{ previewInvoice.clientName }}email.com</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="order-summary">
+        <h3>Order Summary</h3>
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Item</th>
+              <th style="text-align: right">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>01</td>
+              <td>
+                <strong>Minia</strong><br />
+                Bootstrap 5 Admin Dashboard
+              </td>
+              <td style="text-align: right">
+                {{ previewInvoice.amount | currency }}
+              </td>
+            </tr>
+            <tr>
+              <td>02</td>
+              <td>
+                <strong>Skote</strong><br />
+                Bootstrap 5 Admin Dashboard
+              </td>
+              <td style="text-align: right">$499.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="summary-total">
+        <h4>Sub Total: {{ previewInvoice.amount + 499 | currency }}</h4>
+      </div>
+
+      <div class="invoice-actions">
+        <button class="print-btn" (click)="printInvoice()">
+          Print Invoice
+        </button>
+        <button class="download-btn" (click)="downloadInvoice()">
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="payment-management-container">
+  <!-- Main Content -->
+  <div class="main-content with-sidebar">
+    <!-- Header -->
+    <div class="payment-header">
+      <h2 class="payment-title">Payments & Invoices</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="payment-tabs-container">
+      <div class="payment-tabs">
+        <button
+          class="payment-tab-btn"
+          [class.active]="activeTab === 'all'"
+          (click)="onTabChange('all')"
+        >
+          All
+        </button>
+        <button
+          class="payment-tab-btn"
+          [class.active]="activeTab === 'ongoing'"
+          (click)="onTabChange('ongoing')"
+        >
+          Ongoing Issues
+        </button>
+        <button
+          class="payment-tab-btn"
+          [class.active]="activeTab === 'closed'"
+          (click)="onTabChange('closed')"
+        >
+          Closed Issues
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter and Search Container -->
+    <div class="filter-search-container">
+      <div class="search-container">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search invoices"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('invoiceId')">
+              <span>Invoice ID</span>
+              <img
+                [src]="getSortIcon('invoiceId')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('date')">
+              <span>Date</span>
+              <img [src]="getSortIcon('date')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('clientName')">
+              <span>Client Name</span>
+              <img
+                [src]="getSortIcon('clientName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('amount')">
+              <span>Amount</span>
+              <img [src]="getSortIcon('amount')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('status')">
+              <span>Status</span>
+              <img [src]="getSortIcon('status')" alt="Sort" class="sort-icon" />
+            </th>
+            <th>Description</th>
+            <th>Followup</th>
+            <th>Followup Date</th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let invoice of getPaginatedInvoices()">
+            <td class="invoice-id">{{ invoice.invoiceId }}</td>
+            <td>{{ invoice.date }}</td>
+            <td class="client-name">{{ invoice.clientName }}</td>
+            <td>{{ invoice.amount | currency }}</td>
+            <td>
+              <span
+                class="status-badge"
+                [class.paid]="invoice.status === 'Paid'"
+                [class.pending]="invoice.status === 'Pending'"
+                [class.overdue]="invoice.status === 'Overdue'"
+              >
+                {{ invoice.status }}
+              </span>
+            </td>
+            <td class="truncate">{{ invoice.description }}</td>
+            <td>{{ invoice.followup }}</td>
+            <td>{{ invoice.followupDate }}</td>
+            <td class="text-center">
+              <div class="actions-container">
+                <button
+                  class="action-btn preview-btn"
+                  (click)="showInvoice(invoice)"
+                  title="Preview"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-preview.png"
+                    alt="Preview"
+                  />
+                </button>
+                <button
+                  class="action-btn edit-btn"
+                  (click)="editInvoice(invoice)"
+                  title="Edit"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-edit.png"
+                    alt="Edit"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredInvoices.length === 0" class="no-results">
+        <p>No invoices found matching your criteria.</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        <span
+          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ filteredInvoices.length }} entries</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+
+        <button
+          *ngFor="let page of getVisiblePages()"
+          class="pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.dots]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="goToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar -->
+  <div class="right-sidebar show">
+    <div class="sidebar-header">
+      <h3>{{ newInvoice.id === 0 ? "Add New Invoice" : "Edit Invoice" }}</h3>
+    </div>
+
+    <form class="invoice-form" (ngSubmit)="submitInvoice()">
+      <div class="form-group">
+        <label for="invoiceId">Invoice ID</label>
+        <input
+          type="text"
+          id="invoiceId"
+          [(ngModel)]="newInvoice.invoiceId"
+          name="invoiceId"
+          readonly
+          placeholder="Auto-generated"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input
+          type="text"
+          id="date"
+          [(ngModel)]="newInvoice.date"
+          name="date"
+          placeholder="Enter date"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="clientName">Client Name</label>
+        <input
+          type="text"
+          id="clientName"
+          [(ngModel)]="newInvoice.clientName"
+          name="clientName"
+          placeholder="Enter client name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="amount">Amount</label>
+        <input
+          type="number"
+          id="amount"
+          [(ngModel)]="newInvoice.amount"
+          name="amount"
+          placeholder="Enter amount"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select
+          id="status"
+          [(ngModel)]="newInvoice.status"
+          name="status"
+          required
+        >
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <input
+          type="text"
+          id="description"
+          [(ngModel)]="newInvoice.description"
+          name="description"
+          placeholder="Enter description"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="followup">Followup</label>
+        <input
+          type="text"
+          id="followup"
+          [(ngModel)]="newInvoice.followup"
+          name="followup"
+          placeholder="Enter followup notes"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="followupDate">Followup Date</label>
+        <input
+          type="text"
+          id="followupDate"
+          [(ngModel)]="newInvoice.followupDate"
+          name="followupDate"
+          placeholder="Enter followup date"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="clear-btn" (click)="clearForm()">
+          Clear
+        </button>
+        <button type="submit" class="submit-btn">
+          {{ newInvoice.id === 0 ? "Add Invoice" : "Update Invoice" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,173 @@
+<mat-sidenav-container class="admin-layout" autosize>
+  <!-- Sidebar -->
+  <mat-sidenav
+    #sidenav
+    mode="side"
+    opened="true"
+    [class.collapsed]="!sidebarOpen"
+    class="sidebar"
+  >
+    <div class="sidebar-logo">
+      <img src="assets/images/logo_original_64x64.png" alt="Logo" width="40" />
+      <button
+        mat-icon-button
+        (click)="toggleSidebar()"
+        class="toggle-button"
+        *ngIf="sidebarOpen"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard')
+              ? 'assets/admin-dashboard/admin-dashboard-active.png'
+              : 'assets/admin-dashboard/admin-dashboard-inactive.png'
+          "
+        />
+        <span *ngIf="sidebarOpen">Dashboard</span>
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard/admin-client-management"
+        routerLinkActive="active"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard/admin-client-management')
+              ? 'assets/admin-dashboard/admin-client-active.png'
+              : 'assets/admin-dashboard/admin-client-inactive.png'
+          "
+        />
+        <span *ngIf="sidebarOpen">Client Management</span>
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard/admin-user-management"
+        routerLinkActive="active"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard/admin-user-management')
+              ? 'assets/admin-dashboard/admin-user-active.png'
+              : 'assets/admin-dashboard/admin-user-inactive.png'
+          "
+        />
+        <span *ngIf="sidebarOpen">User Management</span>
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard/admin-asset-management"
+        routerLinkActive="active"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard/admin-asset-management')
+              ? 'assets/admin-dashboard/admin-asset-active.png'
+              : 'assets/admin-dashboard/admin-asset-inactive.png'
+          "
+        />
+        <span *ngIf="sidebarOpen">Project Management</span>
+      </a>
+      
+
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard/admin-master-data"
+        routerLinkActive="active"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard/admin-master-data')
+              ? 'assets/admin-dashboard/admin-data-active.png'
+              : 'assets/admin-dashboard/admin-data-inactive.png'
+          "
+        />
+        
+        
+        <span *ngIf="sidebarOpen">Master Data</span>
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard/admin-payment-invoice"
+        routerLinkActive="active"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard/admin-payment-invoice')
+              ? 'assets/admin-dashboard/admin-payment-active.png'
+              : 'assets/admin-dashboard/admin-payment-inactive.png'
+          "
+        />
+        <span *ngIf="sidebarOpen">Payments & Invoices</span>
+      </a>
+
+      <a
+        class="nav-link"
+        routerLink="/admin-dashboard/admin-support"
+        routerLinkActive="active"
+      >
+        <img
+          [src]="
+            isActiveRoute('/admin-dashboard/admin-support')
+              ? 'assets/admin-dashboard/admin-support-active.png'
+              : 'assets/admin-dashboard/admin-support-inactive.png'
+          "
+        />
+        <span *ngIf="sidebarOpen">Support</span>
+      </a>
+    </nav>
+  </mat-sidenav>
+
+  <!-- Main content -->
+  <mat-sidenav-content>
+    <mat-toolbar class="toolbar" [class.collapsed]="!sidebarOpen">
+      <button
+        mat-icon-button
+        (click)="toggleSidebar()"
+        *ngIf="!sidebarOpen"
+        class="collapsed-toggle"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="flex-spacer"></span>
+      <div class="profile" (click)="toggleDropdown()">
+        <img
+          src="assets/admin-dashboard/admin-profile-inactive.png"
+          width="32"
+        />
+        <span>Rajasekhar</span>
+        <mat-icon>arrow_drop_down</mat-icon>
+
+        <div class="profile-dropdown" *ngIf="dropdownOpen">
+          <div class="dropdown-item" (click)="navigateToAccount()">
+            <mat-icon>person</mat-icon> My Account
+          </div>
+
+          <!-- <div
+            class="dropdown-item"
+            (click)="navigateToAccount('notifications')"
+          >
+            <mat-icon>notifications</mat-icon> Notifications
+          </div> -->
+        </div>
+      </div>
+    </mat-toolbar>
+
+    <div class="admin-page">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

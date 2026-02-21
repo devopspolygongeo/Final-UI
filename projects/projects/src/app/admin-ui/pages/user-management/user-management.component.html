@@ -1,0 +1,346 @@
+<!-- user-management.component.html -->
+<div class="user-management-wrapper">
+  <!-- Header Section -->
+  <div class="page-header">
+    <h2 class="page-title">User Management</h2>
+    <button class="add-user-button" (click)="openUserPanel()">Add User</button>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="management-layout">
+    <!-- Main Content Section -->
+    <div class="main-section">
+      <!-- Navigation Tabs -->
+      <div class="tab-navigation">
+        <div class="nav-tabs">
+          <button
+            class="nav-tab"
+            [class.active]="currentTab === 'all'"
+            (click)="switchTab('all')"
+          >
+            All
+          </button>
+          <button
+            class="nav-tab"
+            [class.active]="currentTab === 'ongoing'"
+            (click)="switchTab('ongoing')"
+          >
+            Ongoing Issues
+          </button>
+          <button
+            class="nav-tab"
+            [class.active]="currentTab === 'closed'"
+            (click)="switchTab('closed')"
+          >
+            Closed Issues
+          </button>
+        </div>
+      </div>
+      <!-- Data Table -->
+      <div class="data-table-wrapper">
+        <table class="users-data-table">
+          <thead>
+            <tr>
+              <th class="sortable-column" (click)="sortData('sno')">
+                <span class="column-header">
+                  S.No
+                  <img
+                    [src]="getSortIcon('sno')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="sortable-column" (click)="sortData('username')">
+                <span class="column-header">
+                  User Name
+                  <img
+                    [src]="getSortIcon('username')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="sortable-column" (click)="sortData('clientName')">
+                <span class="column-header">
+                  Client
+                  <img
+                    [src]="getSortIcon('clientName')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="sortable-column" (click)="sortData('designation')">
+                <span class="column-header">
+                  Designation
+                  <img
+                    [src]="getSortIcon('designation')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="sortable-column" (click)="sortData('email')">
+                <span class="column-header">
+                  Email
+                  <img
+                    [src]="getSortIcon('email')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="sortable-column" (click)="sortData('contact')">
+                <span class="column-header">
+                  Contact
+                  <img
+                    [src]="getSortIcon('contact')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="sortable-column" (click)="sortData('role')">
+                <span class="column-header">
+                  Role
+                  <img
+                    [src]="getSortIcon('role')"
+                    alt="Sort"
+                    class="sort-indicator"
+                  />
+                </span>
+              </th>
+              <th class="center-align">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of displayedUsers" class="user-row">
+              <td>{{ user.sno}}</td>
+              <td class="user-name">{{ user.username }}</td>
+              <td>{{ user.clientName }}</td>
+              <td>{{ user.designation }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.contact }}</td>
+              <td>{{ user.roleName }}</td>
+              <td class="center-content">
+                <div class="action-buttons">
+                  <button
+                    class="action-button edit-action"
+                    (click)="editUser(user)"
+                    title="Edit"
+                  >
+                    <img
+                      src="assets/admin-dashboard/admin-client-edit.png"
+                      alt="Edit"
+                    />
+                  </button>
+                  <button
+                    class="action-button delete-action"
+                    (click)="deleteUser(user)"
+                    title="Delete"
+                  >
+                    <img
+                      src="assets/admin-dashboard/admin-delete.png"
+                      alt="Delete"
+                    />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div *ngIf="displayedUsers.length === 0" class="empty-state">
+          <p>No users found matching your criteria.</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-section">
+        <div class="pagination-info">
+          <span
+            >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+            {{ getTotalUsers() }} entries</span
+          >
+        </div>
+        <div class="pagination-navigation">
+          <button
+            class="pagination-button"
+            [disabled]="currentPage === 1"
+            (click)="navigateToPage(currentPage - 1)"
+          >
+            ⏮
+          </button>
+
+          <button
+            *ngFor="let page of getPageNumbers()"
+            class="pagination-button page-number"
+            [class.active]="page === currentPage"
+            [class.ellipsis]="page === '...'"
+            [disabled]="page === '...'"
+            (click)="page !== '...' && navigateToPage(+page)"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            class="pagination-button"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="navigateToPage(currentPage + 1)"
+          >
+            ⏭
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Details Panel -->
+    <div class="user-details-panel" *ngIf="showUserPanel">
+      <div class="panel-header">
+        <h3 class="panel-title">{{ isEditMode ? "Edit" : "Add" }} User</h3>
+        <button
+          class="close-panel-button"
+          (click)="closeUserPanel()"
+          title="Close"
+        >
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="submitUser()" #userForm="ngForm" class="user-form">
+        <div class="form-field">
+          <label for="firstname" class="field-label">First Name</label>
+          <input
+            type="text"
+            id="firstname"
+            name="firstname"
+            class="form-input"
+            [(ngModel)]="newUser.firstName"
+            placeholder="First Name"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="lastname" class="field-label">Last Name</label>
+          <input
+            type="text"
+            id="lastname"
+            name="lastname"
+            class="form-input"
+            [(ngModel)]="newUser.lastName"
+            placeholder="Last Name"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="clientid" class="field-label">Client</label>
+          <select
+            id="clientid"
+            name="clientid"
+            class="form-select"
+            [(ngModel)]="newUser.clientId"
+            required
+          >
+            <option value="">Select Client</option>
+            <option *ngFor="let client of clients" [value]="client.sno">
+              {{ client.clientname }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="email" class="field-label">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            [(ngModel)]="newUser.email"
+            placeholder="Email"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="contact" class="field-label">Contact</label>
+          <input
+            type="text"
+            id="contact"
+            name="contact"
+            class="form-input"
+            [(ngModel)]="newUser.contact"
+            placeholder="Contact"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="designation" class="field-label">Designation</label>
+          <input
+            type="text"
+            id="designation"
+            name="designation"
+            class="form-input"
+            [(ngModel)]="newUser.designation"
+            placeholder="Designation"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="role" class="field-label">Role</label>
+          <select
+            id="role"
+            name="role"
+            class="form-select"
+            [(ngModel)]="newUser.role"
+            required
+          >
+            <option value="">Select Role</option>
+           <option *ngFor="let role of userTypes" [ngValue]="role.usertypeid">
+  {{ role.usertypename }}
+</option>
+
+          </select>
+        </div>
+
+
+        <!-- Project Access (ADMIN ONLY) -->
+<!-- Project Access (ADMIN ONLY) -->
+<div class="form-field"  *ngIf="newUser.role === 1">
+  <label for="projectAccess" class="field-label">Project Access</label>
+
+  <select
+    id="projectAccess"
+    name="projectAccess"
+    class="form-select project-access-select"
+    multiple
+    [(ngModel)]="newUser.projectAccess"
+  >
+    <option *ngFor="let project of projects" [value]="project.projectid">
+      {{ project.name }}
+    </option>
+  </select>
+
+  <small class="multi-hint">
+    Hold <b>Ctrl</b> (Windows) or <b>Cmd</b> (Mac) to select multiple
+  </small>
+</div>
+
+
+
+
+
+
+
+        <button type="submit" class="submit-user-button">
+          {{ isEditMode ? "Update" : "Add" }} User
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

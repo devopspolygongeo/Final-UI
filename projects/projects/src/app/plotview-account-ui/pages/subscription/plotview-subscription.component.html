@@ -1,0 +1,379 @@
+
+
+
+
+<div class="subscription-management-container">
+
+  <!-- Header -->
+  <div class="header">
+    <h2 class="title">Subscriptions</h2>
+    <button class="add-subscription-btn" (click)="addSubscription()">
+      Add Subscription
+    </button>
+  </div>
+
+  <!-- Controls Row -->
+  <div class="controls-row">
+    <!-- Date Picker -->
+    <div class="date-picker-container">
+      <input
+        type="date"
+        class="date-input"
+        [(ngModel)]="selectedDate"
+        (change)="onDateChange()"
+      />
+    </div>
+
+    <!-- Entries Control -->
+    <div class="entries-control">
+      <span>Show</span>
+      <select
+        class="entries-select"
+        [(ngModel)]="itemsPerPage"
+        (change)="onItemsPerPageChange()"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <span>entries</span>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+      <div class="search-wrapper">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter asset name"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container">
+    <table class="subscriptions-table">
+      <thead>
+        <tr>
+          <th class="sortable-header" (click)="sortBy('id')">
+            <span>Subscription Id</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('assetAssigned')">
+            <span>Asset assigned</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('validity')">
+            <span>Validity</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('area')">
+            <span>Area</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('plan')">
+            <span>Plan</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('amount')">
+            <span>Amount</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th>Active</th>
+          <th class="sortable-header" (click)="sortBy('date')">
+            <span>Date</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sub of filteredSubscriptions" class="subscription-row">
+          <td>{{ sub.id }}</td>
+          <td>{{ sub.assetAssigned }}</td>
+          <td>{{ sub.validity }}</td>
+          <td>{{ sub.area }}</td>
+          <td>
+            {{ sub.plan }}
+            <div *ngIf="sub.specialPlan" class="special-plan">
+              {{ sub.specialPlan }}
+            </div>
+          </td>
+          <td>{{ sub.amount | currency : "INR" : "symbol" : "1.0-0" }}</td>
+          <td>
+            <div class="toggle-container" (click)="toggleActive(sub)">
+              <img
+                [src]="
+                  sub.isActive
+                    ? 'assets/admin-dashboard/admin-toggle-active.png'
+                    : 'assets/admin-dashboard/admin-toggle-inactive.png'
+                "
+                alt="Toggle"
+                class="toggle-icon"
+              />
+            </div>
+          </td>
+          <td>{{ sub.date }}</td>
+          <td>
+            <div class="actions-container">
+              <button
+                class="three-dots-btn"
+                (click)="toggleActionsMenu(sub.id)"
+                [class.active]="activeMenuId === sub.id"
+              >
+                ⋮
+              </button>
+              <div class="actions-menu" [class.show]="activeMenuId === sub.id">
+                <button class="menu-item" (click)="assignAsset(sub)">
+                  <svg class="menu-icon" viewBox="0 0 24 24">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                  </svg>
+                  Assign an asset
+                </button>
+                <button class="menu-item" (click)="extendPlan(sub)">
+                  <svg class="menu-icon" viewBox="0 0 24 24">
+                    <path d="M12 8V4l8 8-8 8v-4H4V8h8z" />
+                  </svg>
+                  Extend the plan
+                </button>
+                <button class="menu-item" (click)="reviseAsset(sub)">
+                  <svg class="menu-icon" viewBox="0 0 24 24">
+                    <path
+                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                    />
+                  </svg>
+                  Revise asset
+                </button>
+                <button class="menu-item" (click)="viewDetails(sub)">
+                  <svg class="menu-icon" viewBox="0 0 24 24">
+                    <path
+                      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+                    />
+                  </svg>
+                  Invoice details
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- No results message -->
+    <div *ngIf="filteredSubscriptions.length === 0" class="no-results">
+      <p>No subscriptions found matching your criteria.</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container">
+    <div class="pagination-info">
+      <span
+        >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+        {{ getTotalFilteredItems() }} entries</span
+      >
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        ⏮
+      </button>
+
+      <button
+        *ngFor="let page of getVisiblePages()"
+        class="pagination-btn page-number"
+        [class.active]="page === currentPage"
+        [class.dots]="page === '...'"
+        [disabled]="page === '...'"
+        (click)="page !== '...' && goToPage(+page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === getTotalPages()"
+        (click)="goToPage(currentPage + 1)"
+      >
+        ⏭
+      </button>
+    </div>
+  </div>
+
+  <!-- Add Subscription Modal -->
+  <div
+    class="modal-backdrop"
+    [class.show]="showAddModal"
+    (click)="closeAddModal()"
+  >
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Add subscription</h2>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Asset</label>
+          <select class="form-select" [(ngModel)]="newSubscription.asset">
+            <option value="">New asset</option>
+            <option value="Harmony Meadows">Harmony Meadows</option>
+            <option value="Green Valley">Green Valley</option>
+            <option value="Sunny Hills">Sunny Hills</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Type of service</label>
+          <select class="form-select" [(ngModel)]="newSubscription.serviceType">
+            <option value="">New subscription</option>
+            <option value="renewal">Renewal</option>
+            <option value="upgrade">Upgrade</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Asset size</label>
+          <div class="asset-size-group">
+            <select
+              class="form-select size-select"
+              [(ngModel)]="newSubscription.assetSize"
+            >
+              <option value="10">10 acres</option>
+              <option value="5">5 acres</option>
+              <option value="3">3 acres</option>
+              <option value="2">2 acres</option>
+            </select>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Input in acres"
+              [(ngModel)]="newSubscription.customSize"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Subscription duration</label>
+          <select class="form-select" [(ngModel)]="newSubscription.duration">
+            <option value="6">6 months</option>
+            <option value="3">3 months</option>
+            <option value="12">12 months</option>
+          </select>
+        </div>
+
+        <!-- Replace the checkbox-group section in your modal with this: -->
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="newSubscription.includeOnboarding"
+              />
+              <img
+                [src]="
+                  newSubscription.includeOnboarding
+                    ? 'assets/admin-dashboard/checkbox-checked.png'
+                    : 'assets/admin-dashboard/checkbox-unchecked.png'
+                "
+                alt="Checkbox"
+                class="custom-checkbox"
+                (click)="toggleOnboarding($event)"
+              />
+              <span (click)="toggleOnboarding($event)">Include onboarding</span>
+            </label>
+
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="newSubscription.includeMaintenance"
+              />
+              <img
+                [src]="
+                  newSubscription.includeMaintenance
+                    ? 'assets/admin-dashboard/checkbox-checked.png'
+                    : 'assets/admin-dashboard/checkbox-unchecked.png'
+                "
+                alt="Checkbox"
+                class="custom-checkbox"
+                (click)="toggleMaintenance($event)"
+              />
+              <span (click)="toggleMaintenance($event)"
+                >Include maintenance</span
+              >
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Amount Payable</label>
+          <div class="amount-input">
+            <span class="currency-symbol">₹</span>
+            <input
+              type="number"
+              class="form-input amount-field"
+              [(ngModel)]="newSubscription.amount"
+              placeholder="12000"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddModal()">
+          Add & Review
+        </button>
+        <button class="btn btn-primary" (click)="saveSubscription()">
+          Pay now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop for closing menu -->
+<div
+  class="menu-backdrop"
+  [class.show]="activeMenuId !== null"
+  (click)="closeActionsMenu()"
+></div>

@@ -1,0 +1,19 @@
+<div class="dashboard-content mx-auto my-4">
+  <div class="d-flex flex-row mb-4">
+    <div class="logo mx-2 c-pointer"></div>
+    <div class="c-pointer" style="color: #004AAD;">plotview</div>
+    <div class="ms-auto">
+      <ng-container *ngFor="let navItem of navItems">
+        <span class="px-4 c-pointer" [ngClass]="{active: navItem.active}" title="{{navItem.name | titlecase}}"
+          (click)="onNavItemClick(navItem)" routerLink="{{navItem}}"> {{navItem.name | titlecase}}</span>
+      </ng-container>
+    </div>
+    
+    <div style="cursor: pointer;" (click)="userSetings()">
+      {{user.lastName | titlecase}}
+    </div>
+  </div>
+  <div class="divider mb-4"></div>
+  <!-- <span id="logout" title="Logout" class="left-nav-item logout" (click)="onLogout()"></span> -->
+    <router-outlet></router-outlet>
+</div>

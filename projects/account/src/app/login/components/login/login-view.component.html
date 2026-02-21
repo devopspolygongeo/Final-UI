@@ -1,0 +1,41 @@
+<div id="login">
+   <div class="login-form">
+      <mat-card>
+         <mat-card-content>
+            <div class="logo-image d-flex">
+               <img class="ms-auto me-auto" title="logo" />
+            </div>
+            <div class="mt-1 mb-3 p-2">
+               <form [formGroup]="loginForm" (ngSubmit)="submit()">
+                  <p>
+                     <mat-form-field>
+                        <input type="text" matInput placeholder="Username" formControlName="userName" />
+                        <mat-error *ngIf="loginForm.controls['userName'].invalid">
+                           Username is required
+                        </mat-error>
+                     </mat-form-field>
+                  </p>
+
+                  <p>
+                     <mat-form-field>
+                        <input type="password" matInput placeholder="Password" formControlName="password" />
+                        <mat-error *ngIf="loginForm.controls['password'].invalid">
+                           Password is required
+                        </mat-error>
+                     </mat-form-field>
+                  </p>
+
+                  <p *ngIf="errorMessage" class="mat-mdc-form-field-error ">
+                     {{ errorMessage }}
+                  </p>
+
+                  <div class="button d-flex justify-content-center">
+                     <button class="login-button" type="submit" mat-raised-button color="primary">Login</button>
+                  </div>
+               </form>
+            </div>
+
+         </mat-card-content>
+      </mat-card>
+   </div>
+</div>

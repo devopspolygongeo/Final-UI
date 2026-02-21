@@ -1,0 +1,202 @@
+<mat-sidenav-container>
+
+  <!-- ================= LEFT VERTICAL NAV ================= -->
+  <div class="top-nav-bar hide-on-mobile">
+    <div class="top-nav-scroll">
+      <ng-container *ngFor="let navItem of navItems">
+        <span class="top-nav-item {{ navItem.name }}" [ngClass]="{ active: navItem.active }"
+          title="{{ navItem.name | titlecase }}" (click)="onNavItemClick(navItem)">
+        </span>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- ================= SIDEBAR TOGGLE ================= -->
+  <div class="sidebar-toggle hide-on-mobile" *ngIf="!(is3D && hasPointCloud)" [ngClass]="{
+      expanded: !isSidebarCollapsed,
+      proximity: selectedNav.name === 'proximity',
+      gallery: selectedNav.name === 'gallery',
+      'view-360': selectedNav.name === 'view-360'
+    }" (click)="toggleSidebar()" title="{{ isSidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar' }}">
+  </div>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <mat-sidenav-content *ngIf="view; else loadingSpinner">
+
+    <!-- ===== LEFT EXPAND PANEL ===== -->
+    <div [ngSwitch]="selectedNav.name" class="nav-expand hide-on-mobile {{ selectedNav.name }}_content" [ngClass]="{
+        'd-none': hideNavPanel || (is3D && hasPointCloud),
+        collapsed: isSidebarCollapsed
+      }">
+
+      <div class="nav-expand-body">
+
+        <ng-container *ngSwitchDefault>
+          <app-layers [sources]="sources" [groups]="groups" (layerToggleEv)="onLayerToggle($event)"
+            (layerPaintChangeEv)="onLayerPaintChange($event)">
+          </app-layers>
+        </ng-container>
+
+        <app-landmarks *ngSwitchCase="'proximity'" [mapConfig]="mapConfig" [landmarks]="landmarks" [mapEvent]="mapEvent"
+          (showDirectionsEv)="onShowDirections($event)">
+        </app-landmarks>
+
+        <app-accessibility *ngSwitchCase="'accessibility'"></app-accessibility>
+
+        <app-gallery *ngSwitchCase="'gallery'" [assets]="assets" (closeBtnEv)="onCloseNav($event)">
+        </app-gallery>
+
+        <app-documents *ngSwitchCase="'docs'" [assets]="assets" (closeBtnEv)="onCloseNav($event)">
+        </app-documents>
+
+        <app-view-360 *ngSwitchCase="'view-360'" [assets]="assets" (closeBtnEv)="onCloseNav($event)">
+        </app-view-360>
+
+      </div>
+    </div>
+
+    <!-- ================= MAPBOX (BASE LAYER) ================= -->
+    <app-map *ngIf="mapConfig" [mapConfig]="mapConfig" [layerVisibility]="layerVisibility"
+      [layerPaintChange]="layerPaintChange" [showLandmarks]="showLandmarks" [directions]="directions"
+      [enableTerrain]="is3D" [enable25D]="is25D" (btnEv)="onMapBtnEvents($event)" (mapMouseEv)="mapMouseEvents($event)" [isMiningProject]="isMiningProject">
+    </app-map>
+
+
+    <!-- ================= POTREE OVERLAY ================= -->
+    <div *ngIf="is3D && hasPointCloud" class="potree-overlay">
+      <iframe [src]="selectedSurvey.threeD | sanitizeUrl" frameborder="0" allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- ================= LAYOUT PANEL ================= -->
+    <app-layouts-panel *ngIf="layouts?.length" [layouts]="layouts" [layoutAttributes]="view.layoutAttributes"
+      [plot]="selectedPlot" [(showLayoutPanel)]="showLayoutPanel">
+    </app-layouts-panel>
+
+  </mat-sidenav-content>
+
+  <!-- ================= RIGHT TOP TOOLBAR (MOVED OUT) ================= -->
+  <div class="right-nav-bar d-flex">
+
+    <div *ngIf="hoverDetails?.length" id="hover-info">
+      <div *ngFor="let hoverItem of hoverDetails" class="justify-content-center p-2">
+        <b>{{ hoverItem.name | titlecase }}:</b> {{ hoverItem.value }}
+      </div>
+    </div>
+
+    <mat-form-field class="glass-select select-modern" appearance="outline" floatLabel="always">
+      <mat-label>Project</mat-label>
+      <mat-select [ngModel]="selectedProject" (selectionChange)="onProjectChange($event.value)"
+        panelClass="glass-select-panel">
+        <mat-option *ngFor="let project of projects" [value]="project">
+          {{ project.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="glass-select select-modern" appearance="outline" floatLabel="always">
+      <mat-label>Survey</mat-label>
+      <mat-select [ngModel]="selectedSurvey" (selectionChange)="onSurveyChange($event.value)"
+        panelClass="glass-select-panel">
+        <mat-option *ngFor="let survey of surveys" [value]="survey">
+          {{ survey.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="user-account-menu">
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" class="account-button">
+        <div class="account-avatar">
+          {{ getUserInitial() }}
+        </div>
+      </button>
+
+      <mat-menu #userMenu="matMenu" class="user-menu">
+        <button mat-menu-item (click)="onLogout()">Logout</button>
+      </mat-menu>
+    </div>
+
+  </div>
+
+  <!-- ================= 2D / 3D TOGGLE (MOVED OUT) ================= -->
+  <!-- ================= 2D / 2.5D / 3D TOGGLE ================= -->
+<div class="view-mode-toggle" role="group" aria-label="Map view mode">
+
+  <!-- 2D -->
+  <button
+    type="button"
+    class="segbtn"
+    [class.active]="!is3D && !is25D"
+    (click)="set2D()"
+    title="2D">
+    2D
+  </button>
+
+  <!-- 2.5D (NEW) -->
+  <button
+    type="button"
+    class="segbtn"
+    [class.active]="is25D" 
+    (click)="set25D()"
+    title="2.5D">
+    2.5D
+  </button>
+
+  <!-- 3D -->
+  <button
+    type="button"
+    class="segbtn"
+    [class.active]="is3D"
+    (click)="set3D()"
+    title="3D">
+    3D
+  </button>
+
+</div>
+
+
+</mat-sidenav-container>
+
+<!-- ================= MOBILE NAV ================= -->
+<div class="bottom-bar show-on-mobile">
+  <div class="d-flex">
+    <ng-container *ngFor="let navItem of navItems">
+      <span class="bottom-nav-item {{ navItem.name }}" [ngClass]="{ active: navItem.active }"
+        title="{{ navItem.name | titlecase }}" (click)="openBottomSheet(navItem)">
+      </span>
+    </ng-container>
+  </div>
+</div>
+
+<!-- ================= BOTTOM SHEET ================= -->
+<ng-template #bottomSheetTemplate>
+  <div [ngSwitch]="selectedNav.name">
+
+    <ng-container *ngSwitchDefault>
+      <app-layers [sources]="sources" [groups]="groups" (layerToggleEv)="onLayerToggle($event)"
+        (layerPaintChangeEv)="onLayerPaintChange($event)">
+      </app-layers>
+
+      <app-layouts-panel *ngIf="layouts?.length" [layouts]="layouts" [layoutAttributes]="view.layoutAttributes"
+        [plot]="selectedPlot" [(showLayoutPanel)]="showLayoutPanel">
+      </app-layouts-panel>
+    </ng-container>
+
+    <app-mobileView-landmarks *ngSwitchCase="'proximity'" [mapConfig]="mapConfig" [landmarks]="landmarks"
+      [mapEvent]="mapEvent" (showDirectionsEv)="onShowDirections($event)">
+    </app-mobileView-landmarks>
+
+    <app-accessibility *ngSwitchCase="'accessibility'"></app-accessibility>
+    <app-gallery *ngSwitchCase="'gallery'" [assets]="assets"></app-gallery>
+    <app-documents *ngSwitchCase="'docs'" [assets]="assets"></app-documents>
+    <app-view-360 *ngSwitchCase="'view-360'" [assets]="assets"></app-view-360>
+
+  </div>
+</ng-template>
+
+<!-- ================= LOADER ================= -->
+<ng-template #loadingSpinner>
+  <div class="center">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

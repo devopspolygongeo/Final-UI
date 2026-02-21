@@ -1,0 +1,355 @@
+<div class="client-management-container">
+  <div class="main-content" [class.with-sidebar]="showAddClientPanel">
+    <!-- Header -->
+    <div class="header">
+      <h2 class="title">Clients</h2>
+      <button class="add-client-btn" (click)="addClient()">Add Client</button>
+    </div>
+
+    <!-- Filter and Search Container -->
+    <div class="filter-search-container">
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'all'"
+          (click)="onTabChange('all')"
+        >
+          All
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'active'"
+          (click)="onTabChange('active')"
+        >
+          Active
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'inactive'"
+          (click)="onTabChange('inactive')"
+        >
+          Inactive
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-container">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter client name"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('name')">
+              <span>Client Name</span>
+              <img [src]="getSortIcon('name')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('location')">
+              <span>Location</span>
+              <img
+                [src]="getSortIcon('location')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('totalAssets')">
+              <span>Total assets</span>
+              <img
+                [src]="getSortIcon('totalAssets')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('closedAssets')">
+              <span>Closed assets</span>
+              <img
+                [src]="getSortIcon('closedAssets')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('subscriptions')">
+              <span>Subscriptions</span>
+              <img
+                [src]="getSortIcon('subscriptions')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('admin')">
+              <span>Admin</span>
+              <img [src]="getSortIcon('admin')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="center-header">Active</th>
+            <th class="center-header">Assets</th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of filteredClients" class="client-row">
+            <td class="client-name">{{ client.name }}</td>
+            <td>{{ client.location }}</td>
+            <td class="text-center">
+              {{ client.totalAssets.toString().padStart(2, "0") }}
+            </td>
+            <td class="text-center">
+              {{ client.closedAssets.toString().padStart(2, "0") }}
+            </td>
+            <td class="text-center">
+              {{ client.subscriptions.toString().padStart(2, "0") }}
+            </td>
+            <td>{{ client.admin }}</td>
+            <td class="text-center">
+              <div class="toggle-container">
+                <input
+                  type="checkbox"
+                  [id]="'toggle-' + client.id"
+                  class="toggle-input"
+                  [checked]="client.isActive"
+                  (change)="toggleClientStatus(client)"
+                />
+                <label [for]="'toggle-' + client.id" class="toggle-label">
+                  <img
+                    *ngIf="!client.isActive"
+                    src="assets/admin-dashboard/admin-toggle-inactive.png"
+                    alt="Inactive"
+                    class="toggle-icon"
+                  />
+                  <img
+                    *ngIf="client.isActive"
+                    src="assets/admin-dashboard/admin-toggle-active.png"
+                    alt="Active"
+                    class="toggle-icon"
+                  />
+                </label>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="assets-cell">
+                <button
+                  class="assets-btn"
+                  (click)="navigateToAssetManagement(client)"
+                >
+                  Assets
+                </button>
+                <div *ngIf="client.assets.length > 0" class="assets-count">
+                  {{ client.assets.length }}
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="actions-container">
+                <button
+                  class="action-btn edit-btn"
+                  (click)="editClient(client)"
+                  title="Edit"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-edit.png"
+                    alt="Edit"
+                  />
+                </button>
+                <button
+                  class="action-btn delete-btn"
+                  (click)="deleteClient(client)"
+                  title="Delete"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-delete.png"
+                    alt="Delete"
+                  />
+                </button>
+                <button
+                  class="action-btn export-btn"
+                  (click)="exportClient(client)"
+                  title="Export"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-export.png"
+                    alt="Export"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredClients.length === 0" class="no-results">
+        <p>No clients found matching your criteria.</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        <span
+          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ getTotalFilteredItems() }} entries</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+
+        <button
+          *ngFor="let page of getVisiblePages()"
+          class="pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.dots]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="goToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar Panel -->
+  <div class="right-sidebar" [class.show]="showAddClientPanel">
+    <div class="sidebar-header">
+      <h3>{{ newClient.id === 0 ? "Client details" : "Edit Client" }}</h3>
+      <button class="close-sidebar-btn" (click)="closeSidebar()" title="Close">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <form
+      (ngSubmit)="submitNewClient()"
+      #clientForm="ngForm"
+      class="client-form"
+    >
+      <div class="form-group">
+        <label for="name">Client Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="newClient.name"
+          placeholder="Client Name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          [(ngModel)]="newClient.location"
+          placeholder="Location"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="totalAssets">Total Assets</label>
+        <input
+          type="number"
+          id="totalAssets"
+          name="totalAssets"
+          [(ngModel)]="newClient.totalAssets"
+          placeholder="Total Assets"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="closedAssets">Closed Assets</label>
+        <input
+          type="number"
+          id="closedAssets"
+          name="closedAssets"
+          [(ngModel)]="newClient.closedAssets"
+          placeholder="Closed Assets"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="subscriptions">Subscriptions</label>
+        <input
+          type="number"
+          id="subscriptions"
+          name="subscriptions"
+          [(ngModel)]="newClient.subscriptions"
+          placeholder="Subscriptions"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="admin">Admin</label>
+        <select id="admin" name="admin" [(ngModel)]="newClient.admin" required>
+          <option value="" disabled selected>Select Admin</option>
+          <option
+            *ngFor="let username of uniqueAdminUsernames"
+            [value]="username"
+          >
+            {{ username }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group toggle-group">
+        <label for="toggle-new" class="toggle-label">Active</label>
+        <input
+          type="checkbox"
+          id="toggle-new"
+          class="toggle-input"
+          name="isActive"
+          [(ngModel)]="newClient.isActive"
+        />
+        <label for="toggle-new" class="toggle-label">
+          <img
+            *ngIf="!newClient.isActive"
+            src="assets/admin-dashboard/admin-toggle-inactive.png"
+            alt="Inactive"
+            class="toggle-icon mx-5 py-1"
+          />
+          <img
+            *ngIf="newClient.isActive"
+            src="assets/admin-dashboard/admin-toggle-active.png"
+            alt="Active"
+            class="toggle-icon mx-5 py-1"
+          />
+        </label>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        {{ newClient.id === 0 ? "Add Client" : "Update Client" }}
+      </button>
+    </form>
+  </div>
+</div>

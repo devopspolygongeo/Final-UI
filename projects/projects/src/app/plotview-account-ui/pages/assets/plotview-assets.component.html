@@ -1,0 +1,78 @@
+<div class="main-container">
+  <!-- Title now dynamic -->
+  <h1 class="page-title">Assets/{{ assetName }}</h1>
+
+  <div class="content-container">
+    <nav class="tab-navigation">
+      <a
+        class="tab-link"
+        routerLink="basicdetails"
+        [queryParamsHandling]="'preserve'"
+        routerLinkActive="active"
+        #rla1="routerLinkActive"
+        [class.active]="rla1.isActive"
+      >
+        Basic details
+      </a>
+
+      <a
+        class="tab-link"
+        routerLink="plotdetails"
+        [queryParamsHandling]="'preserve'"
+        routerLinkActive="active"
+        #rla2="routerLinkActive"
+        [class.active]="rla2.isActive"
+      >
+        Plot details
+      </a>
+
+      <a
+        class="tab-link"
+        routerLink="proximity"
+        [queryParamsHandling]="'preserve'"
+        routerLinkActive="active"
+        #rla3="routerLinkActive"
+        [class.active]="rla3.isActive"
+      >
+        Proximity
+      </a>
+
+      <a
+        class="tab-link"
+        routerLink="gallery"
+        [queryParamsHandling]="'preserve'"
+        routerLinkActive="active"
+        #rla4="routerLinkActive"
+        [class.active]="rla4.isActive"
+      >
+        Gallery
+      </a>
+
+      <a
+        class="tab-link"
+        routerLink="documents"
+        [queryParamsHandling]="'preserve'"
+        routerLinkActive="active"
+        #rla5="routerLinkActive"
+        [class.active]="rla5.isActive"
+      >
+        Documents
+      </a>
+
+      <a
+        class="tab-link"
+        routerLink="lead-management"
+        [queryParamsHandling]="'preserve'"
+        routerLinkActive="active"
+        #rla6="routerLinkActive"
+        [class.active]="rla6.isActive"
+      >
+        Lead Management
+      </a>
+    </nav>
+
+    <div class="tab-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

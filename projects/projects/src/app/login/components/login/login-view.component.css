@@ -1,0 +1,33 @@
+#login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background-image: url('../../../../assets/images/login.jpeg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-sizing: border-box;
+}
+
+.login-form {
+  width: 450px;
+}
+
+.login-button {
+  border-radius: 1.25rem;
+  width: 18rem;
+}
+
+mat-form-field {
+  width: 100%;
+  --mdc-filled-text-field-container-color: white --mdc-filled-text-field--focused: white
+}
+
+.logo-image img {
+  /* content: url(../../../../assets/images/polygon_logo.png); */
+  height: 10%;
+  width: 80%;
+  cursor: pointer;
+}

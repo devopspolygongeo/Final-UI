@@ -1,0 +1,4 @@
+<app-dashboard-view [view]=view [projects]=projects [surveys]=surveys [sources]=sources [groups]=groups
+    [layouts]=layouts [assets]=assets [landmarks]=landmarks [errorMsg]=errorMsg
+    (projectChangeEv)="onProjectChange($event)" (surveyChangeEv)="onSurveyChange($event)"
+    (logoutEv)="onLogout($event)" [isMiningProject]="isMiningProject"></app-dashboard-view>

@@ -1,0 +1,235 @@
+<div class="source-management-container">
+  <!-- Main Content -->
+  <div class="main-content with-sidebar">
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="sources-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('id')">
+              <span>GroupID</span>
+              <img [src]="getSortIcon('id')" alt="Sort" class="sort-icon" />
+            </th>
+            <!-- <th class="sortable-header" (click)="sortBy('groupName')"> -->
+              <!-- <span>Asset Name</span>
+              <img
+                [src]="getSortIcon('groupName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th> -->
+            <th class="sortable-header" (click)="sortBy('groupType')">
+              <span>Group Type</span>
+              <img
+                [src]="getSortIcon('groupType')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('groupName')">
+              <span>Group Name</span>
+              <img
+                [src]="getSortIcon('groupName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('priority')">
+              <span>Priority</span>
+              <img
+                [src]="getSortIcon('priority')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="center-header">Visibility</th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let group of paginatedGroups" class="source-row">
+            <td class="source-id">{{ group.id }}</td>
+            <!-- <td class="asset-name"></td> -->
+            <td>{{ typeLabel(group.groupType) }}</td>
+
+            <td>{{ group.groupName }}</td>
+            <td class="text-center">{{ group.priority }}</td>
+            <td class="text-center">
+              <div class="toggle-container">
+                <input
+                  type="checkbox"
+                  [id]="'toggle-' + group.id"
+                  class="toggle-input"
+                  [checked]="group.visibility"
+                  (change)="toggleGroupVisibility(group)"
+                />
+                <label [for]="'toggle-' + group.id" class="toggle-label">
+                  <img
+                    *ngIf="!group.visibility"
+                    src="assets/admin-dashboard/admin-toggle-inactive.png"
+                    alt="Inactive"
+                    class="toggle-icon"
+                  />
+                  <img
+                    *ngIf="group.visibility"
+                    src="assets/admin-dashboard/admin-toggle-active.png"
+                    alt="Active"
+                    class="toggle-icon"
+                  />
+                </label>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="actions-container">
+                <button
+                  class="action-btn edit-btn"
+                  (click)="editGroup(group)"
+                  title="Edit"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-edit.png"
+                    alt="Edit"
+                  />
+                </button>
+                <button
+                  class="action-btn delete-btn"
+                  (click)="deleteGroup(group)"
+                  title="Delete"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-delete.png"
+                    alt="Delete"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredGroups.length === 0" class="no-results">
+        <p>No groups found</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        <span
+          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ getTotalFilteredItems() }} entries</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+
+        <button
+          *ngFor="let page of getVisiblePages()"
+          class="pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.dots]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="goToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar - Always Visible -->
+  <div class="right-sidebar show">
+    <div class="sidebar-header">
+      <button class="clear-btn" (click)="resetForm()" title="Clear">
+        <img src="assets/admin-dashboard/back.png" alt="Clear" />
+      </button>
+      <h3>{{ newGroup.id === 0 ? "Add new group" : "Edit group" }}</h3>
+    </div>
+
+    <form class="source-form" (ngSubmit)="submitNewGroup()" #groupForm="ngForm">
+      <div class="form-group">
+        <label for="surveyId">Survey ID</label>
+        <input
+          type="number"
+          id="surveyId"
+          [(ngModel)]="newGroup.surveyId"
+          name="surveyId"
+          placeholder="Enter survey ID"
+          required
+        />
+      </div>
+
+      <!-- <div class="form-group">
+        <label for="assetName">Asset Name</label>
+        <input
+          type="text"
+          id="assetName"
+          [(ngModel)]="newGroup.groupName"
+          name="assetName"
+          placeholder="Enter asset name"
+          required
+        />
+      </div> -->
+
+      <div class="form-group">
+        <label for="groupType">Group Type</label>
+        <select
+          id="groupType"
+          [(ngModel)]="newGroup.groupType"
+          name="groupType"
+          required
+        >
+          <option value="">Select Group Type</option>
+          <option *ngFor="let type of groupTypes" [value]="type.id">
+            {{ type.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="groupName">Group Name</label>
+        <input
+          type="text"
+          id="groupName"
+          [(ngModel)]="newGroup.groupName"
+          name="groupName"
+          placeholder="Enter group name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="priority">Group Priority</label>
+        <input
+          type="number"
+          id="priority"
+          [(ngModel)]="newGroup.priority"
+          name="priority"
+          placeholder="Enter priority (1-10)"
+          min="1"
+          max="10"
+          required
+        />
+      </div>
+
+      <button type="submit" class="submit-btn">
+        {{ newGroup.id === 0 ? "Create Group" : "Update Group" }}
+      </button>
+    </form>
+  </div>
+</div>

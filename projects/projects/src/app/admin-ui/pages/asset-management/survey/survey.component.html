@@ -1,0 +1,297 @@
+<div class="admin-asset-container">
+  <div
+    class="admin-asset-main-content"
+    [class.with-sidebar]="showAddSurveySidebar"
+  >
+    <div class="admin-asset-header">
+      <h2 class="admin-asset-title">Surveys for Project ID: {{ projectId }} - {{projectName}}</h2>
+      <button class="admin-asset-add-btn" (click)="addSurvey()">
+        Add Survey
+      </button>
+    </div>
+
+    <div class="admin-asset-filter-container">
+      <div class="admin-asset-search-container">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="admin-asset-search-icon"
+        />
+        <input
+          class="admin-asset-search-input"
+          placeholder="Search surveys..."
+          [(ngModel)]="searchTerm"
+          (input)="filterSurveys()"
+        />
+      </div>
+    </div>
+
+    <div class="admin-asset-table-container">
+      <table class="admin-asset-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('id')">
+              Survey ID
+              <img [src]="getSortIcon('id')" class="admin-asset-sort-icon" />
+            </th>
+            <!-- <th (click)="sortBy('projectId')">
+              Project ID
+              <img
+                [src]="getSortIcon('projectId')"
+                class="admin-asset-sort-icon"
+              />
+            </th> -->
+            <th (click)="sortBy('name')">
+              Survey Name
+              <img [src]="getSortIcon('name')" class="admin-asset-sort-icon" />
+            </th>
+            <th (click)="sortBy('latitude')">
+              Latitude
+              <img
+                [src]="getSortIcon('latitude')"
+                class="admin-asset-sort-icon"
+              />
+            </th>
+            <th (click)="sortBy('longitude')">
+              Longitude
+              <img
+                [src]="getSortIcon('longitude')"
+                class="admin-asset-sort-icon"
+              />
+            </th>
+            <th (click)="sortBy('surveyDate')">
+              Date of Survey
+              <img
+                [src]="getSortIcon('surveyDate')"
+                class="admin-asset-sort-icon"
+              />
+            </th>
+            <th (click)="sortBy('progress')">
+              Completion %
+              <img
+                [src]="getSortIcon('progress')"
+                class="admin-asset-sort-icon"
+              />
+            </th>
+            <th (click)="sortBy('plotView')">
+              Plot View
+              <img
+                [src]="getSortIcon('plotView')"
+                class="admin-asset-sort-icon"
+              />
+            </th>
+            <th>Client Ops</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of paginatedSurveys">
+            <td>{{ s.id }}</td>
+            <!-- <td>{{ s.projectId }}</td> -->
+            <td>{{ s.name }}</td>
+            <td>{{ s.latitude }}</td>
+            <td>{{ s.longitude }}</td>
+            <td>{{ s.surveyDate }}</td>
+            <td>{{ s.progress }}%</td>
+            <td>{{ s.plotView ? "Yes" : "No" }}</td>
+            <td>
+              <button
+                class="admin-asset-action-btn view-btn"
+                (click)="goToSurveyDetail(s)"
+              >
+                <img
+                  src="assets/admin-dashboard/admin-asset-ops.png"
+                  alt="View"
+                />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-asset-footer">
+      <div class="entries-count">
+        Showing
+        {{ paginatedSurveys.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}
+        to {{ (currentPage - 1) * pageSize + paginatedSurveys.length }} of
+        {{ filteredSurveys.length }} entries
+      </div>
+      <div class="admin-asset-pagination">
+        <button
+          class="admin-asset-pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="navigateToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+        <button
+          *ngFor="let page of getPageNumbers()"
+          class="admin-asset-pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.ellipsis]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && navigateToPage(+page)"
+        >
+          {{ page }}
+        </button>
+        <button
+          class="admin-asset-pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="navigateToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Right Sidebar for Add/Edit Survey -->
+  <div class="admin-asset-sidebar" [class.show]="showAddSurveySidebar">
+    <div class="admin-asset-sidebar-header">
+      <h3>{{ newSurvey.id === 0 ? "Add Survey" : "Edit Survey" }}</h3>
+      <button
+        class="admin-asset-close-sidebar-btn"
+        (click)="closeSurveySidebar()"
+      >
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <form
+      class="admin-asset-form"
+      (ngSubmit)="submitSurvey()"
+      #surveyForm="ngForm"
+    >
+      <div class="admin-asset-form-group">
+        <label for="name">Survey Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="newSurvey.name"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="latitude">Latitude</label>
+        <input
+          type="number"
+          id="latitude"
+          name="latitude"
+          [(ngModel)]="newSurvey.latitude"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="longitude">Longitude</label>
+        <input
+          type="number"
+          id="longitude"
+          name="longitude"
+          [(ngModel)]="newSurvey.longitude"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="surveyDate">Date of Survey</label>
+        <input
+          type="date"
+          id="surveyDate"
+          name="surveyDate"
+          [(ngModel)]="newSurvey.surveyDate"
+          required
+        />
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="progress">Completion (%)</label>
+        <input
+          type="number"
+          id="progress"
+          name="progress"
+          [(ngModel)]="newSurvey.progress"
+          required
+          min="0"
+          max="100"
+        />
+      </div>
+      
+
+
+      <div class="admin-asset-form-group toggle-group">
+        <label for="plotView"
+          >Plot View
+          <input
+            class="admin-asset-toggle-checkbox"
+            type="checkbox"
+            id="plotView"
+            name="plotView"
+            [(ngModel)]="newSurvey.plotView"
+        /></label>
+      </div>
+
+      <div class="admin-asset-form-group">
+        <label for="terrainExaggeration">TerrainExaggeration</label>
+        <input
+          type="number"
+          id="terrainExaggeration"
+          name="terrainExaggeration"
+          [(ngModel)]="newSurvey.terrainExaggeration"
+          required
+        />
+      </div>
+
+
+      <div class="admin-asset-form-group">
+  <label for="zoom">Zoom</label>
+  <input
+    type="number"
+    id="zoom"
+    name="zoom"
+    [(ngModel)]="newSurvey.zoom"
+    required
+  />
+</div>
+
+<div class="admin-asset-form-group">
+  <label for="zoomMin">Zoom Min</label>
+  <input
+    type="number"
+    id="zoomMin"
+    name="zoomMin"
+    [(ngModel)]="newSurvey.zoomMin"
+    required
+  />
+</div>
+
+<div class="admin-asset-form-group">
+  <label for="zoomMax">Zoom Max</label>
+  <input
+    type="number"
+    id="zoomMax"
+    name="zoomMax"
+    [(ngModel)]="newSurvey.zoomMax"
+    required
+  />
+</div>
+
+<div class="admin-asset-form-group toggle-group">
+  <label>
+    Enable 3D
+    <input
+      type="checkbox"
+      [(ngModel)]="newSurvey.threeD"
+      name="threeD"
+    />
+  </label>
+</div>
+
+
+      <button type="submit" class="admin-asset-submit-btn">
+        {{ newSurvey.id === 0 ? "Add Survey" : "Update Survey" }}
+      </button>
+    </form>
+  </div>
+</div>

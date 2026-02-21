@@ -1,0 +1,44 @@
+<div class="asset-detail-container">
+  <!-- Navigation Tabs -->
+  <h2 class="asset-detail-title">
+    Polygon Geospatial / Assets / {{ assetName }}
+  </h2>
+
+  <div class="nav-tabs-container">
+    <div class="nav-tabs">
+      <button
+        class="nav-tab-btn"
+        [class.active]="activeTab === 'sources'"
+        (click)="setActiveTab('sources')"
+      >
+        Sources
+      </button>
+      <button
+        class="nav-tab-btn"
+        [class.active]="activeTab === 'groups'"
+        (click)="setActiveTab('groups')"
+      >
+        Groups
+      </button>
+      <button
+        class="nav-tab-btn"
+        [class.active]="activeTab === 'layers'"
+        (click)="setActiveTab('layers')"
+      >
+        Layers
+      </button>
+      <button
+        class="nav-tab-btn"
+        [class.active]="activeTab === 'plotattributes'"
+        (click)="setActiveTab('plot-attributes')"
+      >
+        Plot Attributes
+      </button>
+    </div>
+  </div>
+
+  <!-- Dynamic Content -->
+  <div class="content-container">
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,0 +1,135 @@
+
+.admin-layout {
+  height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #f5f5f5;
+  padding-top: 16px;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 16px 16px;
+}
+
+.sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 0 8px 16px 8px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 2px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-weight: 500;
+  color: #333;
+}
+
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar.collapsed .nav-link span {
+  display: none;
+}
+
+.nav-link img {
+  margin-right: 12px;
+  width: 24px;
+  height: 24px;
+}
+
+.sidebar.collapsed .nav-link img {
+  margin-right: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.nav-link.active span {
+  color: #1976d2;
+  font-size: 14px;
+}
+
+.nav-link span {
+  transition: opacity 0.2s ease;
+  font-size: 14px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 0 16px;
+}
+
+.toolbar.collapsed {
+  justify-content: flex-end;
+}
+
+.flex-spacer {
+  flex: 1 1 auto;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-button,
+.collapsed-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.profile {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}

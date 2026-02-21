@@ -1,0 +1,106 @@
+
+<div class="map" id="map" class="match-parent"></div>
+<!-- Measurement Display Panel -->
+<div class="measurement-panel" *ngIf="currentMeasurement || currentArea">
+  <div class="measurement-value" *ngIf="currentMeasurement">
+    📏 Length: {{ currentMeasurement }}
+  </div>
+  <div class="measurement-value" *ngIf="currentArea">
+    📐 Area: {{ currentArea }}
+  </div>
+</div>
+<div class="custom-mapbox-ctrl top mapboxgl-ctrl mapboxgl-ctrl-group">
+  <button
+    class="layout-toggle"
+    [ngClass]="{ active: layoutPanelToggleActive }"
+    type="button"
+    (click)="toggleLayoutVisibility()"
+    aria-label="Plot View"
+    title="Toggle Layout Panel"
+    aria-disabled="false"
+  >
+    <span aria-hidden="true" title="Layout Toggle"></span>
+  </button>
+</div>
+<div class="custom-mapbox-ctrl mapboxgl-ctrl mapboxgl-ctrl-group">
+  <button
+    class="map-view-toggle"
+    [ngClass]="{ active: streetToggleActive }"
+    type="button"
+    (click)="onStyleTypeChange()"
+    aria-label="Satellite View"
+    title="Toggle Satelite/Street View"
+    aria-disabled="false"
+  >
+    <span aria-hidden="true" title="Satellite/Street View"></span>
+  </button>
+  <button
+    class="location-reset"
+    type="button"
+    (click)="resetMapLocation()"
+    aria-label="Reset Map"
+    title="Reset Map position"
+    aria-disabled="false"
+  >
+    <span aria-hidden="true" title="Reset Location"></span>
+  </button>
+
+
+
+  <!-- VOLUME ASSESSMENT (MINING ONLY) -->
+  <button class="volume-assessment" *ngIf="isMiningProject" (click)="activateVolumeTool()" title="Volume Assessment">
+    <img src="assets/images/volume.svg" class="volume-icon" />
+  </button>
+
+
+  <div *ngIf="activeTool === 'volume'" class="volume-tool-panel">
+
+    <!-- Base Height -->
+    <label>
+      Base Height (m)
+      <input type="number" [(ngModel)]="volumeBaseHeight" placeholder="Enter base height" />
+    </label>
+
+    <!-- XYZ FILE -->
+    <label>
+      XYZ File
+      <input type="file" accept=".xyz" (change)="onXyzFileSelect($event)" />
+    </label>
+
+    <!-- GEOJSON FILE 
+  <label>
+    GeoJSON File
+    <input type="file" accept=".geojson" (change)="onGeojsonFileSelect($event)" />
+  </label>  -->
+
+    <!-- CALCULATE -->
+    <button class="volume-calc-btn" (click)="calculateVolume()" [disabled]="
+            !xyzFile ||
+            volumeBaseHeight === undefined
+          ">
+      Calculate Volume
+    </button>
+
+    <!-- ✅ RESULT INSIDE PANEL -->
+    <div *ngIf="volumeResult" class="volume-result">
+      <!-- ✅ RESULT INSIDE PANEL -->
+      <div *ngIf="volumeResult" class="volume-result">
+
+        <hr />
+
+        <h4>📐 Volume Result</h4>
+
+        <p><b>Area:</b> {{ volumeResult.area | number:'1.2-2' }} m²</p>
+        <p><b>Volume:</b> {{ volumeResult.volume | number:'1.2-2' }} m³</p>
+        <p><b>Cut Volume:</b> {{ volumeResult.cutVolume | number:'1.2-2' }} m³</p>
+        <p><b>Base Height:</b> {{ volumeResult.baseHeight }} m</p>
+
+      </div>
+
+
+    </div>
+
+
+
+
+</div>

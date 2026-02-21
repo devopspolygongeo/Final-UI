@@ -1,0 +1,125 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "projects",
+  "projectType": "application",
+  "generators": {},
+  "sourceRoot": "projects/projects/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "options": {
+        "outputPath": "dist/projects",
+        "index": "projects/projects/src/index.html",
+        "main": "projects/projects/src/main.ts",
+        "polyfills": [
+          "zone.js"
+        ],
+        "tsConfig": "projects/projects/tsconfig.app.json",
+        "assets": [
+          "projects/projects/src/favicon.ico",
+          "projects/projects/src/assets"
+        ],
+        "styles": [
+          "node_modules/bootstrap/scss/bootstrap.scss",
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "mapbox-gl/dist/mapbox-gl.css",
+          "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css",
+          "@photo-sphere-viewer/core/index.css",
+          "projects/projects/src/assets/css/simple-line-icons.css",
+          "@fortawesome/fontawesome-free/css/fontawesome.css",
+          "@fortawesome/fontawesome-free/css/solid.css",
+          "projects/projects/src/styles.css",
+          "node_modules/mapbox-gl/dist/mapbox-gl.css"
+        ],
+        "scripts": [
+          "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+        ],
+        "allowedCommonJsDependencies": [
+          "moment",
+          "mapbox-gl",
+          "@mapbox/mapbox-gl-draw"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "sourceMap": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "10kb",
+              "maximumError": "20kb"
+            }
+          ],
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "projects/projects/src/environments/environment.ts",
+              "with": "projects/projects/src/environments/environment.prod.ts"
+            }
+          ]
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "fileReplacements": [
+            {
+              "replace": "projects/projects/src/environments/environment.ts",
+              "with": "projects/projects/src/environments/environment.dev.ts"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "production",
+      "outputs": [
+        "{options.outputPath}"
+      ]
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "prod": {
+          "browserTarget": "projects:build:production"
+        },
+        "dev": {
+          "browserTarget": "projects:build:development"
+        }
+      },
+      "defaultConfiguration": "dev"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "browserTarget": "projects:build"
+      }
+    },
+    "test": {
+      "executor": "@angular-devkit/build-angular:karma",
+      "options": {
+        "polyfills": [
+          "zone.js",
+          "zone.js/testing"
+        ],
+        "tsConfig": "projects/projects/tsconfig.spec.json",
+        "assets": [
+          "projects/projects/src/favicon.ico",
+          "projects/projects/src/assets"
+        ],
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "projects/projects/src/styles.css"
+        ],
+        "scripts": []
+      }
+    }
+  }
+}

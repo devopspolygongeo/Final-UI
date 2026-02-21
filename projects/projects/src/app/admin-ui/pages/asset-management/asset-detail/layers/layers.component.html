@@ -1,0 +1,304 @@
+<!-- In layers.component.html -->
+<div class="source-management-container">
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner">Loading layers...</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content with-sidebar">
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="sources-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('id')">
+              <span>LayerID</span>
+              <img [src]="getSortIcon('id')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('sourceName')">
+              <span>Source Name</span>
+              <img
+                [src]="getSortIcon('sourceName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('groupName')">
+              <span>Group Name</span>
+              <img
+                [src]="getSortIcon('groupName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('attribute')">
+              <span>Layer Attribute</span>
+              <img
+                [src]="getSortIcon('attribute')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('name')">
+              <span>Layer Name</span>
+              <img [src]="getSortIcon('name')" alt="Sort" class="sort-icon" />
+            </th>
+            <!-- Add Topo ID column -->
+            <th class="sortable-header" (click)="sortBy('topoId')">
+              <span>Topo ID</span>
+              <img [src]="getSortIcon('topoId')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('priority')">
+              <span>Priority</span>
+              <img
+                [src]="getSortIcon('priority')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('displayName')">
+              <span>Display Name</span>
+              <img
+                [src]="getSortIcon('displayName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="center-header">Visibility</th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let layer of paginatedLayers">
+  <tr class="source-row"
+     *ngIf="!(layer.displayName || '').toLowerCase().includes('plot')"
+>
+
+            <td class="source-id">{{ layer.id }}</td>
+            <td>{{ layer.sourceName }}</td>
+            <td>{{ layer.groupName }}</td>
+            <td>{{ layer.attribute }}</td>
+            <td>
+  
+</td>
+
+            <!-- Add Topo ID data cell -->
+            <td>{{ layer.topoId }}</td>
+            <td>{{ layer.priority }}</td>
+            <td>{{ layer.displayName }}</td>
+            <td class="text-center">
+              <div class="toggle-container">
+                <input
+                  type="checkbox"
+                  [id]="'toggle-' + layer.id"
+                  class="toggle-input"
+                  [checked]="layer.visibility"
+                  (change)="toggleLayerVisibility(layer)"
+                />
+                <label [for]="'toggle-' + layer.id" class="toggle-label">
+                  <img
+                    *ngIf="!layer.visibility"
+                    src="assets/admin-dashboard/admin-toggle-inactive.png"
+                    alt="Inactive"
+                    class="toggle-icon"
+                  />
+                  <img
+                    *ngIf="layer.visibility"
+                    src="assets/admin-dashboard/admin-toggle-active.png"
+                    alt="Active"
+                    class="toggle-icon"
+                  />
+                </label>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="actions-container">
+                <button
+                  class="action-btn edit-btn"
+                  (click)="editLayer(layer)"
+                  title="Edit"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-edit.png"
+                    alt="Edit"
+                  />
+                </button>
+                <button
+                  class="action-btn delete-btn"
+                  (click)="deleteLayer(layer)"
+                  title="Delete"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-delete.png"
+                    alt="Delete"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+          </ng-container>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredLayers.length === 0 && !isLoading" class="no-results">
+        <p>No layers found matching your criteria.</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="filteredLayers.length > 0">
+      <div class="pagination-info">
+        <span
+          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ getTotalFilteredItems() }} entries</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+
+        <button
+          *ngFor="let page of getVisiblePages()"
+          class="pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.dots]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="goToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar - Always Visible -->
+  <div class="right-sidebar show">
+    <div class="sidebar-header">
+      <button class="clear-btn" (click)="resetForm()" title="Reset">
+        <img src="assets/admin-dashboard/back.png" alt="Reset" />
+      </button>
+      <h3>{{ newLayer.id === 0 ? "Add new layer" : "Edit layer" }}</h3>
+    </div>
+
+    <form class="source-form" (ngSubmit)="submitNewLayer()" #layerForm="ngForm">
+      
+
+      <div class="form-group">
+        <label for="sourceName">Select Source</label>
+        <select
+          id="sourceName"
+          [(ngModel)]="newLayer.sourceName"
+          name="sourceName"
+          #sourceSelect
+          (change)="onSourceChange(sourceSelect.value)"
+          required
+        >
+          <option value="">Select source</option>
+          <option *ngFor="let source of sourceOptions" [value]="source.id">
+            {{ source.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="groupName">Select Group</label>
+        <select
+          id="groupName"
+          [(ngModel)]="newLayer.groupName"
+          name="groupName"
+          #groupSelect
+          (change)="onGroupChange(groupSelect.value)"
+          required
+        >
+          <option value="">Select group</option>
+          <option *ngFor="let group of groupOptions" [value]="group.id">
+            {{ group.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="layerAttribute">Layer Attribute</label>
+        <input
+          type="text"
+          id="layerAttribute"
+          [(ngModel)]="newLayer.attribute"
+          name="layerAttribute"
+          placeholder="Enter layer attribute"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="layerName">Layer Name</label>
+        <input
+          type="text"
+          id="layerName"
+          [(ngModel)]="newLayer.name"
+          name="layerName"
+          placeholder="Enter layer name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="displayName">Display Name</label>
+        <input
+          type="text"
+          id="displayName"
+          [(ngModel)]="newLayer.displayName"
+          name="displayName"
+          placeholder="Display name"
+          required
+        />
+      </div>
+
+      <!-- Updated Topo ID dropdown field -->
+      <div class="form-group">
+        <label for="topoId">Topography</label>
+        <select
+          id="topoId"
+          [(ngModel)]="newLayer.topoId"
+          name="topoId"
+          required
+        >
+          <option value="">Select topography</option>
+          <option *ngFor="let topo of topographyOptions" [value]="topo.id">
+            {{ topo.id }} - {{ topo.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="priority">Layer Priority</label>
+        <input
+          type="number"
+          id="priority"
+          [(ngModel)]="newLayer.priority"
+          name="priority"
+          placeholder="Enter priority (1-10)"
+          min="1"
+          max="10"
+          required
+        />
+      </div>
+
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+  </div>
+</div>

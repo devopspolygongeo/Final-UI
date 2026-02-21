@@ -1,0 +1,217 @@
+/* Layout */
+.main-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.left-section {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* left column = container - right - gap */
+  --right-col: 420px;
+  --col-gap: 16px;
+  flex-basis: calc(100% - var(--right-col) - var(--col-gap));
+}
+
+/* The map host MUST have explicit width/height */
+.left-section app-map {
+  display: block;
+  width: 100%;
+  height: 70vh;
+  min-height: 520px;
+  /* dev visual aid (remove later) */
+  background: #f8fbff;
+  outline: 1px dashed rgba(44, 90, 160, 0.25);
+}
+
+/* Mapbox internals: fill the host box, not the viewport */
+:host ::ng-deep app-map,
+:host ::ng-deep app-map .map-container,
+:host ::ng-deep .mapboxgl-map,
+:host ::ng-deep .mapboxgl-canvas-container,
+:host ::ng-deep .mapboxgl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* RIGHT: fixed panel on the right */
+.right-section {
+  flex: 0 0 var(--right-col);
+  max-width: var(--right-col);
+  margin-left: auto; /* pin to right edge */
+  padding: 16px 12px;
+  border-left: 1px solid #eee;
+  background: #fff;
+}
+
+/* card look for the form */
+.right-form-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  margin-top: 0;
+}
+
+/* === form controls === */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-control:focus {
+  outline: none;
+  border-color: #2c5aa0;
+  box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+}
+
+/* === Price Range row (Min | Max | Unit) === */
+.price-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 84px; /* Min | Max | Unit */
+  gap: 8px;
+  align-items: stretch;
+}
+.price-input {
+  min-width: 0;
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.price-input:focus {
+  outline: none;
+  border-color: #2c5aa0;
+  box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+}
+.price-unit-dropdown .dropdown-input {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: #fafafa;
+  font-size: 14px;
+  color: #495057;
+}
+
+/* === Hide floating map widgets on this page only === */
+:host ::ng-deep .map-toolbar,
+:host ::ng-deep .map-tools,
+:host ::ng-deep .basemap-toggle,
+:host ::ng-deep .terrain-toggle,
+:host ::ng-deep .plotview-hint,
+:host ::ng-deep .globe-button,
+:host ::ng-deep .reset-orientation,
+:host ::ng-deep .mapboxgl-ctrl-compass,
+:host ::ng-deep .mapboxgl-ctrl-group .mapboxgl-ctrl-icon {
+  display: none !important;
+}
+
+/* === Responsive === */
+@media (max-width: 1200px) {
+  :host {
+    --right-col: 380px;
+  }
+}
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .left-section {
+    max-width: 100%;
+  }
+  .right-section {
+    flex: none;
+    max-width: none;
+    border-left: none;
+    border-top: 1px solid #eee;
+    margin-left: 0;
+    padding: 16px 0 0;
+  }
+  .left-section app-map {
+    height: 56vh;
+    min-height: 360px;
+  }
+}
+
+/* Save button row */
+.actions-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn {
+  width: 100%;
+  height: 38px;
+  border: none;
+  border-radius: 6px;
+  background: #2c5aa0; /* matches focus color */
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+.save-btn:hover {
+  filter: brightness(1.03);
+}
+.save-btn:active {
+  transform: translateY(1px);
+}
+.save-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+/* dropdown chevron */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper .form-control {
+  /* make room for the chevron */
+  padding-right: 36px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: #fff; /* keep your current input look */
+}
+
+.select-caret {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* let clicks go to the select */
+  color: #6c757d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

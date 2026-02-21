@@ -1,0 +1,189 @@
+<div class="user-management-container">
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="header">
+      <h2 class="title">Users</h2>
+      <button class="add-user-btn" (click)="openAddUser()">+ Add User</button>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Assets</th>
+            <th class="center-header">Access</th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let user of filteredUsers" class="user-row">
+            <td class="user-name">{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+  <ng-container *ngIf="user.projectaccess?.length; else noAssets">
+  <span *ngFor="let pid of user.projectaccess; let last = last">
+    {{ getProjectNameById(pid) }}
+    <span *ngIf="!last">, </span>
+  </span>
+</ng-container>
+
+
+  <ng-template #noAssets>
+    <span>-</span>
+  </ng-template>
+</td>
+
+
+
+           <td class="text-center">
+  <div class="toggle-container">
+    <input
+      type="checkbox"
+      [id]="'access-toggle-' + user.id"
+      class="toggle-input hidden-checkbox"
+      [checked]="user.access === 'Full'"
+      (change)="toggleUserAccess(user)"
+    />
+
+    <label
+      [for]="'access-toggle-' + user.id"
+      class="toggle-label"
+      title="Toggle Access"
+    >
+      <img
+        *ngIf="user.access !== 'Full'"
+        src="assets/admin-dashboard/admin-toggle-inactive.png"
+        alt="Limited Access"
+        class="toggle-icon"
+      />
+      <img
+        *ngIf="user.access === 'Full'"
+        src="assets/admin-dashboard/admin-toggle-active.png"
+        alt="Full Access"
+        class="toggle-icon"
+      />
+    </label>
+  </div>
+</td>
+
+
+            <td class="text-center">
+              <div class="actions-container">
+                <button class="action-btn edit-btn" (click)="editUser(user)">
+                  <img src="assets/admin-dashboard/admin-client-edit.png" />
+                </button>
+                <button class="action-btn delete-btn" (click)="deleteUser(user)">
+                  <img src="assets/admin-dashboard/admin-delete.png" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="filteredUsers.length === 0" class="no-results">
+        <p>No users found.</p>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="right-sidebar" [class.show]="showEditUserPanel">
+      <div class="sidebar-header">
+        <h3>User Details</h3>
+        <button class="close-sidebar-btn" (click)="closeSidebar()">×</button>
+      </div>
+
+      <form (ngSubmit)="submitUserChanges()" class="user-form">
+
+        <div class="form-group">
+          <label>Name</label>
+          <input [(ngModel)]="currentUser.name" name="name" required />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input [(ngModel)]="currentUser.email" name="email" required />
+        </div>
+
+        <div class="form-group">
+          <label>Phone</label>
+          <input [(ngModel)]="currentUser.phone" name="phone" required />
+        </div>
+
+        <div class="form-group">
+          <label>Role</label>
+          <select [(ngModel)]="currentUser.role" name="role" required>
+            <option value="Organization Admin Account Owner">
+              Organization Admin Account Owner
+            </option>
+            <option value="Asset Manager">Asset Manager</option>
+            <option value="Viewer">Viewer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+  <label>Assets</label>
+<select
+  multiple
+  class="form-select"
+  name="projectaccess"
+  [(ngModel)]="currentUser.projectaccess"
+>
+
+    <option
+  *ngFor="let project of projects"
+  [ngValue]="project.id"
+>
+  {{ project.name }}
+</option>
+
+  </select>
+</div>
+
+
+        <!-- 🔥 PROJECT ACCESS (ADMIN ONLY) -->
+        
+
+        <!-- Access Toggle -->
+       <div class="form-group toggle-group">
+  <label class="field-label">Access</label>
+
+  <div
+    class="toggle-container"
+    (click)="toggleCurrentUserAccess()"
+  >
+    <img
+      *ngIf="currentUser.access !== 'Full'"
+      src="assets/admin-dashboard/admin-toggle-inactive.png"
+      alt="Limited Access"
+      class="toggle-icon"
+    />
+
+    <img
+      *ngIf="currentUser.access === 'Full'"
+      src="assets/admin-dashboard/admin-toggle-active.png"
+      alt="Full Access"
+      class="toggle-icon"
+    />
+  </div>
+</div>
+
+
+        <button class="submit-btn">
+          {{ currentUser.id === 0 ? 'Add User' : 'Save Changes' }}
+        </button>
+
+      </form>
+    </div>
+
+  </div>
+</div>

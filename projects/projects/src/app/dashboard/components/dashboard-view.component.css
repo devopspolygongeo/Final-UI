@@ -1,0 +1,858 @@
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.left-nav-item {
+  height: 25px;
+  width: 25px;
+  background-position: center;
+  background-size: cover;
+  margin: 15px 0 15px 15px;
+  cursor: pointer;
+}
+
+.bottom-nav-item {
+  height: 25px;
+  width: 25px;
+  background-position: center;
+  background-size: cover;
+  margin: 15px 11px 15px 15px;
+  cursor: pointer;
+}
+
+.logo {
+  background-image: url("../../../assets/images/1.png");
+}
+
+.logo1 {
+  background-image: url("../../../assets/images/AerospaceShortlogo.png");
+}
+.layers {
+  background-image: url("../../../assets/images/menu/layers_black_new.png");
+}
+
+.layers.active,
+.layers:hover {
+  background-image: url("../../../assets/images/menu/layers_new.png");
+}
+
+.proximity {
+  background-image: url("../../../assets/images/menu/landmarks_black_new.png");
+}
+
+.proximity.active,
+.proximity:hover {
+  background-image: url("../../../assets/images/menu/landmarks_new.png");
+}
+
+.accessibility {
+  background-image: url("../../../assets/images/menu/accessibility_black_new.png");
+}
+
+.accessibility.active,
+.accessibility:hover {
+  background-image: url("../../../assets/images/menu/accessibility_new.png");
+}
+
+.gallery {
+  background-image: url("../../../assets/images/menu/gallery_black_new.png");
+}
+
+.gallery.active,
+.gallery:hover {
+  background-image: url("../../../assets/images/menu/gallery_new.png");
+}
+
+.docs {
+  background-image: url("../../../assets/images/menu/docs_black_new.png");
+}
+
+.docs.active,
+.docs:hover {
+  background-image: url("../../../assets/images/menu/docs_new.png");
+}
+
+.view-360 {
+  background-image: url("../../../assets/images/menu/360_view_black.png");
+}
+
+.view-360.active,
+.view-360:hover {
+  background-image: url("../../../assets/images/menu/360_view.png");
+}
+
+.logout {
+  margin-top: auto;
+  margin-bottom: 2rem;
+  background-image: url("../../../assets/images/menu/logout_new.png");
+}
+
+/* Floating left panel - now positioned after the vertical nav */
+
+.nav-expand.accessibility_content,
+.nav-expand.docs_content,
+.nav-expand.logo_content,
+.nav-expand.layers_content {
+  width: 19rem !important;
+}
+
+.nav-expand.proximity_content {
+  width: 22rem !important ;
+}
+.nav-expand.gallery_content {
+  width: 34rem !important;
+}
+.nav-expand.view-360_content {
+  width: 1rem !important;
+}
+
+.nav-expand {
+  position: fixed;
+  left: 70px; /* Positioned after the vertical nav bar */
+  top: 0;
+  z-index: 7;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(120%) blur(6px);
+  border-radius: 0;
+  height: 100vh; /* Full height */
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Collapsed state for nav-expand */
+.nav-expand.collapsed {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar toggle button */
+/* Sidebar toggle button */
+.sidebar-toggle {
+  position: fixed;
+  left: 70px; /* Start at the nav bar edge */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 8;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  width: 20px;
+  height: 60px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+  border-color: #5e19ea;
+  border-width: 2px;
+  margin-left: 1px;
+}
+
+.sidebar-toggle:hover {
+  background: #f8f9fa;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* When sidebar is expanded, button moves with it */
+.sidebar-toggle.expanded {
+  left: calc(
+    70px + 19rem - 1px
+  ); /* Nav width + sidebar width - border overlap */
+}
+
+.sidebar-toggle.expanded.proximity {
+  left: calc(70px + 22rem - 1px);
+}
+
+.sidebar-toggle.expanded.gallery {
+  left: calc(70px + 34rem - 1px);
+}
+
+.sidebar-toggle.expanded.view-360 {
+  left: calc(70px + 1rem - 1px);
+}
+
+/* Arrow icon for toggle button */
+.sidebar-toggle::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid #9ca3af;
+  transition: transform 0.3s ease, border-color 0.2s ease;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sidebar-toggle:hover::before {
+  border-right-color: #6b7280;
+}
+
+.sidebar-toggle.expanded::before {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+.nav-expand-body {
+  padding: 12px 14px;
+  max-height: calc(100vh - 0px); /* Full height minus any margins */
+  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav-expand-body::-webkit-scrollbar {
+  /* WebKit */
+  width: 0;
+  height: 0;
+}
+
+.nav-expand.view-360_content {
+  z-index: 3;
+}
+
+/* ========================================
+   REMOVE BORDERS/BOXES FROM LAYER TOGGLES
+   ======================================== */
+
+/* Target ALL elements inside nav-expand-body aggressively */
+.nav-expand-body *,
+.nav-expand-body *::before,
+.nav-expand-body *::after {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Remove backgrounds from container elements but keep text readable */
+.nav-expand-body > *,
+.nav-expand-body div,
+.nav-expand-body section,
+.nav-expand-body article,
+.nav-expand-body aside,
+.nav-expand-body ul,
+.nav-expand-body li,
+.nav-expand-body p {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Specifically target common Angular Material and UI elements */
+.nav-expand-body .mat-card,
+.nav-expand-body .mat-card-content,
+.nav-expand-body .mat-list-item,
+.nav-expand-body .mat-expansion-panel,
+.nav-expand-body .mat-expansion-panel-header,
+.nav-expand-body .mat-form-field,
+.nav-expand-body .mat-slide-toggle,
+.nav-expand-body .mat-checkbox,
+.nav-expand-body .mat-radio-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Target Bootstrap and common CSS framework classes */
+.nav-expand-body .card,
+.nav-expand-body .card-body,
+.nav-expand-body .card-header,
+.nav-expand-body .list-group-item,
+.nav-expand-body .form-control,
+.nav-expand-body .btn,
+.nav-expand-body .panel,
+.nav-expand-body .well {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Remove any utility class borders */
+.nav-expand-body [class*="border"],
+.nav-expand-body [class*="shadow"],
+.nav-expand-body [class*="rounded"],
+.nav-expand-body [class*="card"],
+.nav-expand-body [class*="panel"],
+.nav-expand-body [class*="box"] {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Ensure interactive elements like toggles remain visible */
+.nav-expand-body input[type="checkbox"],
+.nav-expand-body input[type="radio"],
+.nav-expand-body .mat-slide-toggle-thumb,
+.nav-expand-body .mat-slide-toggle-bar,
+.nav-expand-body button {
+  background: revert !important;
+  border: revert !important;
+}
+
+.right-nav-bar select {
+  position: relative;
+  width: 18rem;
+  height: 3rem;
+  border-radius: 5px;
+  border: 0;
+  scrollbar-width: none;
+  padding-left: 10px;
+}
+
+#hover-info {
+  min-height: 3rem;
+  width: 13rem;
+  background-color: #fafafa;
+  border-radius: 5px;
+}
+
+/* mobile view */
+.bottom-bar {
+  height: 50px;
+  display: flex;
+}
+
+.hide-on-mobile {
+  display: block;
+}
+
+::ng-deep .mat-bottom-sheet-container {
+  display: flex !important;
+  height: fit-content;
+}
+mat-label {
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  .sidebar-toggle {
+    display: none;
+  }
+  mat-sidenav-container {
+    height: 92vh;
+  }
+  select {
+    width: 11rem !important;
+  }
+}
+
+.show-on-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .show-on-mobile {
+    display: block;
+  }
+}
+
+/* compact, borderless button with icon; matches control height */
+
+.right-nav-bar .mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px; /* same as your selects */
+  padding: 10px 10px;
+  background: #fff;
+  color: #1f2937;
+  border: none; /* no border */
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.right-nav-bar .mode-btn:active {
+  transform: translateY(1px);
+}
+.right-nav-bar .mode-btn .mode-icon {
+  width: 18px;
+  height: 20px;
+  fill: currentColor;
+  display: inline-block;
+}
+
+/* Bottom-right segmented 2D/3D toggle */
+.view-mode-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 5; /* above map & panels */
+  display: inline-flex;
+  background: #ffffff;
+  font-size: larger;
+  border-radius: 9999px;
+  color: white;
+  overflow: hidden;
+}
+
+/* buttons inside the pill */
+.view-mode-toggle .segbtn {
+  appearance: none;
+  border: 0;
+  padding: 8px 12px;
+  width: 52px; /* keeps it compact */
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* icons */
+.view-mode-toggle .ico {
+  width: 22px;
+  height: 22px;
+}
+.view-mode-toggle .stroke {
+  fill: none;
+  stroke: #374151; /* gray-700 for inactive */
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ACTIVE side gets filled pill + white icon - CHANGED TO PURPLE */
+.view-mode-toggle .segbtn.active {
+  background: #5e19ea; /* changed from blue to purple */
+  color: white;
+}
+.view-mode-toggle .segbtn.active .stroke {
+  stroke: #ffffff;
+}
+
+/* no hover/focus color shifts (keep it solid) */
+.view-mode-toggle .segbtn:focus {
+  outline: none;
+}
+.view-mode-toggle .segbtn:not(.active):hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* lift the control above the mobile bottom bar */
+@media (max-width: 768px) {
+  .view-mode-toggle {
+    bottom: 70px;
+  }
+}
+
+/* Neutralize old generic select style in the right bar */
+.right-nav-bar select {
+  all: unset; /* cancel previous width/height/border rules */
+  scrollbar-width: none;
+}
+
+/* right toolbar positioning (avoid overlap with map controls) */
+.right-nav-bar {
+  position: fixed;
+  right: 8px; /* was 0 */
+  top: 0px; /* was 0 */
+  z-index: 6; /* above map controls */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px; /* space between the two selects */
+  scrollbar-width: none;
+}
+
+.right-nav-bar .mt-4 {
+  margin-top: 6px !important;
+} /* lower than 1.5rem */
+.right-nav-bar .ms-3 {
+  margin-left: 0 !important;
+}
+.right-nav-bar .me-4 {
+  margin-right: 45px !important;
+}
+
+/* keep right toolbar out of the map's right control stack */
+.right-nav-bar {
+  position: fixed;
+  right: 16px;
+  top: 8px;
+  z-index: 6;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* ---------- Field (closed state) ---------- */
+.right-nav-bar .select-modern {
+  width: 17rem;
+}
+
+.right-nav-bar .select-modern .mat-mdc-form-field-infix {
+  padding-top: 10px; /* tighter */
+  padding-bottom: 10px;
+}
+
+.right-nav-bar .select-modern .mat-mdc-text-field-wrapper {
+  border-radius: 12px !important; /* rounded input */
+  background: #fff;
+}
+
+.right-nav-bar .select-modern .mdc-notched-outline__leading,
+.right-nav-bar .select-modern .mdc-notched-outline__trailing {
+  border-radius: 12px;
+}
+
+.right-nav-bar .select-modern .mat-mdc-form-field-focus-overlay {
+  background: transparent; /* no purple wash */
+}
+
+/* CHANGED: Focus border color to purple */
+.right-nav-bar .select-modern.mat-focused .mdc-notched-outline__leading,
+.right-nav-bar .select-modern.mat-focused .mdc-notched-outline__trailing {
+  border-color: #5e19ea; /* changed from blue to purple */
+}
+
+/* ---------- Selected text styling (larger font) ---------- */
+.right-nav-bar .glass-select .mat-mdc-select-value-text {
+  font-size: 16px !important; /* Larger font for selected text */
+  font-weight: 500 !important; /* Medium weight for selected text */
+  color: #1f2937 !important;
+}
+
+/* ---------- Dropdown panel (open state) ---------- */
+/* Modern Dropdown Panel (open state) */
+.cdk-overlay-pane .glass-select-panel.mdc-menu-surface {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  border-radius: 16px !important;
+
+  padding: 8px 0 !important;
+  margin-top: 8px !important;
+  overflow: hidden !important;
+  animation: slideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Option styling - smaller font for dropdown options */
+.glass-select-panel .mat-mdc-option {
+  padding: 12px 20px !important;
+  margin: 2px 8px !important;
+  border-radius: 12px !important;
+  min-height: 44px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+  font-size: 14px !important; /* Smaller font for dropdown options */
+  font-weight: 400 !important; /* Normal weight for dropdown options */
+  color: #6b7280 !important; /* Lighter color for dropdown options */
+}
+
+/* CHANGED: Hover background to purple tint */
+.glass-select-panel .mat-mdc-option:hover:not(.mdc-list-item--selected) {
+  background: rgba(94, 25, 234, 0.06) !important; /* purple tint */
+  transform: translateX(4px) !important;
+  color: #374151 !important; /* Darker color on hover */
+}
+
+/* CHANGED: Selected option to purple gradient */
+.glass-select-panel .mat-mdc-option.mdc-list-item--selected {
+  background: linear-gradient(
+    135deg,
+    rgba(94, 25, 234, 0.15),
+    rgba(94, 25, 234, 0.08)
+  ) !important; /* purple gradient */
+  color: #5e19ea !important; /* purple text */
+  font-weight: 500 !important; /* Medium weight for selected option */
+
+  border-left: 3px solid #5e19ea !important; /* purple border */
+  transform: translateX(2px) !important;
+}
+
+/* caret spacing in the closed field */
+.right-nav-bar .select-modern .mat-mdc-select-arrow {
+  margin-right: 8px;
+}
+
+/* =========================
+   VERTICAL Left Navigation Bar (New Layout)
+   ========================= */
+.top-nav-bar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 70px; /* Fixed width for vertical nav */
+  height: 100vh; /* Full height */
+  z-index: 8; /* Higher than panels */
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(120%) blur(6px);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0; /* No border radius for full height sidebar */
+}
+
+.top-nav-bar .top-nav-scroll {
+  display: flex;
+  flex-direction: column; /* Vertical layout */
+  align-items: center;
+  /* Space between main nav and logout */
+  padding: 20px 10px; /* Remove bottom padding */
+  gap: 20px; /* Better spacing between icons */
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Container for main navigation items */
+.top-nav-bar .top-nav-scroll > ng-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+
+.top-nav-item {
+  height: 26px; /* Slightly larger for better visibility */
+  width: 26px;
+  background-position: center;
+  background-size: cover;
+  margin-bottom: 10px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.12s ease;
+  position: relative;
+}
+
+/* Add separator line below each icon */
+.top-nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 1px;
+  background-color: #d1d5db; /* Light grey separator */
+}
+
+.top-nav-item:hover {
+  transform: translateY(-2px);
+}
+/* kill the purple border */
+.top-nav-item.active {
+  box-shadow: none;
+  background-color: transparent;
+}
+
+/* optional: also ensure no focus ring ever appears */
+.top-nav-item:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* =========================
+   Logout inside vertical nav (at bottom)
+   ========================= */
+.logout-floating {
+  position: fixed; /* Use fixed positioning relative to viewport */
+  bottom: 20px;
+  left: 15px; /* Position within the nav bar width (70px) */
+  z-index: 9; /* Higher than nav bar */
+  height: 45px; /* Match other icons */
+  width: 45px;
+  border-radius: 12px;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 24px 24px; /* Slightly larger icon */
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.logout-floating:hover {
+  transform: translateY(-2px);
+}
+
+/* Keep mobile behavior: hide the new top bar, continue using bottom sheet nav */
+@media (max-width: 768px) {
+  .top-nav-bar {
+    display: none;
+  }
+  .nav-expand {
+    left: 16px; /* Reset to original position on mobile */
+  }
+}
+
+/* ==== Glassy, rounded MAT SELECT (closed state) ==== */
+.right-nav-bar .select-modern {
+  width: 17rem;
+}
+
+/* wrapper that renders the field box */
+.right-nav-bar .select-modern .mat-mdc-text-field-wrapper {
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.88); /* glassy */
+  backdrop-filter: saturate(120%) blur(6px); /* glass effect */
+}
+
+/* remove the heavy outline look */
+.right-nav-bar .select-modern .mdc-notched-outline__leading,
+.right-nav-bar .select-modern .mdc-notched-outline__trailing,
+.right-nav-bar .select-modern .mdc-notched-outline__notch {
+  border-color: transparent !important;
+}
+
+/* input height & padding */
+.right-nav-bar .select-modern .mat-mdc-form-field-infix {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* label color (little caption) */
+.right-nav-bar .select-modern .mat-mdc-floating-label,
+.right-nav-bar .select-modern .mat-mdc-form-field-subscript-wrapper {
+  color: #6b7280; /* gray-500 */
+}
+
+/* caret spacing & tone */
+.right-nav-bar .select-modern .mat-mdc-select-arrow {
+  margin-right: 8px;
+  color: #6b7280;
+}
+
+/* focus state: soft glow, no purple border */
+.right-nav-bar .select-modern.mat-focused .mat-mdc-text-field-wrapper {
+  border-color: rgba(94, 25, 234, 0.35); /* purple glow */
+}
+.right-nav-bar .select-modern .mat-mdc-form-field-focus-overlay {
+  background: transparent; /* kill the default purple wash */
+}
+
+/* kill any default outlines */
+.right-nav-bar .select-modern .mat-mdc-form-field-ripple,
+.right-nav-bar .select-modern .mdc-line-ripple {
+  display: none !important;
+}
+
+/* ==== Dropdown panel (open state) ==== */
+.cdk-overlay-pane .rounded-select-panel.mdc-menu-surface {
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: saturate(120%) blur(6px);
+
+  padding: 6px 0; /* tighter, modern menu */
+  overflow: hidden; /* clip rounded corners cleanly */
+}
+
+/* option look */
+.rounded-select-panel .mat-mdc-option {
+  padding: 10px 14px;
+  margin: 2px 8px;
+  border-radius: 10px;
+}
+
+/* CHANGED: Hover to purple tint */
+.rounded-select-panel .mat-mdc-option:hover:not(.mdc-list-item--selected) {
+  background: rgba(94, 25, 234, 0.05) !important; /* purple tint */
+}
+
+/* CHANGED: Selected to purple background */
+.rounded-select-panel .mat-mdc-option.mdc-list-item--selected {
+  background: rgba(94, 25, 234, 0.12) !important; /* purple background */
+}
+
+::ng-deep .nav-expand-body .mat-card,
+::ng-deep .nav-expand-body .mat-list-item,
+::ng-deep .nav-expand-body .mat-expansion-panel {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.nav-expand-body .mat-card {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Account menu styles */
+.user-account-menu {
+  margin-left: auto;
+}
+
+.account-button {
+  background-color: #5e19ea;
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.account-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.user-menu {
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.user-menu .mat-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Remove the floating logout button since we're moving it to the account menu */
+.logout-floating {
+  display: none;
+}
+
+/* =========================
+   POTREE OVERLAY (FIXED, OFFSET FROM LEFT NAV)
+   ========================= */
+.potree-overlay {
+  position: fixed;
+  top: 0;
+  left: 70px; /* same as top-nav-bar width */
+  width: calc(100vw - 70px);
+  height: 100vh;
+
+  z-index: 50; /* ✅ BELOW the right toolbar & toggles */
+  background: transparent;
+
+  pointer-events: none; /* ✅ overlay itself doesn't block clicks */
+}
+
+.potree-overlay iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+
+  pointer-events: auto; /* ✅ potree remains interactive */
+}

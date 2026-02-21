@@ -1,0 +1,133 @@
+<div class="container">
+  <div class="main-content">
+    <!-- Left Section - 75% with Gallery -->
+    <div class="left-section">
+      <!-- Images Section -->
+      <div class="gallery-section">
+        <h2 class="section-title">Images</h2>
+        <div class="media-grid">
+          <div
+            *ngFor="let image of images; let i = index"
+            class="media-item image-item"
+            (click)="onClickImage(image)"
+          >
+            <img [src]="image.url" [alt]="image.name" class="media-thumbnail" />
+            <div class="media-overlay">
+              <button
+                class="delete-btn"
+                (click)="removeImage(i); $event.stopPropagation()"
+              >
+                <img
+                  src="assets/admin-dashboard/admin-delete.png"
+                  alt="Delete"
+                  class="delete-icon"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Videos Section -->
+      <div class="gallery-section">
+        <h2 class="section-title">Videos</h2>
+        <div class="media-grid">
+          <div
+            class="media-item video-item"
+            *ngFor="let video of videos; let i = index"
+            (click)="onClickVideo(video, $event)">
+        
+            <div class="video-thumbnail" (click)="onClickVideo(video, $event)">
+              <video
+                class="media-thumbnail"
+                [src]="video.url"
+                [attr.poster]="video.thumbnail || null"
+                muted
+                playsinline
+              ></video>
+
+              <div class="play-overlay">
+                <div class="play-button">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 5v14l11-7z" fill="white" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="media-overlay">
+              <button
+                class="delete-btn"
+                (click)="removeVideo(i); $event.stopPropagation()"
+              >
+                <img
+                  src="assets/admin-dashboard/admin-delete.png"
+                  alt="Delete"
+                  class="delete-icon"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section - 25% (uploads) -->
+    <div class="right-section">
+      <div class="upload-tabs">
+        <button
+          class="tab-button"
+          [class.active]="activeTab === 'images'"
+          (click)="setActiveTab('images')"
+        >
+          Images
+        </button>
+        <button
+          class="tab-button"
+          [class.active]="activeTab === 'videos'"
+          (click)="setActiveTab('videos')"
+        >
+          Videos
+        </button>
+      </div>
+
+      <div class="upload-container">
+        <div
+          class="upload-dropzone"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event)"
+        >
+          <div class="upload-icon">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17,8 12,3 7,8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <p class="upload-text">Drag & Drop to upload to gallery.</p>
+          <p class="upload-info"><strong>Max Size:</strong> 1GB each upload</p>
+        </div>
+
+        <button class="upload-button" (click)="triggerFileInput()">
+          Upload
+        </button>
+
+        <input
+          #fileInput
+          type="file"
+          [accept]="activeTab === 'images' ? 'image/*' : 'video/*'"
+          multiple
+          style="display: none"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+    </div>
+  </div>
+</div>

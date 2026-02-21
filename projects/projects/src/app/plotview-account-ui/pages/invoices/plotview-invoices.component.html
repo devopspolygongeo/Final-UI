@@ -1,0 +1,411 @@
+<div class="subscription-management-container">
+  <!-- Header -->
+  <div class="header">
+    <h2 class="title">Invoices</h2>
+  </div>
+
+  <!-- Controls Row -->
+  <div class="controls-row">
+    <!-- Date Picker -->
+    <div class="date-picker-container">
+      <input
+        type="date"
+        class="date-input"
+        [(ngModel)]="selectedDate"
+        (change)="onDateChange()"
+      />
+    </div>
+
+    <!-- Entries Control -->
+    <div class="entries-control">
+      <span>Show</span>
+      <select
+        class="entries-select"
+        [(ngModel)]="itemsPerPage"
+        (change)="onItemsPerPageChange()"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <span>entries</span>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+      <div class="search-wrapper">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter asset name"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container">
+    <table class="subscriptions-table">
+      <thead>
+        <tr>
+          <th class="sortable-header" (click)="sortBy('id')">
+            <span>Invoice Id</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('date')">
+            <span>Date</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('billingName')">
+            <span>Billing Name</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('amount')">
+            <span>Amount</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('status')">
+            <span>Status</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th>Download PDF</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let invoice of getPaginatedInvoices()"
+          class="subscription-row"
+        >
+          <td>{{ invoice.id }}</td>
+          <td>{{ invoice.date }}</td>
+          <td>{{ invoice.billingName }}</td>
+          <td>{{ invoice.amount | currency : "INR" : "symbol" : "1.0-0" }}</td>
+          <td>
+            <span
+              [ngClass]="{
+                'text-green-500': invoice.status === 'Paid',
+                'text-red-500': invoice.status === 'Unpaid',
+                'text-yellow-500': invoice.status === 'Pending'
+              }"
+            >
+              {{ invoice.status }}
+            </span>
+          </td>
+          <td>
+            <button class="download-btn" (click)="download(invoice.id)">
+              <svg
+                class="download-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M7 10L12 15L17 10"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 15V3"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </td>
+          <!-- Only showing the relevant changed part -->
+          <td>
+            <div class="actions-container" style="position: relative">
+              <button
+                class="three-dots-btn"
+                (click)="toggleActionsMenu(invoice.id)"
+                [class.active]="activeMenuId === invoice.id"
+              >
+                ⋮
+              </button>
+              <div
+                class="actions-menu"
+                [class.show]="activeMenuId === invoice.id"
+              >
+                <button class="menu-item" (click)="viewInvoiceDetails(invoice)">
+                  <svg
+                    class="menu-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M14 2V8H20"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M16 13H8"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M16 17H8"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M10 9H9H8"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Invoice Details
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- No results message -->
+    <div *ngIf="filteredInvoices.length === 0" class="no-results">
+      <p>No invoices found matching your criteria.</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container">
+    <div class="pagination-info">
+      <span
+        >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+        {{ getTotalFilteredItems() }} entries</span
+      >
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        ⏮
+      </button>
+
+      <button
+        *ngFor="let page of getVisiblePages()"
+        class="pagination-btn page-number"
+        [class.active]="page === currentPage"
+        [class.dots]="page === '...'"
+        [disabled]="page === '...'"
+        (click)="page !== '...' && goToPage(+page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === getTotalPages()"
+        (click)="goToPage(currentPage + 1)"
+      >
+        ⏭
+      </button>
+    </div>
+  </div>
+
+  <!-- Invoice Details Modal -->
+  <div
+    class="modal-overlay"
+    [class.show]="showInvoiceModal"
+    (click)="closeInvoiceModal()"
+  >
+    <div
+      class="invoice-modal"
+      (click)="$event.stopPropagation()"
+      *ngIf="selectedInvoice"
+    >
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h2 class="modal-title">Invoice Details</h2>
+        <button class="close-btn" (click)="closeInvoiceModal()">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="modal-content">
+        <!-- Company Header -->
+        <div class="company-header">
+          <div class="company-info">
+            <div class="company-logo">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect width="32" height="32" rx="8" fill="#6366F1" />
+                <path
+                  d="M8 12L16 20L24 12"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="company-name">Minia</span>
+            </div>
+            <div class="company-details">
+              <p>1874 County Line Road City, FL 33566</p>
+              <p>📧 abc123.com</p>
+              <p>📞 012-345-6789</p>
+            </div>
+          </div>
+          <div class="invoice-number">
+            <h3>Invoice # {{ selectedInvoice.id }}</h3>
+          </div>
+        </div>
+
+        <!-- Billing Information -->
+        <div class="billing-section">
+          <div class="billing-info">
+            <h4>Billed To:</h4>
+            <div class="billed-to-details">
+              <p>
+                <strong>{{ selectedInvoice.billingName }}</strong>
+              </p>
+              <p>1208 Sherwood Circle Lafayette, LA 70506</p>
+              <p>
+                {{ generateEmailFromBillingName(selectedInvoice.billingName) }}
+              </p>
+              <p>337-256-9134</p>
+            </div>
+          </div>
+          <div class="order-info">
+            <div class="info-group">
+              <h4>Order Date:</h4>
+              <p>{{ selectedInvoice.date }}</p>
+            </div>
+            <div class="info-group">
+              <h4>Payment Method:</h4>
+              <p>Visa ending **** 4242</p>
+              <p>richardsemail.com</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h4>Order summary</h4>
+          <div class="summary-table">
+            <div class="summary-header">
+              <span>No.</span>
+              <span>Item</span>
+              <span>Price</span>
+            </div>
+            <div class="summary-row">
+              <span>01</span>
+              <div class="item-details">
+                <p>
+                  <strong>{{ getAssetDisplayName(selectedInvoice) }}</strong>
+                </p>
+                <p class="item-description">Bootstrap 5 Admin Dashboard</p>
+              </div>
+              <span
+                >${{ getHalfAmount(selectedInvoice.amount).toFixed(2) }}</span
+              >
+            </div>
+            <div class="summary-row">
+              <span>02</span>
+              <div class="item-details">
+                <p><strong>Skote</strong></p>
+                <p class="item-description">Bootstrap 5 Admin Dashboard</p>
+              </div>
+              <span
+                >${{ getHalfAmount(selectedInvoice.amount).toFixed(2) }}</span
+              >
+            </div>
+            <div class="summary-total">
+              <span></span>
+              <span><strong>Sub Total</strong></span>
+              <span
+                ><strong>${{ selectedInvoice.amount.toFixed(2) }}</strong></span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop for closing menu -->
+<div
+  class="menu-backdrop"
+  [class.show]="activeMenuId !== null"
+  (click)="closeActionsMenu()"
+></div>

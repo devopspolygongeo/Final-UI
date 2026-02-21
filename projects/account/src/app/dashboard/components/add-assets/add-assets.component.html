@@ -1,0 +1,265 @@
+<div class="dashboard-content mx-auto my-4">
+  <!-- <span id="logout" title="Logout" class="left-nav-item logout" (click)="onLogout()"></span> -->
+  <div class="mb-4" style="font-size: larger; font-weight: 600;"> Assets/Asset name</div>
+  <div class="card" style="margin-top: 5px;">
+    <div class="tabs">
+      <div class="tab-header">
+        <div class="tab-header-item" [class.active]="activeTab === 'tab1'" (click)="setActiveTab('tab1')">Basic details
+        </div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab2'" (click)="setActiveTab('tab2')">Plot details
+        </div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab3'" (click)="setActiveTab('tab3')">Proximity
+        </div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab4'" (click)="setActiveTab('tab4')">Gallery</div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab5'" (click)="setActiveTab('tab5')">Documents
+        </div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab6'" (click)="setActiveTab('tab6')">Lead
+          Management</div>
+      </div>
+      <div class="tab-content">
+        <div *ngIf="activeTab == 'tab1'">
+          <div class="basic-details-card">
+            <div>
+              <label class="label" for="">Layout name</label>
+              <input type="text" class="form-control basic">
+            </div>
+            <div>
+              <label class="label" for="">Layout Owner</label>
+              <input type="text" class="form-control basic">
+            </div>
+            <div>
+              <label class="label" for="">Area</label>
+              <input type="text" class="form-control basic">
+            </div>
+
+            <div>
+              <label class="label" for="">Location</label>
+              <input type="text" class="form-control basic">
+            </div>
+            <div>
+              <label class="label" for="">City</label>
+              <input type="text" class="form-control basic">
+            </div>
+            <div>
+              <label class="label" for="">State</label>
+              <input type="text" class="form-control basic">
+            </div>
+            <div>
+              <label class="label" for="">Sizes</label>
+              <input type="text" class="form-control basic-multiselect">
+            </div>
+            <div>
+              <label class="label" for="">Approval</label>
+              <input type="text" class="form-control basic">
+            </div>
+
+            <div>
+              <label class="label" for="">Amenities</label>
+              <input type="text" class="form-control basic-multiselect">
+            </div>
+            <div>
+              <label class="label" for=""> Price Range</label>
+              <input type="text" class="form-control basic">
+            </div>
+
+            <div>
+              <label class="label" for="">Plot attributes</label>
+              <input type="text" class="form-control basic-multiselect">
+            </div>
+            <div>
+              <label class="label" for="">Asset Manager</label>
+              <input type="text" class="form-control basic">
+            </div>
+          </div>
+        </div>
+        <div *ngIf="activeTab == 'tab2'">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="card" style="height: 67vh">
+                <app-map [mapConfig]=mapConfig style="height: 100%;" [layerVisibility]="layerVisibility"
+                [layerPaintChange]="layerPaintChange" [showLandmarks]="showLandmarks" [directions]="directions" (mapMouseEv)="mapMouseEvents($event)"></app-map>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card" style="padding: 2%; height: 67vh">
+                <form [formGroup]="plotForm">
+
+                    <div style="text-align: center; font-weight: bold; font-size: large;">Plot Details</div>
+                    <hr>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="plotNo">Plot No</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="plotNo">
+                    </div>
+                
+                    <div style="display: flex;" class="mb-2">
+                      <label for="east">East</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="east">
+                    </div>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="west">West</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="west">
+                    </div>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="north">North</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="north">
+                    </div>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="south">South</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="south">
+                    </div>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="salestatus">Sales Status</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="salestatus">
+                    </div>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="facing">Facing</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="facing">
+                    </div>
+                    <div style="display: flex;" class="mb-2">
+                      <label for="priceRange">Price Range</label>
+                      <input style="margin-left: auto; width: 50%;" class="form-control" type="text" formControlName="priceRange">
+                    </div>
+
+                    <div style="text-align: center;">
+                      <button class="btn btn-sm btn-primary" type="submit" (click)="updateSaleStatus(selectedPlot)">Save</button>
+                    </div>
+                   
+                </form>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="activeTab == 'tab3'">
+          <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4">
+              <div class="card mb-2" style="padding: 1%;">
+                <span>Note : <span>User can add upto 10 landmarks for each projects</span></span>
+              </div>
+              <div class="card" style="padding: 1%;">
+                <input type="text" class="form-control mb-2">
+                <div class="card mb-2" style="display: flex; gap: 20px; padding: 1%;">
+                  <div class="location">
+                    <span>Gachibowli</span><br>
+                    <span>Hi-Tech City</span>
+                  </div>
+                </div>
+                <div class="card mb-2" style="display: flex; gap: 20px; padding: 1%;">
+                  <div class="location">
+                    <span>Gachibowli</span><br>
+                    <span>Hi-Tech City</span>
+                  </div>
+                </div>
+                <div class="card mb-2" style="display: flex; gap: 20px; padding: 1%;">
+                  <div class="location">
+                    <span>Gachibowli</span><br>
+                    <span>Hi-Tech City</span>
+                  </div>
+                </div>
+                <div class="card mb-2" style="display: flex; gap: 20px; padding: 1%;">
+                  <div class="location">
+                    <span>Gachibowli</span><br>
+                    <span>Hi-Tech City</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="activeTab == 'tab4'" style="height: 65vh;">
+          <div class="row">
+            <div class="col-md-8">
+              <div>
+                <span>Image</span>
+                <div class="container" style="display: flex; gap: 20px; padding: 10px; flex-wrap: wrap;">
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                </div>
+              </div>
+              <hr>
+              <div>
+                <span>Video</span>
+                <div class="container" style="display: flex; gap: 20px; padding: 10px; flex-wrap: wrap;">
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 60px;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">
+                  <div class="row">
+                    <div class="col-md-6">Image</div>
+                    <div class="col-md-6">Video</div>
+                  </div>
+
+                </div>
+                <div class="card-body" style="height: 50vh;">
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="activeTab == 'tab5'">
+          <div class="row">
+            <div class="col-md-8">
+              <div>
+                <span>Documents</span>
+                <div class="container" style="display: flex; gap: 20px; padding: 10px; flex-wrap: wrap;">
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                  <div style="border: solid 1px; height: 60px; width: 100px;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header" style="text-align: center;">
+                  Documents
+                </div>
+                <div class="card-body" style="height: 50vh;">
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="activeTab == 'tab6'">
+          Content for Tab 6
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+  </div>
+
+</div>

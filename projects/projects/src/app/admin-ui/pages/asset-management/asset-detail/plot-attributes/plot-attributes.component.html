@@ -1,0 +1,141 @@
+<div class="source-management-container">
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Search Container -->
+    <div class="filter-search-container">
+      <div class="search-container">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search plot attributes"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="sources-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('displayAttribute')">
+              <span>Display attribute</span>
+              <img
+                [src]="getSortIcon('displayAttribute')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('attributeName')">
+              <span>Attribute name</span>
+              <img
+                [src]="getSortIcon('attributeName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th
+              class="sortable-header center-header"
+              (click)="sortBy('clientAccess')"
+            >
+              <span>Client Access</span>
+              <img
+                [src]="getSortIcon('clientAccess')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('attributeType')">
+              <span>Attribute type</span>
+              <img
+                [src]="getSortIcon('attributeType')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th>Access Values</th>
+            <th class="sortable-header center-header" (click)="sortBy('hover')">
+              <span>Hover</span>
+              <img [src]="getSortIcon('hover')" alt="Sort" class="sort-icon" />
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let attr of filteredPlotAttributes" class="source-row">
+            <td>{{ attr.displayAttribute }}</td>
+            <td>{{ attr.attributeName }}</td>
+            <td class="text-center">
+              <div class="toggle-container">
+                <input
+                  type="checkbox"
+                  [id]="'clientAccess-' + attr.attributeName"
+                  class="toggle-input"
+                  [checked]="attr.clientAccess"
+                  (change)="toggleClientAccess(attr)"
+                />
+                <label
+                  [for]="'clientAccess-' + attr.attributeName"
+                  class="toggle-label"
+                >
+                  <img
+                    *ngIf="!attr.clientAccess"
+                    src="assets/admin-dashboard/admin-toggle-inactive.png"
+                    alt="Inactive"
+                    class="toggle-icon"
+                  />
+                  <img
+                    *ngIf="attr.clientAccess"
+                    src="assets/admin-dashboard/admin-toggle-active.png"
+                    alt="Active"
+                    class="toggle-icon"
+                  />
+                </label>
+              </div>
+            </td>
+            <td>{{ attr.attributeType }}</td>
+            <td>{{ attr.accessValues }}</td>
+            <td class="text-center">
+              <div class="toggle-container">
+                <input
+                  type="checkbox"
+                  [id]="'hover-' + attr.attributeName"
+                  class="toggle-input"
+                  [checked]="attr.hover"
+                  (change)="toggleHover(attr)"
+                />
+                <label
+                  [for]="'hover-' + attr.attributeName"
+                  class="toggle-label"
+                >
+                  <img
+                    *ngIf="!attr.hover"
+                    src="assets/admin-dashboard/admin-toggle-inactive.png"
+                    alt="Inactive"
+                    class="toggle-icon"
+                  />
+                  <img
+                    *ngIf="attr.hover"
+                    src="assets/admin-dashboard/admin-toggle-active.png"
+                    alt="Active"
+                    class="toggle-icon"
+                  />
+                </label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredPlotAttributes.length === 0" class="no-results">
+        <p>No plot attributes found matching your criteria.</p>
+      </div>
+    </div>
+  </div>
+</div>

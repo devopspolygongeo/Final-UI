@@ -1,0 +1,85 @@
+.dashboard-content {
+    max-width: 70vw;
+    font-size: larger;
+  }
+  
+  .divider {
+    border: 1px solid black;
+  }
+  
+  .active {
+    color: #3f51b5;
+  }
+  
+  .logo {
+    height: 25px;
+    width: 25px;
+    background-position: center;
+    background-size: cover;
+    background-image: url('../../../../../src/assets/images/logo_original_64x64.png');
+  }
+  
+  .small-text{
+    font-size: small;
+  }
+  
+  .sub-card{
+    width: 32%;
+    padding: 2%;
+  }
+  .icon{
+    height: 30px;
+  }
+
+
+  .basic-details-card{
+    padding: 1%;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .basic{
+    width: 320px;
+    position: relative;
+  }
+  .label{
+    font-size: small;
+  }
+  .basic-multiselect{
+    width: 660px;
+    position: relative;
+  }
+
+label{
+  font-size: small;
+}
+  /* tabs css */
+  .tabs {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .tab-header {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .tab-header-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    font-size: 1rem;
+  }
+  
+  .tab-header-item.active {
+    background-color: #fff;
+    border-bottom: 2px solid #007bff;
+    font-weight: bold;
+  }
+  
+  .tab-content {
+    padding: 20px;
+  }
+  

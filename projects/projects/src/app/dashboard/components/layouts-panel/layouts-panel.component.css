@@ -1,0 +1,615 @@
+#layouts-panel {
+  position: fixed;
+  top: 6rem;
+  right: 6rem;
+  width: 24rem;
+  height: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 15px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#layouts-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 20px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab Group Styling */
+.mat-tab-group {
+  background: transparent !important;
+}
+
+.mat-tab-header {
+  border: none !important;
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.mat-tab-label {
+  color: #64748b !important;
+  font-weight: 200 !important;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 0 4px;
+}
+
+.mat-tab-label:hover {
+  color: #475569 !important;
+  background: #f1f5f9 !important;
+}
+
+.mat-tab-label.mat-tab-label-active {
+  color: #0f172a !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.mat-ink-bar {
+  background: #3b82f6 !important;
+  height: 3px !important;
+  border-radius: 2px;
+}
+
+.mat-tab-body-wrapper {
+  background: #ffffff;
+  padding: 2px 0;
+}
+
+/* Layout Item Styling */
+.layout-item {
+  border: none;
+  cursor: pointer;
+  padding: 1px 2px !important;
+  margin: 8px 16px;
+  background: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.layout-item:first-child {
+  margin-top: 16px;
+}
+
+.layout-item:last-child {
+  margin-bottom: 16px;
+}
+
+/* Icon Styling */
+.layout-icon {
+  width: 26px;
+  height: 26px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  transition: transform 0.3s ease;
+  margin-left: 2px;
+}
+
+.layout-item:hover .layout-icon {
+  transform: scale(1.05);
+}
+
+/* Label and Value Styling */
+.layout-label {
+  flex: 1 1 120px;
+  font-weight: 400;
+  color: #374151;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.layout-value {
+  flex: 1 1 150px;
+  color: #3b82f6;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: right;
+}
+
+/* Title Section */
+.layouts-title {
+  background: #ffffff;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.layouts-title span {
+  padding-left: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+
+.close-panel {
+  margin-left: auto;
+  padding-right: 20px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.close-panel:hover {
+  color: #dc2626;
+  background: #fef2f2;
+  transform: rotate(90deg);
+}
+
+/* Information Box */
+.information-box {
+  position: fixed;
+  width: 24rem;
+  bottom: 2rem;
+  right: 6rem;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 15px 12px rgba(0, 0, 0, 0.08);
+  font-size: 14px;
+  font-weight: 400;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.information-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+/* Plot Details Styling */
+.write-vertical-rl {
+  writing-mode: vertical-rl;
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.plot-box {
+  width: 140px;
+  height: 140px;
+  border: 2px solid #e2e8f0;
+  text-align: center;
+  padding-top: 2rem;
+  background: #ffffff;
+  color: #3b82f6;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.plot-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+/* Direction Labels */
+section h6 {
+  font-weight: 700;
+  color: #4b5563;
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+/* Buttons */
+#request-plot-details,
+#interest-submit-button {
+  background: #3b82f6;
+  color: white;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+#request-plot-details:hover,
+#interest-submit-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+#request-plot-details:active,
+#interest-submit-button:active {
+  transform: translateY(0);
+}
+
+/* Form Styling */
+.mat-form-field {
+  width: 100% !important;
+  margin-bottom: 8px;
+}
+
+.mat-form-field .mat-input-element {
+  color: #374151 !important;
+  font-weight: 500 !important;
+}
+
+.mat-form-field-label {
+  color: #6b7280 !important;
+}
+
+.mat-form-field-underline {
+  background-color: #e5e7eb !important;
+}
+
+.mat-form-field-ripple {
+  background-color: #3b82f6 !important;
+}
+
+.mat-focused .mat-form-field-label {
+  color: #3b82f6 !important;
+}
+
+/* Close button for info box */
+.information-box .fa-xmark {
+  color: #9ca3af;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.information-box .fa-xmark:hover {
+  color: #dc2626;
+  background: #fef2f2;
+  transform: rotate(90deg);
+}
+
+/* Tab Icons */
+.fa-square-poll-horizontal,
+.fa-location-dot {
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* Plot details section styling */
+section {
+  padding: 8px 12px;
+}
+
+section:last-child .d-flex.flex-column {
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: 4px 8px;
+  padding: 4px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #layouts-panel,
+  .information-box {
+    width: calc(100vw - 2rem);
+    right: 1rem;
+  }
+
+  #layouts-panel {
+    top: 2rem;
+  }
+
+  .information-box {
+    bottom: 1rem;
+  }
+}
+
+/* Animation for panel entrance */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+#layouts-panel {
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar for long content */
+.mat-tab-body-content {
+  overflow-y: auto;
+  max-height: 65vh;
+}
+
+.mat-tab-body-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mat-tab-body-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.mat-tab-body-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.mat-tab-body-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced icon styling for specific attributes */
+.layout-icon.facing {
+  background-image: url("../../../../assets/images/plot_details/facing_new.png");
+}
+
+.layout-icon.saleStatus {
+  background-image: url("../../../../assets/images/plot_details/sale_status.png");
+}
+
+.layout-icon.name {
+  background-image: url("../../../../assets/images/layout_panel/layout_name_new.png");
+}
+
+.layout-icon.noOfPlots {
+  background-image: url("../../../../assets/images/layout_panel/count.png");
+}
+
+.layout-icon.location {
+  background-image: url("../../../../assets/images/layout_panel/location_new.png");
+}
+
+.layout-icon.area {
+  background-image: url("../../../../assets/images/layout_panel/area_new.png");
+}
+
+.layout-icon.priceRange {
+  background-image: url("../../../../assets/images/layout_panel/price_range_new.png");
+}
+
+.layout-icon.sizes {
+  background-image: url("../../../../assets/images/layout_panel/sizes_new.png");
+}
+
+.layout-icon.owner {
+  background-image: url("../../../../assets/images/layout_panel/owner.png");
+}
+
+.layout-icon.development {
+  background-image: url("../../../../assets/images/layout_panel/progress.png");
+}
+
+.layout-icon.city {
+  background-image: url("../../../../assets/images/layout_panel/city_new.png");
+}
+
+.layout-icon.state {
+  background-image: url("../../../../assets/images/layout_panel/state_new.png");
+}
+
+.layout-icon.approval {
+  background-image: url("../../../../assets/images/layout_panel/approval_new.png");
+}
+
+.layout-icon.infrastructure {
+  background-image: url("../../../../assets/images/layout_panel/infrastructure.png");
+}
+
+/* Keep all your existing styles and add/modify these specific sections */
+
+/* Plot Details Section - Main Container */
+.plot-details-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+}
+
+/* North Section */
+.north-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.north-value {
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* Middle Section with Plot Box */
+.middle-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 8px 0;
+  position: relative;
+}
+
+/* West Side */
+.west-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60px;
+  margin-right: 16px;
+}
+
+.west-value {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.west-label {
+  font-weight: 700;
+  color: #4b5563;
+  font-size: 16px;
+}
+
+/* Updated Plot Box - Fixed dimensions and centering */
+.plot-box {
+  width: 160px;
+  height: 160px;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #3b82f6;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.plot-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.plot-number {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.plot-area {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* East Side */
+.east-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60px;
+  margin-left: 16px;
+}
+
+.east-value {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.east-label {
+  font-weight: 700;
+  color: #4b5563;
+  font-size: 16px;
+}
+
+/* South Section */
+.south-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.south-label {
+  font-weight: 700;
+  color: #4b5563;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.south-value {
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+/* Direction Labels - Consistent styling */
+.direction-label {
+  font-weight: 700;
+  color: #4b5563;
+  font-size: 16px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Facing and Sale Status section */
+.plot-info-section {
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: 12px 8px 8px 8px;
+  padding: 8px 0;
+}
+
+/* Remove the old section styling that was causing issues */
+section {
+  padding: 4px 8px;
+}
+
+/* Override the problematic flex styling from the original */
+.layout-item {
+  border: none;
+  cursor: default;
+  padding: 8px 12px !important;
+  margin: 4px 8px;
+  background: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 6px;
+}
+
+/* Ensure proper spacing in plot details */
+.plot-details-items .layout-item {
+  margin: 2px 4px;
+}
+
+/* Button styling improvements */
+#request-plot-details {
+  background: #3b82f6;
+  color: white;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  padding: 12px 24px;
+  margin: 16px 0 8px 0;
+}
+
+/* Responsive adjustments for plot section */
+@media (max-width: 768px) {
+  .plot-box {
+    width: 140px;
+    height: 140px;
+  }
+
+  .west-side,
+  .east-side {
+    width: 50px;
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .middle-section {
+    margin: 4px 0;
+  }
+}

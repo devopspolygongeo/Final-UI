@@ -1,0 +1,140 @@
+<div class="row mb-3">
+  <div class="col-md-8">
+    <div class="card" style="height: 100%;"></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card" style="padding: 5%;">
+      <span style="font-weight: 500; font-size: 20px;">Account</span>
+      <span style="font-size: medium;" class="mb-3">Rayapati Rajsekhar</span>
+      <span style="font-weight: 500; font-size: 20px;">Organisation</span>
+      <span style="font-size: medium;">Polygon Geospatial Pvt Ltd</span>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-8">
+    <div class="mb-3">
+      <span style="font-weight: 500; font-size: large;">Assets</span>
+      <!-- <button class="btn btn-sm btn-primary" style="float: right;" (click)="addAssets()">Add Assets</button> -->
+    </div>
+
+    <div class="tabs">
+      <div style="display: flex; gap: 5%;" class="mb-2">
+        <div class="tab-header-item" [class.active]="activeTab === 'tab1'" (click)="setActiveTab('tab1')">All
+        </div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab2'" (click)="setActiveTab('tab2')" (click)="filterActiveAassets()">Ongoing Assets
+        </div>
+        <div class="tab-header-item" [class.active]="activeTab === 'tab3'" (click)="setActiveTab('tab3')" (click)="filterInActiveAassets()">Closed Assets
+        </div>
+      </div>
+      <div class="tab-content">
+        <div *ngIf="activeTab == 'tab1'">
+          <div class="card asset-card" style="background-color: #F1F1F1; padding: 1% 2% 1% 2%;height: 400px; overflow-y: scroll;">
+
+            <div class="card mb-2" style="padding: 1%;" *ngFor = "let asset of assetList">
+              <div>
+                <div style="display: flex;" (click)="addAssets(asset)">
+                  <span style="font-size: medium; font-weight: bold;">{{asset.name}}</span>
+                  <span style="margin-left: auto;" class="small-text">Active till: {{asset.activeTill}}</span>
+                </div>
+                <span class="small-text">{{asset.surveyDate | date}}</span>
+                <div>
+                  <Span class="small-text">{{asset.locationName}}</Span>
+                </div>
+              </div>
+              
+            </div>
+      </div>
+        </div>
+        <div *ngIf="activeTab == 'tab2'">
+          <div class="card asset-card" style="background-color: #F1F1F1; padding: 1% 2% 1% 2%;height: 400px; overflow-y: scroll;" (click)="addAssets($event)">
+
+            <div class="card mb-2" style="padding: 1%;" *ngFor = "let asset of activeAssets">
+              <div style="display: flex;">
+                <span style="font-size: medium; font-weight: bold;">{{asset.assetName}}</span>
+                <span style="margin-left: auto;" class="small-text">Active till: {{asset.activeTill}}</span>
+              </div>
+              <span class="small-text">{{asset.date}}</span>
+              <div>
+                <Span class="small-text">{{asset.locationName}}</Span>
+              </div>
+            </div>
+      </div>
+        </div>
+        <div *ngIf="activeTab == 'tab3'">
+          <div class="card asset-card" style="background-color: #F1F1F1; padding: 1% 2% 1% 2%;height: 400px; overflow-y: scroll;" (click)="addAssets($event)">
+
+            <div class="card mb-2" style="padding: 1%;" *ngFor = "let asset of activeAssets">
+              <div style="display: flex;">
+                <span style="font-size: medium; font-weight: bold;">{{asset.assetName}}</span>
+                <span style="margin-left: auto;" class="small-text">Active till: {{asset.activeTill}}</span>
+              </div>
+              <span class="small-text">{{asset.date}}</span>
+              <div>
+                <Span class="small-text">{{asset.locationName}}</Span>
+              </div>
+            </div>
+      </div>
+        </div>
+      </div>
+    </div>
+    
+
+  </div>
+  <div class="col-md-4">
+      <div class="card mb-3" style="padding: 5%;">
+        <div class="mb-2" style="display: flex;">
+          <!-- <select name="Select" id="" style="width: 90%;" (click)="filterActiveAassets()">
+            <option value="" *ngFor="let asset of activeAssets">
+              
+            </option>
+          </select> -->
+
+          <select id="active-assets" style="width: 90%;" (click)="filterActiveAassets()">
+            <option value="">Select an asset</option>
+            <option *ngFor="let asset of activeAssets" [value]="asset.assetName">
+              {{ asset.assetName }}
+            </option>
+          </select>
+          <span style="font-weight: bold; margin-left: 5px;"><img class="icon"
+              src="../../../assets/images/layoutdetails_city.jpg" alt=""></span>
+        </div>
+        <span style="font-size: small;" class="mb-4">Asset: Harmony Meadows</span>
+
+        <span class="small-text">Valid till</span>
+        <div style="display: flex;">
+          <span style="font-size: x-large; color: #004AAD; font-weight: bold;">145 days</span>
+          <span style="margin-left: auto;" class="small-text">12th June 2024</span>
+        </div>
+      </div>
+      <div class="card mb-3" style="padding: 5%;">
+        <div class="mb-2" style="display: flex;">
+          <span style="font-weight: bold;" class="small-text">Plot Permissions</span>
+          <select name="Select" id="" style="width: 20%; margin-left: auto;" placeholder="month"></select>
+        </div>
+        <span style="font-size: small;" class="mb-4">Asset: Harmony Meadows</span>
+
+        <span style="font-size: x-large; font-weight: bold;">140</span>
+        <div style="display: flex;">
+          <span class="small-text" style="color: green;">55% Increased</span>
+          <span style="margin-left: auto;" class="small-text">12th June 2024</span>
+        </div>
+
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div class="card sub-card">
+          <h3>02</h3>
+          <span class="small-text">Active Sbuscriptions</span>
+        </div>
+        <div class="card sub-card">
+          <h3 class="mb-4">02</h3>
+          <span class="small-text">Active Assets</span>
+        </div>
+        <div class="card sub-card">
+          <h3>01</h3>
+          <span class="small-text">Registered Users</span>
+        </div>
+      </div>
+    </div>
+  </div>
+

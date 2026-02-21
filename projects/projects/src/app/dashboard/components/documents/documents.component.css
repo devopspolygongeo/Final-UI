@@ -1,0 +1,207 @@
+/* ===============================
+   DOCUMENTS COMPONENT STYLES
+   Enhanced to match layer styling
+   =============================== */
+
+/* Import attractive fonts (consistent with layers) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;600&display=swap");
+
+/* Main header styling - matches layers component */
+h5 {
+  color: #1e293b;
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #5e19ea, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+/* Close button styling */
+.close-btn-nav {
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.close-btn-nav:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f7f0ff 100%);
+  border-color: #5e19ea;
+  box-shadow: 0 6px 20px rgba(94, 25, 234, 0.12);
+  transform: translateY(-1px);
+}
+
+.close-btn-nav:active {
+  transform: translateY(0);
+}
+
+.icon-close {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #5e19ea, #8b5cf6);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+}
+
+/* Container styling */
+.container {
+  padding: 0 16px;
+}
+
+/* PDF/document wrapper styling */
+.pdf-wrapper {
+  max-width: 200px;
+  max-height: 200px;
+  cursor: pointer;
+  margin: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.pdf-wrapper:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f7f0ff 100%);
+  border-color: #5e19ea;
+  box-shadow: 0 8px 24px rgba(94, 25, 234, 0.12);
+  transform: translateY(-2px);
+}
+
+.pdf-wrapper:active {
+  transform: translateY(0);
+}
+
+/* Gradient overlay effect on hover */
+.pdf-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(94, 25, 234, 0.08) 0%,
+    rgba(147, 51, 234, 0.08) 50%,
+    rgba(182, 6, 212, 0.08) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pdf-wrapper:hover::before {
+  opacity: 1;
+}
+
+/* Document object styling */
+.document {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* Empty state message styling */
+.empty-document-message {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #94a3b8;
+  font-weight: 400;
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 12px;
+  margin: 16px;
+  border: 2px dashed #e2e8f0;
+}
+
+/* Flex container for documents */
+.d-flex {
+  display: flex;
+}
+
+.flex-md-wrap {
+  flex-wrap: wrap;
+}
+
+/* Margin utilities */
+.mt-4 {
+  margin-top: 1rem !important;
+}
+
+.ms-4 {
+  margin-left: 1rem !important;
+}
+
+.mb-5 {
+  margin-bottom: 3rem !important;
+}
+
+.m-4 {
+  margin: 1.5rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pdf-wrapper {
+    max-width: 160px;
+    max-height: 160px;
+    margin: 12px;
+  }
+
+  .document {
+    width: 160px;
+    height: 160px;
+  }
+
+  h5 {
+    padding: 0 12px;
+    font-size: 16px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+}
+
+/* Animation for document entries */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pdf-wrapper {
+  animation: fadeInUp 0.3s ease-out;
+}

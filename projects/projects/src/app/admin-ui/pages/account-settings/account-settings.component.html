@@ -1,0 +1,112 @@
+<div class="account-settings-container">
+  <!-- Header -->
+   <div class="header">
+      <h1>Account Settings</h1>
+    </div>
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <!-- User Profile Section -->
+      <div class="user-profile">
+        <div class="user-avatar">
+          <svg
+            width="80"
+            height="80"
+            viewBox="0 0 24 24"
+            fill="#fff"
+            stroke="none"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h3>{{ userName }}</h3>
+      </div>
+
+      <!-- Menu Options -->
+      <div class="menu-options">
+        <div
+          class="menu-item"
+          [class.active]="activeComponent === 'profile'"
+          (click)="setActiveComponent('profile')"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </div>
+
+        <div
+          class="menu-item"
+          [class.active]="activeComponent === 'change-password'"
+          (click)="setActiveComponent('change-password')"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <circle cx="12" cy="16" r="1"></circle>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Change Password</span>
+        </div>
+
+        <div class="menu-item">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>User management</span>
+        </div>
+
+        <div class="menu-item">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16,17 21,12 16,7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Content Area -->
+    <div class="content-area">
+      <app-profile *ngIf="activeComponent === 'profile'"></app-profile>
+      <app-change-password
+        *ngIf="activeComponent === 'change-password'"
+      ></app-change-password>
+    </div>
+  </div>
+</div>

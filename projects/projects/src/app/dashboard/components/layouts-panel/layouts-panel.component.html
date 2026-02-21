@@ -1,0 +1,158 @@
+<div id="layouts-panel" *ngIf="showLayoutPanel">
+  <mat-tab-group
+    [selectedIndex]="selectedTabIndex"
+    [backgroundColor]="'primary'"
+  >
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <i
+          title="Layout Details"
+          class="fa-solid fa-square-poll-horizontal"
+        ></i>
+      </ng-template>
+      <div class="d-flex flex-column">
+        <div
+          class="layout-item d-flex flex-row p-2"
+          *ngFor="let layout of layoutDetails"
+        >
+          <span class="layout-icon {{ layout.attribute }} me-2"></span>
+          <span class="layout-label"> {{ layout.name | titlecase }} </span>
+          <span class="layout-value"> {{ layout.value }}</span>
+        </div>
+      </div>
+    </mat-tab>
+
+    <ng-container *ngIf="plot">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <i title="Plot Details" class="fa-solid fa-location-dot"></i>
+        </ng-template>
+
+        <div class="plot-details-container">
+          <!-- North Section -->
+          <div class="north-section">
+            <div class="north-value">{{ plot.north }}</div>
+            <h6 class="direction-label">N</h6>
+          </div>
+
+          <!-- Middle Section with West, Plot Box, and East -->
+          <div class="middle-section">
+            <!-- West Side -->
+            <div class="west-side">
+              <div class="west-value">{{ plot.west }}</div>
+              <h6 class="direction-label">W</h6>
+            </div>
+
+            <!-- Plot Box -->
+            <div class="plot-box">
+              <div class="plot-number">Plot No {{ plot.plot_no }}</div>
+              <div class="plot-area">({{ plot.area }})</div>
+            </div>
+
+            <!-- East Side -->
+            <div class="east-side">
+              <div class="east-value">{{ plot.east }}</div>
+              <h6 class="direction-label">E</h6>
+            </div>
+          </div>
+
+          <!-- South Section -->
+          <div class="south-section">
+            <h6 class="direction-label">S</h6>
+            <div class="south-value">{{ plot.south }}</div>
+          </div>
+
+          <!-- Plot Information -->
+          <div class="plot-info-section w-100">
+            <div class="plot-details-items">
+              <div class="layout-item d-flex flex-row">
+                <span class="layout-icon facing me-2"></span>
+                <span class="layout-label">Facing</span>
+                <span class="layout-value">{{ plot.facing }}</span>
+              </div>
+              <div class="layout-item d-flex flex-row">
+                <span class="layout-icon saleStatus me-2"></span>
+                <span class="layout-label">Sale Status</span>
+                <span class="layout-value">{{ plot.salestatus }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Request Button -->
+          <div class="d-flex justify-content-center">
+            <button id="request-plot-details" (click)="requestPlotDetails()">
+              Request plot details
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+    </ng-container>
+  </mat-tab-group>
+</div>
+
+<div *ngIf="showInfoBox" class="information-box">
+  <div
+    class="d-flex justify-content-end me-1 mt-1"
+    title="Close the Info Box"
+    (click)="closeInfoBox()"
+  >
+    <i class="fa-solid fa-xmark"></i>
+  </div>
+  <div *ngIf="!showInterestForm" class="pb-3">
+    Click on any Plot for plot details
+  </div>
+  <div *ngIf="showInterestForm">
+    <div class="p-2">Please express your interest for selected plot</div>
+    <form [formGroup]="requestPlotForm" (ngSubmit)="onInterestSubmission()">
+      <p>
+        <mat-form-field [hideRequiredMarker]="false">
+          <input
+            type="text"
+            matInput
+            placeholder="Enter name"
+            formControlName="userName"
+          />
+          <mat-error *ngIf="requestPlotForm.controls['userName'].invalid">
+            Username is required
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field [hideRequiredMarker]="false">
+          <input
+            type="text"
+            matInput
+            placeholder="Enter email"
+            formControlName="email"
+          />
+          <mat-error *ngIf="requestPlotForm.controls['email'].invalid">
+            Email is required
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field [hideRequiredMarker]="false">
+          <input
+            type="text"
+            matInput
+            placeholder="Enter Phone no."
+            formControlName="phoneNo"
+          />
+          <mat-error *ngIf="requestPlotForm.controls['phoneNo'].invalid">
+            Phone No is required
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <div class="d-flex justify-content-center">
+        <button
+          id="interest-submit-button"
+          class="py-2 px-5 mb-2"
+          type="submit"
+          mat-raised-button
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

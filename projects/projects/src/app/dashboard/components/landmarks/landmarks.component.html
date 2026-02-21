@@ -1,0 +1,92 @@
+<h5 class="mt-4 ms-4">Proximity</h5>
+<div class="mx-3 mt-4 vh-90 y-scroll">
+  <form class="landmark-form">
+    <mat-form-field
+      appearance="outline"
+      class="w-100"
+      style="width: 95% !important; margin: 0 auto; display: block"
+    >
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        #landmarkSearchInput
+        matInput
+        type="text"
+        placeholder="Search for a place"
+        aria-label="Number"
+        [formControl]="searchLandmark"
+        [matAutocomplete]="auto"
+      />
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        [displayWith]="displayFn"
+        (optionSelected)="onAutocompleteSelection($event.option.value)"
+      >
+        <mat-option
+          *ngFor="let option of autoCompleteList | async"
+          [value]="option"
+        >
+          <span class="autoCompleteItem">
+            {{ option.name
+            }}<small *ngIf="option.full_address" class="text-muted"
+              >- {{ option.full_address }}</small
+            >
+          </span>
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </form>
+  <div class="d-flex flex-column">
+    <div
+      class="landmark-item d-flex my-2 align-items-center"
+      [ngClass]="{ active: navItem.active }"
+      *ngFor="let navItem of landmarkNavItems"
+      (click)="onClickLandmark($event, navItem)"
+    >
+      <ng-container
+        *ngTemplateOutlet="
+          landmarkTemplate;
+          context: {
+            iconStyle: navItem.iconStyle,
+            name: navItem.name,
+            desc: navItem.description,
+            metaData: navItem.landmark?.metaData
+          }
+        "
+      >
+      </ng-container>
+    </div>
+
+    <div class="addl-info-container" *ngIf="addlInfo">
+      <i class="icon-info"></i><span> Info</span>
+      <div class="p-3 addl-info">
+        <div>
+          <span class="fw-bold">Distance </span>:
+          {{ (addlInfo.distance * 1.0) / 1000 | number : "1.2-2" }}km
+        </div>
+        <div>
+          <span class="fw-bold">Estimated travel time</span>:
+          {{ addlInfo.duration }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template
+  #landmarkTemplate
+  let-iconStyle="iconStyle"
+  let-name="name"
+  let-desc="desc"
+  let-metaData="metaData"
+>
+  <div class="mx-1 flex-shrink-0">
+    <div class="icon {{ iconStyle }}"></div>
+  </div>
+  <div class="mx-1 py-2 flex-grow-1 info">
+    <h6 class="mb-0">{{ name }}</h6>
+    {{ desc }}
+  </div>
+  <div class="mx-1 flex-shrink-0">
+    {{ metaData?.distance }}
+  </div>
+</ng-template>

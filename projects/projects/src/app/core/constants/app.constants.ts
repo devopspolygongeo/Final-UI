@@ -1,0 +1,19 @@
+export const AppConstants = {
+    DEFAULT_SATELITE_MAP_URL: 'mapbox://styles/rayapati49/clc5s4vsd000w14rtr5zwjp20',
+    DEFAULT_STREET_MAP_URL: 'mapbox://styles/rayapati49/clbz1wv47001315rztqzw0df6',
+    GLOBAL_GROUP_ID: 10,
+    CLASSIC_GROUP_ID: 30,
+    VIEW_BY_CLASSIFICATION: 22,
+    TOGGLE_LAYOUT_PANEL_VISIBILITY: 'TOGGLE_LAYOUT_PANEL_VISIBILITY',
+    MAP_MOUSE_MOVE_EVENT: 'mousemove',
+    MAP_MOUSE_LEAVE_EVENT: 'mouseleave',
+    MAP_MOUSE_LEFT_CLICK_EVENT: 'click',
+    MAP_MOUSE_RIGHT_CLICK_EVENT: 'contextmenu',
+    LOGIN_URL: '/login',
+    DASHBOARD_URL: '/dashboard',
+    GLOBAL: 'GLOBAL',
+    CLASSIC: 'CLASSIC',
+    CLASSIFY_BY_FILTER: 'CLASSIFY_BY_FILTER',
+    CLASSIFY_BY_CATEGORY: 'CLASSIFY_BY_CATEGORY'
+    
+}

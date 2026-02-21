@@ -1,0 +1,50 @@
+<div class="card" style="border: none;">
+  <div style="text-align: center; margin-top: 3%;">
+    <h5 class="card-title">Subscription Details</h5>
+  </div>
+  <hr>
+  <div class="card-body" style="padding: 8%;">
+    <form [formGroup]="subscriptionForm" (ngSubmit)="onSubmit()">
+      <div class="form-group" style="display: flex;">
+        <label for="subscriptionId">Subscription Id</label>
+        <input type="text" class="form-control" id="subscriptionId" formControlName="subscriptionId">
+      </div>
+      <div class="form-group">
+        <label for="assetAssigned">Asset assigned</label>
+        <input type="text" class="form-control" id="assetAssigned" formControlName="assetAssigned">
+      </div>
+      <div class="form-group">
+        <label for="validity">Validity</label>
+        <input type="text" class="form-control" id="validity" formControlName="validity">
+      </div>
+      <div class="form-group">
+        <label for="area">Area</label>
+        <input type="text" class="form-control" id="area" formControlName="area">
+      </div>
+      <div class="form-group">
+        <label for="plan">Plan</label>
+        <input type="text" class="form-control" id="plan" formControlName="plan">
+      </div>
+      <div class="form-group">
+        <label for="amount">Amount</label>
+        <input type="text" class="form-control" id="amount" formControlName="amount">
+      </div>
+      <div class="form-group">
+        <label class="form-check-label" for="active">Active</label>
+        <input type="checkbox" id="active" formControlName="active">
+      </div>
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input type="date" class="form-control" id="date" formControlName="date">
+      </div>
+      
+    </form>
+  </div>
+
+  <div style="text-align: center;">
+    <button type="button" class="btn btn-sm btn-secondary" style="margin-right: 5px;" (click)="onCancel()">Add & Review</button>
+    <button type="submit" class="btn btn-sm btn-primary">Pay Now</button>
+  </div>
+</div>
+
+

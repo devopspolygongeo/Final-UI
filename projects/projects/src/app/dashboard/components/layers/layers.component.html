@@ -1,0 +1,193 @@
+<h5 class="mt-4 ms-4">Layers</h5>
+<div class="y-scroll">
+  <div class="ps-4">
+    <ng-container *ngIf="globalLayerToggles">
+      <ng-container
+        *ngTemplateOutlet="
+          layersWithToggle;
+          context: {
+            toggles: globalLayerToggles,
+            display: true,
+            groupType: 'na'
+          }
+        "
+      ></ng-container>
+    </ng-container>
+  </div>
+  <div *ngIf="classicLayersToggleMap.size" class="mt-5 ps-3 pt-0">
+    <div
+      class="p-3 pe-0 mb-2 clearfix box-shadow"
+      *ngFor="
+        let item of classicLayersToggleMap | keyvalue : sortGroupsByPriority
+      "
+    >
+      <div class="box-shadow-header">
+        <span
+          ><i
+            [ngClass]="{
+              'icon-arrow-right': !item.value.expand,
+              'icon-arrow-down': item.value.expand
+            }"
+            class="pe-2"
+            (click)="item.value.expand = !item.value.expand"
+          ></i
+          ><b>{{ item.key }}</b>
+        </span>
+        <span>
+          <mat-slide-toggle
+            class="float-right"
+            id="{{ item.key }}"
+            [checked]="item.value.visibility"
+            hideIcon="true"
+            [color]="'primary'"
+            (change)="onGroupToggle($event, CLASSIC)"
+          ></mat-slide-toggle>
+        </span>
+      </div>
+      <ng-container
+        class="ps-3"
+        *ngTemplateOutlet="
+          layersWithToggle;
+          context: {
+            toggles: item.value.toggles,
+            display: item.value.expand,
+            classes: 'pe-0',
+            colorPicker: true
+          }
+        "
+      ></ng-container>
+    </div>
+  </div>
+  <div
+    *ngIf="categoryLayersToggleMap.size"
+    class="font-weight-bold mt-5 p-3 pt-0"
+  >
+    <div>
+      <h6>
+        <span>Plot Layout</span>
+        <p class="plot-nav-item">
+          <span
+            (click)="changeLayoutGroupType(CLASSIFY_BY_FILTER)"
+            class="classify_by_filter"
+            [ngClass]="{ active: selectedGroupType === CLASSIFY_BY_FILTER }"
+          ></span>
+        </p>
+        <p class="plot-nav-item">
+          <span
+            (click)="changeLayoutGroupType(CLASSIFY_BY_CATEGORY)"
+            class="classify_by_category"
+            [ngClass]="{ active: selectedGroupType === CLASSIFY_BY_CATEGORY }"
+          ></span>
+        </p>
+      </h6>
+      <ng-container [ngSwitch]="selectedGroupType">
+        <div *ngSwitchCase="CLASSIFY_BY_CATEGORY" class="pt-1 clearfix">
+          <select
+            class="minimal form-control"
+            [ngModel]="selectedGroupToggle"
+            (ngModelChange)="onCategoryChange($event)"
+          >
+            <option
+              *ngFor="let category of categoryLayersToggleMap | keyvalue"
+              [ngValue]="category.key"
+            >
+              {{ category.key }}
+            </option>
+          </select>
+          <ng-container
+            class="ps-3"
+            *ngTemplateOutlet="
+              layersWithToggle;
+              context: {
+                toggles: (
+                  categoryLayersToggleMap | mapValue : selectedGroupToggle
+                )?.toggles,
+                display: true,
+                classes: 'pe-0',
+                colorPicker: true
+              }
+            "
+          ></ng-container>
+        </div>
+        <div *ngSwitchCase="CLASSIFY_BY_FILTER" class="pt-1 clearfix">
+          <div
+            class="p-3 pe-0 mb-2 clearfix box-shadow"
+            *ngFor="let item of filterLayersToggleMap | keyvalue"
+          >
+            <div class="box-shadow-header">
+              <span
+                ><i
+                  [ngClass]="{
+                    'icon-arrow-right': !item.value.expand,
+                    'icon-arrow-down': item.value.expand
+                  }"
+                  class="pe-2"
+                  (click)="item.value.expand = !item.value.expand"
+                ></i
+                ><b>{{ item.key }}</b>
+              </span>
+              <span>
+                <mat-slide-toggle
+                  class="float-right"
+                  id="{{ item.key }}"
+                  [checked]="item.value.visibility"
+                  [color]="'primary'"
+                  (change)="onGroupToggle($event, CLASSIFY_BY_FILTER)"
+                ></mat-slide-toggle>
+              </span>
+            </div>
+            <ng-container
+              class="ps-3"
+              *ngTemplateOutlet="
+                layersWithToggle;
+                context: {
+                  toggles: item.value.toggles,
+                  display: item.value.expand,
+                  classes: 'pe-0 ps-4',
+                  colorPicker: false
+                }
+              "
+            ></ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+<ng-template
+  #layersWithToggle
+  let-toggles="toggles"
+  let-classes="classes"
+  let-display="display"
+  let-colorPicker="colorPicker"
+>
+  <ng-container *ngIf="display && toggles">
+    <div
+      *ngFor="let toggle of toggles | sort : sortLayersByPriority"
+      class="{{ classes }} layer-list "
+    >
+      <span *ngIf="colorPicker">
+        <input
+          class="color-picker"
+          type="color"
+          title="Change Color"
+          [value]="
+            toggle.metaData?.layer?.topography?.color ||
+            toggle.metaData?.layer?.topography?.fillColor
+          "
+          (change)="onLayerColorChange($event, toggle)"
+        />
+      </span>
+      <span class="layer-text">{{
+        toggle.name ? toggle.name : toggle.id
+      }}</span>
+      <mat-slide-toggle
+        id="{{ toggle.id }}"
+        [checked]="toggle.checked"
+        [color]="'primary'"
+        hideIcon="true"
+        (change)="onLayerToggle($event, toggle)"
+      ></mat-slide-toggle>
+    </div>
+  </ng-container>
+</ng-template>

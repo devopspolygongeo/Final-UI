@@ -1,0 +1,480 @@
+<div class="subscription-management-container">
+  <!-- Header -->
+  <div class="header">
+    <h2 class="title">Support / Issues</h2>
+    <button class="report-issue-btn" (click)="openReportIssueModal()">
+      Report an Issue
+    </button>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'all'"
+      (click)="setActiveTab('all')"
+    >
+      All
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'ongoing'"
+      (click)="setActiveTab('ongoing')"
+    >
+      Ongoing Issues
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'closed'"
+      (click)="setActiveTab('closed')"
+    >
+      Closed Issues
+    </button>
+  </div>
+
+  <!-- Controls Row -->
+  <div class="controls-row">
+    <!-- Date Picker -->
+    <div class="date-picker-container">
+      <input
+        type="date"
+        class="date-input"
+        [(ngModel)]="selectedDate"
+        (change)="onDateChange()"
+      />
+    </div>
+
+    <!-- Entries Control -->
+    <div class="entries-control">
+      <span>Show</span>
+      <select
+        class="entries-select"
+        [(ngModel)]="itemsPerPage"
+        (change)="onItemsPerPageChange()"
+      >
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <span>entries</span>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+      <div class="search-wrapper">
+        <img
+          src="assets/admin-dashboard/admin-search.png"
+          alt="Search"
+          class="search-icon"
+        />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search issues"
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container">
+    <table class="subscriptions-table">
+      <thead>
+        <tr>
+          <th class="sortable-header" (click)="sortBy('slNo')">
+            <span>Sl No</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('issueId')">
+            <span>Issue Id</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('issueCategory')">
+            <span>Issue Category</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('issueType')">
+            <span>Issue Type</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('description')">
+            <span>Description</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('dateSubmitted')">
+            <span>Date Submitted</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-header" (click)="sortBy('status')">
+            <span>Status</span>
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let issue of getPaginatedIssues()" class="subscription-row">
+          <td>{{ issue.slNo }}</td>
+          <td>{{ issue.issueId }}</td>
+          <td>{{ issue.issueCategory }}</td>
+          <td>{{ issue.issueType }}</td>
+          <td>{{ issue.description }}</td>
+          <td>{{ issue.dateSubmitted }}</td>
+          <td>
+            <span
+              [ngClass]="{
+                'text-green-500': issue.status === 'Resolved',
+                'text-red-500': issue.status === 'Open',
+                'text-yellow-500': issue.status === 'In Progress'
+              }"
+            >
+              {{ issue.status }}
+            </span>
+          </td>
+          <td>
+            <div class="actions-container" style="position: relative">
+              <button
+                class="three-dots-btn"
+                (click)="toggleActionsMenu(issue.issueId)"
+                [class.active]="activeMenuId === issue.issueId"
+              >
+                ⋮
+              </button>
+              <div
+                class="actions-menu"
+                [class.show]="activeMenuId === issue.issueId"
+              >
+                <button class="menu-item" (click)="reportResolved(issue)">
+                  <svg
+                    class="menu-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 6L9 17L4 12"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Report Resolved
+                </button>
+                <button class="menu-item" (click)="closeIssue(issue)">
+                  <svg
+                    class="menu-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18 6L6 18M6 6L18 18"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Close the Issue
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- No results message -->
+    <div *ngIf="filteredIssues.length === 0" class="no-results">
+      <p>No issues found matching your criteria.</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container">
+    <div class="pagination-info">
+      <span
+        >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+        {{ getTotalFilteredItems() }} entries</span
+      >
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        ⏮
+      </button>
+
+      <button
+        *ngFor="let page of getVisiblePages()"
+        class="pagination-btn page-number"
+        [class.active]="page === currentPage"
+        [class.dots]="page === '...'"
+        [disabled]="page === '...'"
+        (click)="page !== '...' && goToPage(+page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === getTotalPages()"
+        (click)="goToPage(currentPage + 1)"
+      >
+        ⏭
+      </button>
+    </div>
+  </div>
+
+  <!-- Report Issue Modal -->
+  <div
+    class="modal-overlay"
+    [class.show]="showReportIssueModal"
+    (click)="closeReportIssueModal()"
+  >
+    <div class="report-issue-modal" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h2 class="modal-title">Report an Issue</h2>
+        <button class="close-btn" (click)="closeReportIssueModal()">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="modal-content">
+        <form (ngSubmit)="submitSupport()" #issueForm="ngForm">
+          <div class="form-group">
+            <label for="issueCategory">Issue Category *</label>
+            <select
+              id="issueCategory"
+              class="form-control"
+              [(ngModel)]="newIssue.issueCategory"
+              name="issueCategory"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Onboarding">Onboarding</option>
+              <option value="Subscriptions">Subscriptions</option>
+              <option value="Payments & Invoices">Payments & Invoices</option>
+              <option value="Technical">Technical</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="issueType">Issue Type *</label>
+            <input
+              type="text"
+              id="issueType"
+              class="form-control"
+              [(ngModel)]="newIssue.issueType"
+              name="issueType"
+              placeholder="Brief issue type"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description *</label>
+            <textarea
+              id="description"
+              class="form-control"
+              [(ngModel)]="newIssue.description"
+              name="description"
+              rows="4"
+              placeholder="Describe your issue in detail"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="closeReportIssueModal()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="!issueForm.form.valid"
+            >
+              Submit Issue
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Report Issue Modal -->
+  <div
+    class="modal-overlay"
+    [class.show]="showReportIssueModal"
+    (click)="closeReportIssueModal()"
+  >
+    <div class="report-issue-modal" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h2 class="modal-title">Report new Issue</h2>
+        <button class="close-btn" (click)="closeReportIssueModal()">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="modal-content">
+        <form (ngSubmit)="submitSupport()" #issueForm="ngForm">
+          <div class="form-group">
+            <label for="issueCategory">Issue Category</label>
+            <select
+              id="issueCategory"
+              class="form-control"
+              [(ngModel)]="newIssue.issueCategory"
+              name="issueCategory"
+              (change)="onCategoryChange()"
+              required
+            >
+              <option value="">Select Category</option>
+              <option
+                *ngFor="let category of issueCategoryOptions"
+                [value]="category"
+              >
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="issueType">Issue type</label>
+            <select
+              id="issueType"
+              class="form-control"
+              [(ngModel)]="newIssue.issueType"
+              name="issueType"
+              [disabled]="!newIssue.issueCategory"
+              required
+            >
+              <option value="">Select Issue Type</option>
+              <option
+                *ngFor="let type of getAvailableIssueTypes()"
+                [value]="type"
+              >
+                {{ type }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="project">Project</label>
+            <select
+              id="project"
+              class="form-control"
+              [(ngModel)]="newIssue.project"
+              name="project"
+              required
+            >
+              <option value="">Select Project</option>
+              <option *ngFor="let project of projectOptions" [value]="project">
+                {{ project }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              class="form-control"
+              [(ngModel)]="newIssue.description"
+              name="description"
+              rows="4"
+              placeholder="Describe your issue in detail"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn-primary submit-btn"
+              [disabled]="!issueForm.form.valid"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop for closing menu -->
+<div
+  class="menu-backdrop"
+  [class.show]="activeMenuId !== null"
+  (click)="closeActionsMenu()"
+></div>

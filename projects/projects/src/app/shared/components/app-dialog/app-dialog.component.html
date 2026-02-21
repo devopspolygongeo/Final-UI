@@ -1,0 +1,31 @@
+<ng-container *ngIf=data>
+    <h2 matDialogTitle *ngIf="data.title">{{data.title}}</h2>
+    <ng-container *ngIf="data.asset;else textContent">
+        <ng-containter [ngSwitch]="data.asset.type">
+            <ng-container *ngSwitchCase="'image'">
+                <img class="image" [src]="data.asset.url" width="100%" height="100%" />
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'video'">
+                <video [src]="data.asset.url" controls width="100%" height="100%">
+                    <source [src]="data.asset.url" type="/video/mp4">
+                </video>
+            </ng-container>
+            <ng-container *ngSwitchCase="'document'">
+                <object [data]="data.asset.url | sanitizeUrl" width="100%" height="100%"
+                    type="application/pdf"></object>
+            </ng-container>
+        </ng-containter>
+
+    </ng-container>
+
+    <mat-dialog-actions text-align="end" *ngIf="data.closeBtn">
+        <button mat-button matDialogClose color="primary">Close</button>
+    </mat-dialog-actions>
+</ng-container>
+<ng-template #textContent>
+    <mat-dialog-content *ngIf="data.content">
+        {{data.content}}
+    </mat-dialog-content>
+
+</ng-template>

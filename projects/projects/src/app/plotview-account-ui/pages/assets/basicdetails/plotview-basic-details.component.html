@@ -1,0 +1,342 @@
+<div class="container" (click)="closeAllDropdowns()">
+  <div class="main-content">
+    <!-- Left Section - 75% -->
+    <div class="left-section">
+      <!-- Layout Name and Layout Owner Row -->
+      <div class="row">
+        <div class="form-group">
+          <label>Layout name</label>
+          <input type="text" [(ngModel)]="layoutName" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Layout Owner</label>
+          <input type="text" [(ngModel)]="layoutOwner" class="form-control" />
+        </div>
+      </div>
+
+      <!-- Location and City Row -->
+      <div class="row">
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" [(ngModel)]="location" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" [(ngModel)]="city" class="form-control" />
+        </div>
+      </div>
+
+      <!-- Sizes Section -->
+      <div class="sizes-section">
+        <label>Sizes</label>
+        <div class="dropdown-wrapper">
+          <div
+            class="tags-container dropdown-tags"
+            [class.active]="sizesDropdownOpen"
+            (click)="toggleSizesDropdown(); $event.stopPropagation()"
+          >
+            <div *ngFor="let size of getSelectedSizes()" class="tag">
+              {{ size.label }}
+              <span
+                class="tag-close"
+                (click)="removeSize(size.value); $event.stopPropagation()"
+                >×</span
+              >
+            </div>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+
+          <div class="dropdown-menu" [class.show]="sizesDropdownOpen">
+            <!-- Input Layer for new size -->
+            <div class="custom-size-entry" (click)="$event.stopPropagation()">
+              <select
+                [(ngModel)]="newSizeUnit"
+                class="unit-select"
+                (click)="$event.stopPropagation()"
+              >
+                <option *ngFor="let unit of units" [value]="unit">
+                  {{ unit }}
+                </option>
+              </select>
+              <input
+                type="number"
+                class="custom-size-input"
+                [(ngModel)]="newSizeValue"
+                placeholder="Enter size"
+                (click)="$event.stopPropagation()"
+              />
+              <button
+                (click)="addCustomSize(); $event.stopPropagation()"
+                class="add-btn"
+              >
+                Add
+              </button>
+            </div>
+
+            <div class="checkbox-grid">
+              <div
+                *ngFor="let size of availableSizes; let i = index"
+                class="checkbox-item"
+                (click)="toggleSize(i); $event.stopPropagation()"
+              >
+                <div class="checkbox-wrapper">
+                  <img
+                    [src]="
+                      size.selected
+                        ? 'assets/admin-dashboard/checkbox-checked.png'
+                        : 'assets/admin-dashboard/checkbox-unchecked.png'
+                    "
+                    class="checkbox-icon"
+                    alt="checkbox"
+                  />
+                  <span>{{ size.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amenities Section -->
+      <div class="amenities-section">
+        <label>Amenities</label>
+        <div class="dropdown-wrapper">
+          <div
+            class="tags-container dropdown-tags"
+            [class.active]="amenitiesDropdownOpen"
+            (click)="toggleAmenitiesDropdown(); $event.stopPropagation()"
+          >
+            <div *ngFor="let amenity of getSelectedAmenities()" class="tag">
+              {{ amenity.label }}
+              <span
+                class="tag-close"
+                (click)="removeAmenity(amenity.value); $event.stopPropagation()"
+                >×</span
+              >
+            </div>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+
+          <!-- Amenities Dropdown Content -->
+          <div class="dropdown-menu" [class.show]="amenitiesDropdownOpen">
+            <!-- Input Layer for new amenity -->
+            <div class="custom-size-entry" (click)="$event.stopPropagation()">
+              <input
+                type="text"
+                class="custom-size-input"
+                [(ngModel)]="newAmenityLabel"
+                placeholder="Enter new amenity"
+                (click)="$event.stopPropagation()"
+              />
+              <button
+                (click)="addCustomAmenity(); $event.stopPropagation()"
+                class="add-btn"
+              >
+                Add
+              </button>
+            </div>
+
+            <div class="checkbox-grid">
+              <div
+                *ngFor="let amenity of availableAmenities; let i = index"
+                class="checkbox-item"
+                (click)="toggleAmenity(i); $event.stopPropagation()"
+              >
+                <div class="checkbox-wrapper">
+                  <img
+                    [src]="
+                      amenity.selected
+                        ? 'assets/admin-dashboard/checkbox-checked.png'
+                        : 'assets/admin-dashboard/checkbox-unchecked.png'
+                    "
+                    class="checkbox-icon"
+                    alt="checkbox"
+                  />
+                  <span>{{ amenity.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plot Attributes Section -->
+      <
+      <div class="plot-attributes-section">
+        <label>Plot attributes</label>
+        <div class="dropdown-wrapper">
+          <div
+            class="tags-container dropdown-tags"
+            [class.active]="plotAttributesDropdownOpen"
+            (click)="togglePlotAttributesDropdown(); $event.stopPropagation()"
+          >
+            <div *ngFor="let attr of getSelectedPlotAttributes()" class="tag">
+              {{ attr.label }}
+              <span
+                class="tag-close"
+                (click)="
+                  removePlotAttribute(attr.value); $event.stopPropagation()
+                "
+                >×</span
+              >
+            </div>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+
+          <!-- Plot Attributes Dropdown Content -->
+          <div class="dropdown-menu" [class.show]="plotAttributesDropdownOpen">
+            <!-- Input Layer for new plot attribute -->
+            <div class="custom-size-entry" (click)="$event.stopPropagation()">
+              <input
+                type="text"
+                class="custom-size-input"
+                [(ngModel)]="newPlotAttributeLabel"
+                placeholder="Enter new attribute"
+                (click)="$event.stopPropagation()"
+              />
+              <button
+                (click)="addCustomPlotAttribute(); $event.stopPropagation()"
+                class="add-btn"
+              >
+                Add
+              </button>
+            </div>
+
+            <div class="checkbox-grid">
+              <div
+                *ngFor="let attr of availablePlotAttributes; let i = index"
+                class="checkbox-item"
+                (click)="togglePlotAttribute(i); $event.stopPropagation()"
+              >
+                <div class="checkbox-wrapper">
+                  <img
+                    [src]="
+                      attr.selected
+                        ? 'assets/admin-dashboard/checkbox-checked.png'
+                        : 'assets/admin-dashboard/checkbox-unchecked.png'
+                    "
+                    class="checkbox-icon"
+                    alt="checkbox"
+                  />
+                  <span>{{ attr.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section - 25% -->
+    <div class="right-section">
+      <!-- Area -->
+      <div class="form-group">
+        <label>Area</label>
+        <input type="text" [(ngModel)]="area" class="form-control" />
+      </div>
+
+      <!-- State -->
+      <div class="form-group">
+        <label>State</label>
+        <div class="dropdown-wrapper">
+          <div
+            class="dropdown-input"
+            [class.active]="stateDropdownOpen"
+            (click)="toggleStateDropdown(); $event.stopPropagation()"
+          >
+            <span>{{ state }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-menu" [class.show]="stateDropdownOpen">
+            <div
+              *ngFor="let option of stateOptions"
+              class="dropdown-item"
+              (click)="selectState(option); $event.stopPropagation()"
+            >
+              {{ option }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval -->
+      <div class="form-group">
+        <label>Approval</label>
+        <div class="dropdown-wrapper">
+          <div
+            class="dropdown-input"
+            [class.active]="approvalDropdownOpen"
+            (click)="toggleApprovalDropdown(); $event.stopPropagation()"
+          >
+            <span>{{ approval }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-menu" [class.show]="approvalDropdownOpen">
+            <div
+              *ngFor="let option of approvalOptions"
+              class="dropdown-item"
+              (click)="selectApproval(option); $event.stopPropagation()"
+            >
+              {{ option }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="form-group">
+        <label>Price Range</label>
+        <div class="price-range-container">
+          <div class="price-inputs">
+            <input
+              type="number"
+              [(ngModel)]="priceRangeMin"
+              class="price-input"
+            />
+            <span class="price-separator">-</span>
+            <input
+              type="number"
+              [(ngModel)]="priceRangeMax"
+              class="price-input"
+            />
+          </div>
+          <div class="price-display">
+            <span>{{ priceRangeMin }}</span>
+            <span>{{ priceRangeMax }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asset Manager -->
+      <div class="form-group">
+        <label>Asset Manager</label>
+        <div class="dropdown-wrapper">
+          <div
+            class="dropdown-input"
+            [class.active]="assetManagerDropdownOpen"
+            (click)="toggleAssetManagerDropdown(); $event.stopPropagation()"
+          >
+            <span>{{ assetManager }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-menu" [class.show]="assetManagerDropdownOpen">
+            <div
+              *ngFor="let option of assetManagerOptions"
+              class="dropdown-item"
+              (click)="selectAssetManager(option); $event.stopPropagation()"
+            >
+              {{ option }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Changes Button -->
+      <div class="save-button-container">
+        <button class="save-button" (click)="saveChanges()">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

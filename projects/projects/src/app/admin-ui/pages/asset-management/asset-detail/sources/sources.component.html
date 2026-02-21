@@ -1,0 +1,302 @@
+<div class="source-management-container">
+  <!-- Main Content -->
+  <div class="main-content with-sidebar">
+    <!-- Data Table -->
+    <div class="table-container">
+      <table class="sources-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="sortBy('id')">
+              <span>SourceID</span>
+              <img [src]="getSortIcon('id')" alt="Sort" class="sort-icon" />
+            </th>
+            <!-- <th class="sortable-header" (click)="sortBy('assetName')">
+              <span>Asset Name</span>
+              <img
+                [src]="getSortIcon('assetName')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th> -->
+            <th class="sortable-header" (click)="sortBy('dataType')">
+              <span>Datatype</span>
+              <img
+                [src]="getSortIcon('dataType')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="sortable-header" (click)="sortBy('name')">
+              <span>Source name</span>
+              <img [src]="getSortIcon('name')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('link')">
+              <span>Source link</span>
+              <img [src]="getSortIcon('link')" alt="Sort" class="sort-icon" />
+            </th>
+            <th class="sortable-header" (click)="sortBy('priority')">
+              <span>Priority</span>
+              <img
+                [src]="getSortIcon('priority')"
+                alt="Sort"
+                class="sort-icon"
+              />
+            </th>
+            <th class="center-header">Visibility</th>
+            <th class="center-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let source of paginatedSources" class="source-row">
+            <td class="source-id">{{ source.id }}</td>
+            <!-- <td class="asset-name">{{ source.assetName }}</td> -->
+            <td>{{ source.dataType }}</td>
+            <td>{{ source.name }}</td>
+            <td class="source-link truncate">{{ source.link }}</td>
+            <td class="text-center">{{ source.priority }}</td>
+            <td class="text-center">
+              <div class="toggle-container">
+                <input
+                  type="checkbox"
+                  [id]="'toggle-' + source.id"
+                  class="toggle-input"
+                  [checked]="source.visibility"
+                  (change)="toggleSourceVisibility(source)"
+                />
+                <label [for]="'toggle-' + source.id" class="toggle-label">
+                  <img
+                    *ngIf="!source.visibility"
+                    src="assets/admin-dashboard/admin-toggle-inactive.png"
+                    alt="Inactive"
+                    class="toggle-icon"
+                  />
+                  <img
+                    *ngIf="source.visibility"
+                    src="assets/admin-dashboard/admin-toggle-active.png"
+                    alt="Active"
+                    class="toggle-icon"
+                  />
+                </label>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="actions-container">
+                <button
+                  class="action-btn edit-btn"
+                  (click)="editSource(source)"
+                  title="Edit"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-client-edit.png"
+                    alt="Edit"
+                  />
+                </button>
+                <button
+                  class="action-btn delete-btn"
+                  (click)="deleteSource(source)"
+                  title="Delete"
+                >
+                  <img
+                    src="assets/admin-dashboard/admin-delete.png"
+                    alt="Delete"
+                  />
+                </button>
+                <button
+                  class="delete-mapbox-btn"
+                  title="Delete from Mapbox"
+                  (click)="deleteFromMapbox(source.link)"
+                >
+                  🗑️ Mapbox
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- No results message -->
+      <div *ngIf="filteredSources.length === 0" class="no-results">
+        <p>No sources found</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        <span
+          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ getTotalFilteredItems() }} entries</span
+        >
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ⏮
+        </button>
+
+        <button
+          *ngFor="let page of getVisiblePages()"
+          class="pagination-btn page-number"
+          [class.active]="page === currentPage"
+          [class.dots]="page === '...'"
+          [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage === getTotalPages()"
+          (click)="goToPage(currentPage + 1)"
+        >
+          ⏭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar - Always Visible -->
+  <div class="right-sidebar show">
+    <div class="sidebar-header">
+      <button class="clear-btn" (click)="resetForm()" title="Clear form">
+        <img src="assets/admin-dashboard/back.png" alt="Clear" />
+      </button>
+      <h3>Add new source</h3>
+    </div>
+
+    <form class="source-form" (ngSubmit)="submitNewSource()">
+      <!-- <div class="form-group">
+        <label for="assetName">Asset Name</label>
+        <input
+          type="text"
+          id="assetName"
+          [(ngModel)]="newSource.assetName"
+          name="assetName"
+          placeholder="Sri Venkateswara Farms (Auto populate)"
+          readonly
+        />
+      </div> -->
+
+      <div class="form-group">
+        <label for="datatype">Datatype</label>
+        <select
+          id="datatype"
+          [(ngModel)]="newSource.dataType"
+          name="datatype"
+          required
+        >
+          <option value="">Select datatype</option>
+          <option value="vector">vector</option>
+          <option value="raster">raster</option>
+        </select>
+      </div>
+
+      <!-- Source Name -->
+      <div class="form-group">
+        <label for="sourceName">Source Name</label>
+        <input
+          type="text"
+          id="sourceName"
+          [(ngModel)]="newSource.name"
+          name="sourceName"
+          [readonly]="true"
+          placeholder="Source Name will auto-fill after upload"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="sourceLink">Source link</label>
+        <input
+          type="text"
+          id="sourceLink"
+          [(ngModel)]="newSource.link"
+          name="sourceLink"
+          [readonly]="true"
+          (click)="openUploadModal()"
+          placeholder="Click to upload"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="priority">Source Priority</label>
+        <input
+          type="number"
+          id="priority"
+          [(ngModel)]="newSource.priority"
+          name="priority"
+          placeholder="Source Priority"
+          min="1"
+          required
+        />
+      </div>
+
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="upload-modal" *ngIf="showUploadModal">
+  <div class="upload-modal-content styled-modal">
+    <h3 class="modal-title">Upload File to Mapbox</h3>
+
+    <div class="form-group">
+      <label>Choose File</label>
+      <input type="file" class="styled-input" (change)="onFileChange($event)" />
+    </div>
+
+    <div class="form-group">
+      <label>Tileset ID</label>
+      <input
+        type="text"
+        class="styled-input"
+        [(ngModel)]="uploadTileset"
+        placeholder="tileset-id"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Source Name</label>
+      <input
+        type="text"
+        class="styled-input"
+        [(ngModel)]="uploadName"
+        placeholder="Display Name"
+      />
+    </div>
+
+    <div *ngIf="uploadProgress > 0" class="progress-bar-container">
+      <div class="progress-bar" [style.width.%]="uploadProgress"></div>
+    </div>
+
+    <div *ngIf="uploadLink" class="upload-success">
+      <strong>Tileset:</strong> {{ uploadLink }}
+    </div>
+
+    <div class="modal-actions">
+      <!-- ✅ Show Upload + Cancel only before upload -->
+      <ng-container *ngIf="!uploadLink">
+        <button
+          class="submit-btn"
+          [disabled]="
+            !uploadFile || !uploadTileset || !uploadName || uploadProgress > 0
+          "
+          (click)="uploadToMapbox()"
+        >
+          Upload
+        </button>
+        <button class="cancel-btn" (click)="closeUploadModal()">Cancel</button>
+      </ng-container>
+
+      <!-- ✅ Show Done only after successful upload -->
+      <ng-container *ngIf="uploadLink">
+        <button class="submit-btn" (click)="closeUploadModal()">Done</button>
+      </ng-container>
+    </div>
+  </div>
+</div>

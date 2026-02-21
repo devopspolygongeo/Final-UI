@@ -1,0 +1,195 @@
+<div class="lead-management-container">
+  <!-- Header Actions -->
+  <div class="header-actions">
+    <button class="action-btn export-btn" (click)="onExport()" title="Export">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7,10 12,15 17,10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    </button>
+    <button class="action-btn print-btn" (click)="onPrint()" title="Print">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <polyline points="6,9 6,2 18,2 18,9" />
+        <path
+          d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+        />
+        <rect x="6" y="14" width="12" height="8" />
+      </svg>
+    </button>
+    <button
+      class="action-btn download-btn"
+      (click)="onDownload()"
+      title="Download"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="checkbox-column">
+            <div class="checkbox-container">
+              <input
+                type="checkbox"
+                [checked]="allSelected"
+                (change)="toggleAllSelection()"
+                class="custom-checkbox"
+              />
+            </div>
+          </th>
+          <th class="sortable-column" (click)="sortTable('name')">
+            Name
+            <img
+              src='assets/admin-dashboard/admin-reorder.png'
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-column" (click)="sortTable('contactNumber')">
+            Contact Number
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-column" (click)="sortTable('email')">
+            Email
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-column" (click)="sortTable('layoutName')">
+            Layout name
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-column" (click)="sortTable('plotNo')">
+            Plot No
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-column" (click)="sortTable('status')">
+            Status
+            <img
+                src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+          <th class="sortable-column" (click)="sortTable('dateSubmitted')">
+            Date Submitted
+            <img
+              src="assets/admin-dashboard/admin-reorder.png"
+              alt="Sort"
+              class="sort-icon"
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let lead of getPaginatedLeads(); trackBy: trackByFn"
+          class="data-row"
+        >
+          <td class="checkbox-column">
+            <div class="checkbox-container">
+              <input
+                type="checkbox"
+                [checked]="lead.selected || false"
+                (change)="toggleLeadSelection(lead)"
+                class="custom-checkbox"
+              />
+            </div>
+          </td>
+          <td class="name-column">{{ lead.name }}</td>
+          <td class="contact-column">{{ lead.contactNumber }}</td>
+          <td class="email-column">{{ lead.email }}</td>
+          <td class="layout-column">{{ lead.layoutName }}</td>
+          <td class="plot-column">{{ lead.plotNo }}</td>
+          <td class="status-column">
+            <span class="status-badge" [ngClass]="getStatusClass(lead.status)">
+              {{ lead.status }}
+            </span>
+          </td>
+          <td class="date-column">{{ lead.dateSubmitted }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container">
+    <div class="pagination-info">
+      <span
+        >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+        {{ totalEntries }} entries</span
+      >
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        ⏮
+      </button>
+
+      <button
+        *ngFor="let page of getVisiblePages()"
+        class="pagination-btn page-number"
+        [class.active]="page === currentPage"
+        [class.dots]="page === '...'"
+        [disabled]="page === '...'"
+        (click)="page !== '...' && goToPage(+page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+      >
+        ⏭
+      </button>
+    </div>
+  </div>
+</div>

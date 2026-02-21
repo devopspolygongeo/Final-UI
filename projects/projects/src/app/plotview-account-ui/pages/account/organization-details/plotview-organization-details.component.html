@@ -1,0 +1,92 @@
+<div class="organization-container">
+  <div class="organization-grid">
+    <div class="form-group">
+      <label>Company name</label>
+      <input [(ngModel)]="companyName" type="text" />
+    </div>
+
+    <div class="form-group">
+      <label>Billing Contact name</label>
+      <div class="editable-input">
+        <input
+          [(ngModel)]="billingContactName"
+          type="text"
+          [readonly]="!isBillingContactEditable"
+        />
+        <img
+          src="assets/admin-dashboard/admin-client-edit.png"
+          class="edit-icon"
+          alt="Edit"
+          (click)="toggleBillingContactEdit()"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input [(ngModel)]="email" type="email" />
+    </div>
+
+    <div class="form-group">
+      <label>GST details</label>
+      <input [(ngModel)]="gstDetails" type="text" />
+    </div>
+
+    <div class="address-box">
+      <div class="box-header">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9,22 9,12 15,12 15,22" />
+        </svg>
+        <span>Corporate Address</span>
+      </div>
+      <div class="box-content">{{ corporateAddress }}</div>
+    </div>
+
+    <div class="address-box">
+      <div class="box-header">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          />
+          <polyline points="14,2 14,8 20,8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10,9 9,9 8,9" />
+        </svg>
+        <span>Billing Address</span>
+        <img
+          src="assets/admin-dashboard/admin-client-edit.png"
+          class="edit-icon"
+          alt="Edit"
+          (click)="toggleBillingAddressEdit()"
+        />
+      </div>
+      <div class="box-content" *ngIf="!isBillingAddressEditable">
+        {{ billingAddress }}
+      </div>
+      <textarea
+        class="address-textarea"
+        [(ngModel)]="billingAddress"
+        *ngIf="isBillingAddressEditable"
+        (blur)="saveBillingAddress()"
+      ></textarea>
+    </div>
+
+    <div class="button-wrapper">
+      <button (click)="onSaveChanges()">Save Changes</button>
+    </div>
+  </div>
+</div>

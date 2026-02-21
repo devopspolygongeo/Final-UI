@@ -1,0 +1,305 @@
+/* ===============================
+   GALLERY COMPONENT STYLES
+   Enhanced to match layer styling
+   =============================== */
+
+/* Import attractive fonts (consistent with layers) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;600&display=swap");
+
+/* Main header styling - matches layers component */
+h5 {
+  color: #1e293b;
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #5e19ea, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+/* Close button styling */
+.close-btn-nav {
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.close-btn-nav:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f7f0ff 100%);
+  border-color: #5e19ea;
+  box-shadow: 0 6px 20px rgba(94, 25, 234, 0.12);
+  transform: translateY(-1px);
+}
+
+.close-btn-nav:active {
+  transform: translateY(0);
+}
+
+.icon-close {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #5e19ea, #8b5cf6);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+}
+
+/* Section headings */
+.heading {
+  font-family: "Inter", sans-serif !important;
+  margin-bottom: 16px;
+}
+
+.heading span strong {
+  font-weight: 500 !important;
+  color: #1e293b;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  background: linear-gradient(90deg, #f1f5f9, #e2e8f0);
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+  padding-bottom: 8px;
+}
+
+/* Horizontal rule styling */
+.hr-tag {
+  border-top: 1.5px solid;
+  opacity: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #e2e8f0 20%,
+    #e2e8f0 80%,
+    transparent 100%
+  );
+  height: 2px;
+  border: none;
+  margin-top: 12px;
+}
+
+/* Container styling */
+.container {
+  padding: 0 16px;
+}
+
+/* Media items styling */
+.image,
+.video {
+  height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+}
+
+.image:hover,
+.video:hover {
+  border-color: #5e19ea;
+  box-shadow: 0 8px 24px rgba(94, 25, 234, 0.12);
+  transform: translateY(-2px);
+}
+
+.image:active,
+.video:active {
+  transform: translateY(0);
+}
+
+/* Media wrapper styling */
+.m-3.flex-fill,
+.m-3 {
+  margin: 16px !important;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.m-3.flex-fill:hover,
+.m-3:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f7f0ff 100%);
+}
+
+/* Gradient overlay effect on hover */
+.m-3.flex-fill::before,
+.m-3::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(94, 25, 234, 0.08) 0%,
+    rgba(147, 51, 234, 0.08) 50%,
+    rgba(182, 6, 212, 0.08) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 12px;
+}
+
+.m-3.flex-fill:hover::before,
+.m-3:hover::before {
+  opacity: 1;
+}
+
+/* Empty state message styling */
+.empty-message {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #94a3b8;
+  font-weight: 400;
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 12px;
+  margin: 16px;
+  border: 2px dashed #e2e8f0;
+}
+
+/* Scrollable container */
+.y-scroll {
+  height: 50vh;
+  overflow-y: auto;
+  padding-right: 8px;
+  scroll-behavior: smooth;
+}
+
+.y-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.y-scroll::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 8px;
+}
+
+.y-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5e19ea 0%, #8b5cf6 100%);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.y-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4c14c0 0%, #7c3aed 100%);
+}
+
+/* Flex utilities */
+.d-flex {
+  display: flex;
+}
+
+.flex-md-wrap {
+  flex-wrap: wrap;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+/* Margin utilities */
+.mt-4 {
+  margin-top: 1rem !important;
+}
+
+.ms-4 {
+  margin-left: 1rem !important;
+}
+
+.mb-5 {
+  margin-bottom: 3rem !important;
+}
+
+.mx-5 {
+  margin-left: 3rem !important;
+  margin-right: 3rem !important;
+}
+
+.pt-1 {
+  padding-top: 0.25rem !important;
+}
+
+.w-100 {
+  width: 100% !important;
+}
+
+.vh-50 {
+  height: 50vh;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .y-scroll {
+    width: 100%;
+    height: 35vh;
+    padding-right: 6px;
+  }
+
+  h5 {
+    padding: 0 12px;
+    font-size: 16px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  .image,
+  .video {
+    height: 160px;
+  }
+
+  .m-3.flex-fill,
+  .m-3 {
+    margin: 12px !important;
+  }
+
+  .mx-5 {
+    margin-left: 1.5rem !important;
+    margin-right: 1.5rem !important;
+  }
+}
+
+/* Animation for media entries */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.m-3.flex-fill,
+.m-3 {
+  animation: fadeInUp 0.3s ease-out;
+}

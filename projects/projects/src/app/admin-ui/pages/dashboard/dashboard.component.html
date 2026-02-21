@@ -1,0 +1,20 @@
+<div class="dashboard-container">
+  <div class="dashboard-grid">
+    <div
+      class="dashboard-card"
+      *ngFor="let item of dashboardItems"
+      (click)="navigate(item.route)"
+    >
+      <div class="card-image-container">
+        <img
+          [src]="item.icon"
+          [alt]="item.title"
+          [class]="item.rounded ? 'card-image rounded' : 'card-image'"
+        />
+      </div>
+      <div class="card-text">
+        <span>{{ item.title }}</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="main-content">
+  <!-- LEFT: Map -->
+  <div class="left-section" #leftCol>
+    <app-map
+      *ngIf="mapConfig"
+      [mapConfig]="mapConfig"
+      [showLandmarks]="true"
+      [enableTerrain]="is3D"
+      [styleType]="'Street'"
+      [directions]="$any(directions)"
+      (mapMouseEv)="onMapMouseEvents($event)"
+    >
+    </app-map>
+  </div>
+
+  <!-- RIGHT: Proximity panel -->
+  <div class="right-section">
+    <div class="proximity-header">
+      <h3>Proximity</h3>
+      <div class="note">
+        Note: User can add upto 10 landmarks for each project
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <input
+        class="search-input"
+        [(ngModel)]="searchText"
+        (keyup.enter)="onSearch()"
+        placeholder="Search location"
+      />
+      <button class="search-btn" (click)="onSearch()" title="Search">
+        <img src="assets/admin-dashboard/admin-search.png" alt="Search" />
+      </button>
+
+      <!-- Suggestions -->
+      <div class="suggestions" *ngIf="suggestions?.length">
+        <div
+          class="suggestion-item"
+          *ngFor="let s of suggestions"
+          (click)="addSuggestion(s)"
+        >
+          {{ s.name || s.full_address }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Existing proximities -->
+    <div class="landmarks-list">
+      <div *ngIf="!landmarks?.length" class="empty">
+        No proximities added yet.
+      </div>
+
+      <div class="landmark-card" *ngFor="let lm of landmarks; index as i">
+        <div class="left" (click)="focusLandmark(lm)">
+          <img
+            class="pin"
+            src="assets/admin-dashboard/location-pin.png"
+            alt="pin"
+          />
+          <div class="text">
+            <div class="title">{{ lm.name }}</div>
+            <div class="subtitle">
+              {{ lm.description || lm.latitude + ", " + lm.longitude }}
+            </div>
+          </div>
+        </div>
+        <button class="trash-btn" (click)="removeLandmark(i)" title="Remove">
+          <img src="assets/admin-dashboard/admin-delete.png" alt="delete" />
+        </button>
+      </div>
+    </div>
+
+    <!-- subtle divider like screenshot -->
+    <div class="pv-divider"></div>
+  </div>
+</div>
