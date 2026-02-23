@@ -160,13 +160,7 @@ export class LayersComponent implements OnInit {
       }
     });
   }
-  getParentLayers(): LayerUI[] {
-  return this.layers.filter(l => l.hasSubLayer);
-}
-
-getChildLayers(parentId: number): LayerUI[] {
-  return this.layers.filter(l => l.parentLayerId === parentId);
-}
+ 
 
 
   getEmptyLayer(): LayerUI {
@@ -248,20 +242,17 @@ getChildLayers(parentId: number): LayerUI[] {
 
   toggleLayerVisibility(layer: LayerUI): void {
     layer.visibility = !layer.visibility;
-    if (layer.hasSubLayer) {
-    this.getChildLayers(layer.id)
-      .forEach(child => child.visibility = layer.visibility);
-  }
+    
 
   // 🔥 Child → parent
-  if (layer.parentLayerId) {
+ /* if (layer.parentLayerId) {
     const siblings = this.getChildLayers(layer.parentLayerId);
     const parent = this.layers.find(l => l.id === layer.parentLayerId);
 
     if (parent) {
       parent.visibility = siblings.some(s => s.visibility);
     }
-  }
+  }*/
     this.filterLayers();
   }
 
@@ -317,8 +308,8 @@ getChildLayers(parentId: number): LayerUI[] {
       layerpriority: this.newLayer.priority,
       topoid: this.newLayer.topoId,
       display_name: this.newLayer.displayName,
-      has_sublayer: this.newLayer.hasSubLayer ? 1 : 0,
-  parent_layerid: this.newLayer.parentLayerId
+      //has_sublayer: this.newLayer.hasSubLayer ? 1 : 0,
+ // parent_layerid: this.newLayer.parentLayerId
     };
 
     const apiCall = this.newLayer.id === 0
@@ -397,6 +388,6 @@ interface LayerUI extends Layer {
   sourceName: string;
   groupName: string;
   topoName: string;
-  hasSubLayer?: boolean;
-  parentLayerId?: number | null;
+  //hasSubLayer?: boolean;
+ // parentLayerId?: number | null;
 }
