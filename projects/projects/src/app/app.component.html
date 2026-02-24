@@ -1,2 +1,10 @@
-<router-outlet></router-outlet>
+<div *ngIf="!isMobile; else mobileNotSupported">
+  <router-outlet></router-outlet>
+</div>
 
+<ng-template #mobileNotSupported>
+  <div class="mobile-block">
+    <h1>Please open in Desktop</h1>
+    <p>This platform does not support mobile devices.</p>
+  </div>
+</ng-template>
