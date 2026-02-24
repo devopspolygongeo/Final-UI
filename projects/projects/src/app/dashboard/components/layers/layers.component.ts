@@ -1,26 +1,40 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { AppConstants } from '../../../core/constants/app.constants';
-import { Group, Layer, PaintProperty, Source, Toggle } from '../../../core/models/';
+import {
+  Group,
+  Layer,
+  PaintProperty,
+  Source,
+  Toggle,
+} from '../../../core/models/';
 import { MapService } from '../../../shared/services/map.service';
 import { Subscription } from 'rxjs';
 
-type GroupToggle = { toggles: Toggle[], visibility: boolean, expand: boolean };
-
+type GroupToggle = { toggles: Toggle[]; visibility: boolean; expand: boolean };
 
 @Component({
   selector: 'app-layers',
   templateUrl: './layers.component.html',
   styleUrls: ['./layers.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayersComponent {
-
   @Input() sources: Source[] = [];
   @Input() groups: Group[] = [];
 
-  @Output() layerToggleEv: EventEmitter<Toggle[]> = new EventEmitter<Toggle[]>();
-  @Output() layerPaintChangeEv: EventEmitter<PaintProperty[]> = new EventEmitter<PaintProperty[]>();
+  @Output() layerToggleEv: EventEmitter<Toggle[]> = new EventEmitter<
+    Toggle[]
+  >();
+  @Output() layerPaintChangeEv: EventEmitter<PaintProperty[]> =
+    new EventEmitter<PaintProperty[]>();
 
   globalLayerToggles: Toggle[] = [];
   classicLayersToggleMap: Map<string, GroupToggle> = new Map();
@@ -36,38 +50,50 @@ export class LayersComponent {
   selectedGroupType: string = this.CLASSIFY_BY_CATEGORY;
 
   subscriptions: Subscription[] = [];
-  constructor(readonly mapService: MapService) {
-  }
+  constructor(readonly mapService: MapService) {}
 
   ngOnInit() {
     // console.log('LayersComponent initialized');
-    this.subscriptions.push(this.mapService.isMapLoaded().subscribe(isMapLoaded => {
-      if (isMapLoaded) {
-        this.resetTogglesVisibility(this.GLOBAL);
-        this.resetTogglesVisibility(this.CLASSIC);
-        this.resetTogglesVisibility(this.CLASSIFY_BY_CATEGORY);
-      }
-    }));
+    this.subscriptions.push(
+      this.mapService.isMapLoaded().subscribe((isMapLoaded) => {
+        if (isMapLoaded) {
+          this.resetTogglesVisibility(this.GLOBAL);
+          this.resetTogglesVisibility(this.CLASSIC);
+          this.resetTogglesVisibility(this.CLASSIFY_BY_CATEGORY);
+        }
+      }),
+    );
     //console.log('LayersComponent initialized',this.mapService);
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['sources'] && changes['sources'].currentValue != changes['sources'].previousValue) {
+    if (
+      changes['sources'] &&
+      changes['sources'].currentValue != changes['sources'].previousValue
+    ) {
       this.loadLayers();
       this.selectedGroupType = this.CLASSIFY_BY_CATEGORY;
     }
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
-
-  addToToggleMap(map: Map<string, GroupToggle>, groupName: string, toggleItem: Toggle, visibility: boolean) {
+  addToToggleMap(
+    map: Map<string, GroupToggle>,
+    groupName: string,
+    toggleItem: Toggle,
+    visibility: boolean,
+  ) {
     if (map.has(groupName)) {
       map.get(groupName)?.toggles.push(toggleItem);
     } else {
-      map.set(groupName, { toggles: [toggleItem], visibility: visibility, expand: visibility } as GroupToggle);
+      map.set(groupName, {
+        toggles: [toggleItem],
+        visibility: visibility,
+        expand: visibility,
+      } as GroupToggle);
     }
   }
 
@@ -77,19 +103,30 @@ export class LayersComponent {
     this.categoryLayersToggleMap = new Map();
     this.filterLayersToggleMap = new Map();
     for (let source of this.sources) {
-      //console.log("📦 Source received:", source.name, source);
+      //console.log('📦 Source received:', source.name, source);
       if (source.dataType == 'raster') {
-        this.globalLayerToggles.push({ id: source.name, checked: source.visibility, metaData: { source: source } });
+        this.globalLayerToggles.push({
+          id: source.name,
+          checked: source.visibility,
+          metaData: { source: source },
+        });
       } else if (source.layers) {
         //console.log(`📄 Layers under source "${source.name}":`, source.layers);
 
         for (let layer of source.layers) {
-         // console.log("entire layer:",layer);
-          //console.log("🔍 Processing layer:", layer.name, "with group:", layer.group?.name, "type:", layer.group?.type);
+          console.log('entire layer:', layer);
+          console.log(
+            '🔍 Processing layer:',
+            layer.name,
+            'with group:',
+            layer.group?.name,
+            'type:',
+            layer.group?.type,
+          );
 
           if (layer.group) {
             //setting the group visibility for all the layers under it
-         //   console.log("SOURCE", source.name, source);
+            //   console.log("SOURCE", source.name, source);
             // if (source.layers) {
             //   for (let layer of source.layers) {
             //     console.log("🔍 Final Layer Object:", layer);
@@ -97,22 +134,44 @@ export class LayersComponent {
             //   }
             // }
 
-            const toggleItem: Toggle = { id: this.getLayerName(layer), name: layer.displayName, checked: layer.group.visibility, metaData: { layer: layer } };
+            const toggleItem: Toggle = {
+              id: this.getLayerName(layer),
+              name: layer.displayName,
+              checked: layer.group.visibility,
+              metaData: { layer: layer },
+            };
             if (layer.group.type === AppConstants.GLOBAL_GROUP_ID) {
               toggleItem.metaData.groupType = this.GLOBAL;
               this.globalLayerToggles.push(toggleItem);
             } else if (layer.group.type === AppConstants.CLASSIC_GROUP_ID) {
               toggleItem.metaData.groupType = this.CLASSIC;
-              this.addToToggleMap(this.classicLayersToggleMap, layer.group.name, toggleItem, layer.group.visibility);
-            } else if (layer.group.type === AppConstants.VIEW_BY_CLASSIFICATION) {
+              this.addToToggleMap(
+                this.classicLayersToggleMap,
+                layer.group.name,
+                toggleItem,
+                layer.group.visibility,
+              );
+            } else if (
+              layer.group.type === AppConstants.VIEW_BY_CLASSIFICATION
+            ) {
               if (layer.group.visibility) {
                 this.selectedGroupToggle = layer.group.name;
               }
               toggleItem.metaData.groupType = this.CLASSIFY_BY_CATEGORY;
-              this.addToToggleMap(this.categoryLayersToggleMap, layer.group.name, toggleItem, false);
-              const filterToggle = JSON.parse(JSON.stringify(toggleItem))
-              filterToggle.metaData.groupType = this.CLASSIFY_BY_FILTER
-              this.addToToggleMap(this.filterLayersToggleMap, layer.group.name, filterToggle, layer.group.visibility);
+              this.addToToggleMap(
+                this.categoryLayersToggleMap,
+                layer.group.name,
+                toggleItem,
+                false,
+              );
+              const filterToggle = JSON.parse(JSON.stringify(toggleItem));
+              filterToggle.metaData.groupType = this.CLASSIFY_BY_FILTER;
+              this.addToToggleMap(
+                this.filterLayersToggleMap,
+                layer.group.name,
+                filterToggle,
+                layer.group.visibility,
+              );
             }
           }
         }
@@ -121,17 +180,26 @@ export class LayersComponent {
   }
 
   getLayerName(layer: Layer) {
-    if (layer.name === 'waypoints')
-      return layer.sourceId + '-' + layer.name;
-    else
-      return layer.name
+    if (layer.name === 'waypoints') return layer.sourceId + '-' + layer.name;
+    else return layer.name;
   }
 
   onLayerToggle(event: MatSlideToggleChange, toggle: Toggle) {
     toggle.checked = event.checked;
+    console.log(
+      'TOGGLE EMIT:',
+      toggle.id,
+      toggle.metaData?.layer?.name,
+      toggle.metaData?.layer?.sourceId,
+    );
     this.layerToggleEv.emit([toggle]);
+    console.log('APPLY VISIBILITY TO:', toggle.id);
+
     if (toggle.metaData?.groupType === this.CLASSIFY_BY_FILTER) {
-      const paintProps = { layer: toggle.metaData.layer, color: event.checked ? '#3f51b5' : 'transparent' } as PaintProperty;
+      const paintProps = {
+        layer: toggle.metaData.layer,
+        color: event.checked ? '#3f51b5' : 'transparent',
+      } as PaintProperty;
       this.layerPaintChangeEv.emit([paintProps]);
     }
   }
@@ -139,7 +207,7 @@ export class LayersComponent {
   resetTogglesVisibility(groupType: string) {
     if (groupType === this.GLOBAL) {
       //console.log("Resetting global layer toggles visibility", this.globalLayerToggles);
-      this.globalLayerToggles.forEach(toggle => {
+      this.globalLayerToggles.forEach((toggle) => {
         if (toggle.metaData?.source)
           toggle.checked = toggle.metaData.source.visibility;
         else if (toggle.metaData?.layer)
@@ -149,51 +217,92 @@ export class LayersComponent {
     } else if (groupType === this.CLASSIC) {
       //console.log("Resetting classic layer toggles visibility", this.classicLayersToggleMap);
       if (this.classicLayersToggleMap.size) {
-        const allToggles = Array.from(this.classicLayersToggleMap.values()).flatMap(item => item.toggles)
-        allToggles.forEach(toggle => toggle.checked = toggle.metaData?.layer.group.visibility);
+        const allToggles = Array.from(
+          this.classicLayersToggleMap.values(),
+        ).flatMap((item) => item.toggles);
+        allToggles.forEach(
+          (toggle) =>
+            (toggle.checked = toggle.metaData?.layer.group.visibility),
+        );
         this.layerToggleEv.emit(allToggles);
 
-        const paintProperties = allToggles.map(toggle => { return { layer: toggle.metaData.layer, color: toggle.metaData.layer.topography?.fillColor } as PaintProperty });
+        const paintProperties = allToggles.map((toggle) => {
+          return {
+            layer: toggle.metaData.layer,
+            color: toggle.metaData.layer.topography?.fillColor,
+          } as PaintProperty;
+        });
         this.layerPaintChangeEv.emit(paintProperties);
       }
-
     } else if (groupType === this.CLASSIFY_BY_CATEGORY) {
-    //  console.log("Resetting category layer toggles visibility-categorywise", this.categoryLayersToggleMap);
+      //  console.log("Resetting category layer toggles visibility-categorywise", this.categoryLayersToggleMap);
       if (this.categoryLayersToggleMap.size) {
-        const allToggles = Array.from(this.categoryLayersToggleMap.values()).flatMap(item => item.toggles)
-        allToggles.forEach(toggle => toggle.checked = toggle.metaData?.layer.group.visibility);
+        const allToggles = Array.from(
+          this.categoryLayersToggleMap.values(),
+        ).flatMap((item) => item.toggles);
+        allToggles.forEach(
+          (toggle) =>
+            (toggle.checked = toggle.metaData?.layer.group.visibility),
+        );
         this.layerToggleEv.emit(allToggles);
 
-        this.selectedGroupToggle = allToggles.find(toggle => toggle.metaData.layer.group.visibility)?.metaData.layer.group.name || this.selectedGroupToggle;
+        this.selectedGroupToggle =
+          allToggles.find((toggle) => toggle.metaData.layer.group.visibility)
+            ?.metaData.layer.group.name || this.selectedGroupToggle;
 
-        const paintProperties = allToggles.map(toggle => { return { layer: toggle.metaData.layer, color: toggle.metaData.layer.topography?.fillColor } as PaintProperty });
+        const paintProperties = allToggles.map((toggle) => {
+          return {
+            layer: toggle.metaData.layer,
+            color: toggle.metaData.layer.topography?.fillColor,
+          } as PaintProperty;
+        });
         this.layerPaintChangeEv.emit(paintProperties);
       }
     } else if (groupType === this.CLASSIFY_BY_FILTER) {
-      console.log("Resetting filter layer toggles visibility-filterwise", this.filterLayersToggleMap);
+      console.log(
+        'Resetting filter layer toggles visibility-filterwise',
+        this.filterLayersToggleMap,
+      );
       if (this.filterLayersToggleMap.size) {
-        const allToggles = Array.from(this.filterLayersToggleMap.values()).flatMap(item => item.toggles)
-        allToggles.forEach(toggle => toggle.checked = toggle.metaData?.layer.group.visibility);
+        const allToggles = Array.from(
+          this.filterLayersToggleMap.values(),
+        ).flatMap((item) => item.toggles);
+        allToggles.forEach(
+          (toggle) =>
+            (toggle.checked = toggle.metaData?.layer.group.visibility),
+        );
         this.layerToggleEv.emit(allToggles);
 
-        const paintProps = allToggles.map(toggle => { return { layer: toggle.metaData?.layer as Layer, color: toggle.checked ? '#3f51b5' : 'transparent' } });
+        const paintProps = allToggles.map((toggle) => {
+          return {
+            layer: toggle.metaData?.layer as Layer,
+            color: toggle.checked ? '#3f51b5' : 'transparent',
+          };
+        });
         this.layerPaintChangeEv.emit(paintProps);
       }
     }
   }
 
-
   onGroupToggle(event: MatSlideToggleChange, groupType: string) {
     const map = this.getToggleMap(groupType);
     if (map && map.has(event.source.id)) {
-      const groupToggle = map.get(event.source.id)
+      const groupToggle = map.get(event.source.id);
       if (groupToggle) {
-        groupToggle.toggles.forEach(toggleItem => toggleItem.checked = event.checked);
+        groupToggle.toggles.forEach(
+          (toggleItem) => (toggleItem.checked = event.checked),
+        );
         this.layerToggleEv.emit(Object.assign([], groupToggle.toggles));
 
         if (groupType === this.CLASSIFY_BY_FILTER) {
-          const paintProps = groupToggle.toggles.map(toggle => toggle.metaData?.layer as Layer)
-            .map(layer => { return { layer: layer, color: event.checked ? '#3f51b5' : 'transparent' } as PaintProperty });
+          const paintProps = groupToggle.toggles
+            .map((toggle) => toggle.metaData?.layer as Layer)
+            .map((layer) => {
+              return {
+                layer: layer,
+                color: event.checked ? '#3f51b5' : 'transparent',
+              } as PaintProperty;
+            });
           this.layerPaintChangeEv.emit(paintProps);
         }
       }
@@ -218,20 +327,26 @@ export class LayersComponent {
 
   onLayerColorChange(event: any, toggle: Toggle) {
     if (toggle.metaData && toggle.metaData['layer']) {
-      this.layerPaintChangeEv.emit([{ layer: toggle.metaData.layer, color: event?.target?.value } as PaintProperty]);
+      this.layerPaintChangeEv.emit([
+        {
+          layer: toggle.metaData.layer,
+          color: event?.target?.value,
+        } as PaintProperty,
+      ]);
     }
   }
 
   onCategoryChange(categoryName: string) {
     let emitToggles: Toggle[] = [];
     for (let [key, value] of this.categoryLayersToggleMap) {
-      value.toggles.forEach(toggleItem => toggleItem.checked = key === categoryName);
+      value.toggles.forEach(
+        (toggleItem) => (toggleItem.checked = key === categoryName),
+      );
       emitToggles.push(...value.toggles);
     }
     this.selectedGroupToggle = categoryName;
     this.layerToggleEv.emit(emitToggles);
   }
-
 
   changeLayoutGroupType(groupType: string) {
     this.selectedGroupType = groupType;
@@ -239,11 +354,10 @@ export class LayersComponent {
   }
 
   sortGroupsByPriority(a: any, b: any) {
-    return a.priority - b.priority
+    return a.priority - b.priority;
   }
 
   sortLayersByPriority(a: any, b: any) {
     return a.metaData?.layer?.priority - b.metaData?.layer?.priority;
   }
-
 }
