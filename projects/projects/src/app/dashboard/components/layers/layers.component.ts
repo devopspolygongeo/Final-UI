@@ -52,6 +52,18 @@ export class LayersComponent {
   subscriptions: Subscription[] = [];
   constructor(readonly mapService: MapService) {}
 
+  // ✅ Normalize DB values like 0/1, "0"/"1", "true"/"false" into boolean
+  private toBool(v: any): boolean {
+    if (v === true || v === false) return v;
+    if (v === 1 || v === 0) return v === 1;
+    if (typeof v === 'string') {
+      const s = v.trim().toLowerCase();
+      if (s === 'true' || s === '1') return true;
+      if (s === 'false' || s === '0' || s === '') return false;
+    }
+    return Boolean(v);
+  }
+
   ngOnInit() {
     // console.log('LayersComponent initialized');
     this.subscriptions.push(
@@ -102,16 +114,18 @@ export class LayersComponent {
     this.classicLayersToggleMap = new Map();
     this.categoryLayersToggleMap = new Map();
     this.filterLayersToggleMap = new Map();
+
     for (let source of this.sources) {
-      //console.log('📦 Source received:', source.name, source);
+      console.log('📦 Source received:', source.name, source);
+
       if (source.dataType == 'raster') {
         this.globalLayerToggles.push({
           id: source.name,
-          checked: source.visibility,
+          checked: this.toBool(source.visibility),
           metaData: { source: source },
         });
       } else if (source.layers) {
-        //console.log(`📄 Layers under source "${source.name}":`, source.layers);
+        console.log(`📄 Layers under source "${source.name}":`, source.layers);
 
         for (let layer of source.layers) {
           console.log('entire layer:', layer);
@@ -126,20 +140,29 @@ export class LayersComponent {
 
           if (layer.group) {
             //setting the group visibility for all the layers under it
-            //   console.log("SOURCE", source.name, source);
-            // if (source.layers) {
-            //   for (let layer of source.layers) {
-            //     console.log("🔍 Final Layer Object:", layer);
-            //     console.log("LAYER:", layer.name, "GROUP TYPE:", layer.group?.type);
-            //   }
-            // }
+            console.log('SOURCE', source.name, source);
+            if (source.layers) {
+              for (let layer of source.layers) {
+                console.log('🔍 Final Layer Object:', layer);
+                console.log(
+                  'LAYER:',
+                  layer.name,
+                  'GROUP TYPE:',
+                  layer.group?.type,
+                );
+              }
+            }
 
+            // ✅ IMPORTANT FIX:
+            // checked MUST come from layer.visibility (DB layer-level),
+            // NOT from layer.group.visibility (group-level).
             const toggleItem: Toggle = {
               id: this.getLayerName(layer),
               name: layer.displayName,
-              checked: layer.group.visibility,
+              checked: this.toBool((layer as any).visibility),
               metaData: { layer: layer },
             };
+
             if (layer.group.type === AppConstants.GLOBAL_GROUP_ID) {
               toggleItem.metaData.groupType = this.GLOBAL;
               this.globalLayerToggles.push(toggleItem);
@@ -149,14 +172,17 @@ export class LayersComponent {
                 this.classicLayersToggleMap,
                 layer.group.name,
                 toggleItem,
-                layer.group.visibility,
+                this.toBool(layer.group.visibility),
               );
             } else if (
               layer.group.type === AppConstants.VIEW_BY_CLASSIFICATION
             ) {
-              if (layer.group.visibility) {
+              // selectedGroupToggle is about which category tab is selected,
+              // it can remain group-based if your UX expects "default active category"
+              if (this.toBool(layer.group.visibility)) {
                 this.selectedGroupToggle = layer.group.name;
               }
+
               toggleItem.metaData.groupType = this.CLASSIFY_BY_CATEGORY;
               this.addToToggleMap(
                 this.categoryLayersToggleMap,
@@ -164,13 +190,14 @@ export class LayersComponent {
                 toggleItem,
                 false,
               );
+
               const filterToggle = JSON.parse(JSON.stringify(toggleItem));
               filterToggle.metaData.groupType = this.CLASSIFY_BY_FILTER;
               this.addToToggleMap(
                 this.filterLayersToggleMap,
                 layer.group.name,
                 filterToggle,
-                layer.group.visibility,
+                this.toBool(layer.group.visibility),
               );
             }
           }
@@ -209,9 +236,9 @@ export class LayersComponent {
       //console.log("Resetting global layer toggles visibility", this.globalLayerToggles);
       this.globalLayerToggles.forEach((toggle) => {
         if (toggle.metaData?.source)
-          toggle.checked = toggle.metaData.source.visibility;
+          toggle.checked = this.toBool(toggle.metaData.source.visibility);
         else if (toggle.metaData?.layer)
-          toggle.checked = toggle.metaData.layer.visibility;
+          toggle.checked = this.toBool(toggle.metaData.layer.visibility);
       });
       this.layerToggleEv.emit(this.globalLayerToggles);
     } else if (groupType === this.CLASSIC) {
@@ -220,9 +247,11 @@ export class LayersComponent {
         const allToggles = Array.from(
           this.classicLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
+
+        // ✅ IMPORTANT FIX: reset based on layer.visibility (not group.visibility)
         allToggles.forEach(
           (toggle) =>
-            (toggle.checked = toggle.metaData?.layer.group.visibility),
+            (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),
         );
         this.layerToggleEv.emit(allToggles);
 
@@ -240,15 +269,19 @@ export class LayersComponent {
         const allToggles = Array.from(
           this.categoryLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
+
+        // ✅ IMPORTANT FIX: reset based on layer.visibility (not group.visibility)
         allToggles.forEach(
           (toggle) =>
-            (toggle.checked = toggle.metaData?.layer.group.visibility),
+            (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),
         );
         this.layerToggleEv.emit(allToggles);
 
+        // keep selected group based on group.visibility (existing UX)
         this.selectedGroupToggle =
-          allToggles.find((toggle) => toggle.metaData.layer.group.visibility)
-            ?.metaData.layer.group.name || this.selectedGroupToggle;
+          allToggles.find((toggle) =>
+            this.toBool(toggle.metaData.layer.group.visibility),
+          )?.metaData.layer.group.name || this.selectedGroupToggle;
 
         const paintProperties = allToggles.map((toggle) => {
           return {
@@ -267,9 +300,11 @@ export class LayersComponent {
         const allToggles = Array.from(
           this.filterLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
+
+        // ✅ IMPORTANT FIX: reset based on layer.visibility (not group.visibility)
         allToggles.forEach(
           (toggle) =>
-            (toggle.checked = toggle.metaData?.layer.group.visibility),
+            (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),
         );
         this.layerToggleEv.emit(allToggles);
 

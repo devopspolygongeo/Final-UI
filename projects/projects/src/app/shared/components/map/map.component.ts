@@ -82,7 +82,6 @@ export class MapComponent implements OnInit, OnChanges {
   streetToggleActive = true;
   layoutPanelToggleActive = true;
   clickedFeatureId!: string;
-  // Add these measurement properties
   currentMeasurement: string = '';
   currentArea: string = '';
   is25DEnabled: boolean = false;
@@ -90,6 +89,34 @@ export class MapComponent implements OnInit, OnChanges {
   volumeBaseHeight?: number;
   volumePolygonGeoJSON?: Feature<Polygon>;
   volumeResult: any;
+
+  private toBool(v: any): boolean {
+    // handles: true/false, 1/0, "1"/"0", "true"/"false", null/undefined
+    if (v === true || v === false) return v;
+    if (v === 1 || v === 0) return v === 1;
+    if (typeof v === 'string') {
+      const s = v.trim().toLowerCase();
+      if (s === 'true' || s === '1') return true;
+      if (s === 'false' || s === '0' || s === '') return false;
+    }
+    return Boolean(v);
+  }
+
+  private reapplyUiStateToMap(): void {
+    // Apply visibility toggles AFTER layers exist
+    if (this.layerVisibility?.length) {
+      this.toggleVisibility(this.layerVisibility);
+    }
+    if (this.layerPaintChange?.length) {
+      this.changeLayerColor(this.layerPaintChange);
+    }
+    if (this.showLandmarks) {
+      this.toggleMarkersAndNavigation();
+    }
+    if (this.directions) {
+      this.showRoute();
+    }
+  }
 
   onBaseHeightChange(value: any) {
     this.volumeBaseHeight = value !== null ? Number(value) : undefined;
@@ -133,6 +160,7 @@ export class MapComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     mapboxgl.accessToken = environment.mapBox.accessToken;
+
     console.log('✅ mapConfig.streetUrl:', this.mapConfig?.streetUrl);
     console.log('✅ mapConfig.satelliteUrl:', this.mapConfig?.satelliteUrl);
     console.log('✅ styleType:', this.styleType);
@@ -142,7 +170,7 @@ export class MapComponent implements OnInit, OnChanges {
         ? this.mapConfig?.streetUrl
         : this.mapConfig?.satelliteUrl,
     );
-    // console.log('🗝️ Mapbox token:', mapboxgl.accessToken);
+
     this.map = new mapboxgl.Map({
       container: 'map',
       style:
@@ -155,11 +183,11 @@ export class MapComponent implements OnInit, OnChanges {
       center: [this.mapConfig.longitude, this.mapConfig.latitude],
       attributionControl: false,
     });
+
     this.map.on('draw.create', (e) => {
       if (this.activeTool !== 'volume') {
-        return; // 🔒 isolation
+        return;
       }
-
       this.onVolumePolygonCreated(e);
     });
 
@@ -218,11 +246,13 @@ export class MapComponent implements OnInit, OnChanges {
 
     console.log('⛏️ isMiningProject in MAP:', this.isMiningProject);
   }
+
   public resize(): void {
     try {
       this.map?.resize();
     } catch {}
   }
+
   onStyleTypeChange() {
     this.streetToggleActive = !this.streetToggleActive;
     if (this.styleType === 'Street') {
@@ -234,7 +264,6 @@ export class MapComponent implements OnInit, OnChanges {
       if (layer.hasOwnProperty('layout')) {
       }
     });
-    // console.log(this.layersToBePreserved);
     this.reloadMap();
   }
 
@@ -255,10 +284,12 @@ export class MapComponent implements OnInit, OnChanges {
       this.addAllMapLayers();
       this.addAllLandmarks();
       this.addControls();
-      //this.setupMeasurementEvents();
       this.listenToMouseEvents();
       this.mapService.setMapLoaded(true);
       this.applyTerrain(this.enableTerrain);
+
+      // ✅ important
+      this.reapplyUiStateToMap();
     });
   }
 
@@ -266,6 +297,7 @@ export class MapComponent implements OnInit, OnChanges {
     this.layerNames = this.mapConfig.sources
       .flatMap((source) => source.layers || [])
       .map((layer) => this.getLayerName(layer));
+
     this.map.on('click', this.layerNames, this.onMouseEventFn);
     this.map.on('mousemove', this.layerNames, this.onMouseEventFn);
     this.map.on('mouseleave', this.layerNames, this.onMouseEventFn);
@@ -301,7 +333,6 @@ export class MapComponent implements OnInit, OnChanges {
           this.clickedFeatureId = ft.id + '';
         }
       }
-      // To add any styles on mouse click
     }
     this.mapMouseEv.emit(event);
   }
@@ -313,12 +344,14 @@ export class MapComponent implements OnInit, OnChanges {
       this.addAllLandmarks();
       this.addControls();
       this.mapService.setMapLoaded(true);
+
+      // ✅ important
+      this.reapplyUiStateToMap();
     });
   }
 
   private addAllMapSources() {
     this.mapConfig.sources.forEach((source) => {
-      // console.log('📦 Loading source:', source.name, 'Type:', source.dataType);
       if (source.dataType == 'vector' || source.dataType == 'raster') {
         if (!this.map.getSource(source.name)) {
           this.map.addSource(source.name, {
@@ -328,7 +361,6 @@ export class MapComponent implements OnInit, OnChanges {
         }
       }
     });
-    // this.addGoogleMapSources();
   }
 
   private addAllMapLayers() {
@@ -336,7 +368,6 @@ export class MapComponent implements OnInit, OnChanges {
     let vectorLayers: { priority: number; layer: AnyLayer }[] = [];
 
     this.mapConfig.sources.forEach((source) => {
-      //----------------------------ratser tilesets-----------------------
       if (source.dataType === 'raster') {
         let rasterLayer: RasterLayer = {
           id: source.name,
@@ -360,7 +391,9 @@ export class MapComponent implements OnInit, OnChanges {
                 source: source.name,
                 'source-layer': layer.name,
                 layout: {
-                  visibility: layer.visibility ? 'visible' : 'none',
+                  visibility: this.toBool(layer.visibility)
+                    ? 'visible'
+                    : 'none',
                 },
                 paint: {
                   'line-color': layer.topography?.color,
@@ -378,11 +411,17 @@ export class MapComponent implements OnInit, OnChanges {
                 source: source.name,
                 'source-layer': layer.name,
                 layout: {
-                  visibility: layer.visibility ? 'visible' : 'none',
+                  visibility: this.toBool(layer.visibility)
+                    ? 'visible'
+                    : 'none',
+                  // keep as-is; if attribute missing, it will show blank text (still ok)
                   'text-field': ['format', ['get', layer.attribute]],
                   'text-size': 10,
                   'text-justify': 'auto',
                   'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                  // help avoid “disappears due to collision” in dense areas
+                  'text-allow-overlap': true,
+                  'text-ignore-placement': true,
                 },
               };
               vectorLayers.push({
@@ -390,20 +429,21 @@ export class MapComponent implements OnInit, OnChanges {
                 layer: wayPointsLayer,
               });
             } else if (layer.topography?.vectorType === 'symbol') {
+              // This block is intended for parcel labels only.
+              // IMPORTANT: It must NOT be affected by toggleVisibility filters except the parcel/village filter.
               let parcelLabelLayer: AnyLayer = {
                 id: layerName,
                 type: 'symbol',
                 source: source.name,
                 'source-layer': source.name,
-                // <-- exact tileset layer name
-
                 layout: {
-                  visibility: layer.visibility ? 'visible' : 'none',
-                  'text-field': ['get', 'Parcel_num'], // <-- exact GeoJSON field
+                  visibility: this.toBool(layer.visibility)
+                    ? 'visible'
+                    : 'none',
+                  'text-field': ['get', 'Parcel_num'],
                   'text-size': 11,
                   'text-allow-overlap': true,
                 },
-
                 paint: {
                   'text-color': '#000',
                   'text-halo-color': '#fff',
@@ -420,7 +460,9 @@ export class MapComponent implements OnInit, OnChanges {
                 const lineLayer: AnyLayer = {
                   id: layerName,
                   layout: {
-                    visibility: layer.visibility ? 'visible' : 'none',
+                    visibility: this.toBool(layer.visibility)
+                      ? 'visible'
+                      : 'none',
                     'line-join': 'round',
                     'line-cap': 'round',
                   },
@@ -440,7 +482,9 @@ export class MapComponent implements OnInit, OnChanges {
                 const circleLayer: AnyLayer = {
                   id: layerName,
                   layout: {
-                    visibility: layer.visibility ? 'visible' : 'none',
+                    visibility: this.toBool(layer.visibility)
+                      ? 'visible'
+                      : 'none',
                   },
                   source: source.name,
                   type: 'circle',
@@ -465,7 +509,9 @@ export class MapComponent implements OnInit, OnChanges {
                 const fillLayer: AnyLayer = {
                   id: layerName,
                   layout: {
-                    visibility: layer.visibility ? 'visible' : 'none',
+                    visibility: this.toBool(layer.visibility)
+                      ? 'visible'
+                      : 'none',
                   },
                   source: source.name,
                   type: 'fill',
@@ -485,6 +531,7 @@ export class MapComponent implements OnInit, OnChanges {
         }
       }
     });
+
     rasterLayers.sort((a, b) => a.priority - b.priority);
     vectorLayers.sort((a, b) => a.priority - b.priority);
 
@@ -496,18 +543,15 @@ export class MapComponent implements OnInit, OnChanges {
     this.markers = [];
     if (this.mapConfig && this.mapConfig.landmarks) {
       for (let landmark of this.mapConfig.landmarks) {
-        // create a HTML element for each landmark
         const el = document.createElement('div');
         el.className = 'marker';
-        // make a marker for each feature and add it to the map
         this.markers.push(
           new mapboxgl.Marker(el)
             .setLngLat([landmark.longitude, landmark.latitude])
             .setPopup(
-              new mapboxgl.Popup({ offset: 25 }) // add popups
-                .setHTML(
-                  `<div class="text-center" ><h5 class="my-2">${landmark.name}</h5><p class="mb-1">${landmark.description}</p></div>`,
-                ),
+              new mapboxgl.Popup({ offset: 25 }).setHTML(
+                `<div class="text-center" ><h5 class="my-2">${landmark.name}</h5><p class="mb-1">${landmark.description}</p></div>`,
+              ),
             ),
         );
       }
@@ -559,6 +603,7 @@ export class MapComponent implements OnInit, OnChanges {
           map.getLayer(this.getLayerName(layer))?.visibility === 'visible'
         );
       });
+
     visibleLayers.forEach((layer) => {
       this.map.setFilter(this.getLayerName(layer), undefined);
     });
@@ -577,6 +622,7 @@ export class MapComponent implements OnInit, OnChanges {
           map.getLayer(this.getLayerName(layer))?.visibility === 'visible'
         );
       });
+
     if (visibleLayers && visibleLayers.length) {
       const attrMap = visibleLayers.reduce((group, layer) => {
         group.set(layer.attribute, [
@@ -585,14 +631,14 @@ export class MapComponent implements OnInit, OnChanges {
         ]);
         return group;
       }, new Map());
-      // filters Ex: ['all', [in, 'facing', 'East', 'West', 'South], ['saleStatus', 'Available', 'Sold']]
+
       const filters = [
         'all',
         ...[...attrMap.entries()].map((entry) => ['in', entry[0], ...entry[1]]),
       ];
 
       visibleLayers.forEach((layer) => {
-        this.map.setFilter(this.getLayerName(layer), filters);
+        this.map.setFilter(this.getLayerName(layer), filters as any);
       });
     }
   }
@@ -601,13 +647,11 @@ export class MapComponent implements OnInit, OnChanges {
     if (this.showLandmarks) {
       if (this.markers && this.markers.length) {
         this.markers.forEach((marker) => marker.addTo(this.map));
-        // the zoom level and center should be set to make all the landmarks visible in the map
         this.setBounds(
           this.markers.map((marker) => marker.getLngLat()),
           120,
         );
       }
-      // enable click on points to allow navigation.
       this.map.on('contextmenu', this.onMouseEventFn);
       this.navigationEnabled = true;
     } else {
@@ -630,7 +674,6 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   private disableNavigation() {
-    // disable navigation
     if (this.map) {
       this.removeRoutesOnMap();
       if (this.navigationEnabled) {
@@ -639,6 +682,7 @@ export class MapComponent implements OnInit, OnChanges {
       }
     }
   }
+
   private removeRoutesOnMap() {
     if (this.map) {
       if (this.map.getSource('route')) {
@@ -666,6 +710,7 @@ export class MapComponent implements OnInit, OnChanges {
         },
       ],
     } as GeoJSON.FeatureCollection;
+
     if (this.map.getLayer('end')) {
       (this.map.getSource('end') as GeoJSONSource).setData(end);
     } else {
@@ -699,14 +744,13 @@ export class MapComponent implements OnInit, OnChanges {
           coordinates: coords,
         },
       } as GeoJSON.Feature;
+
       const endPoint = coords[coords.length - 1];
       this.addEndPointToMap(new LngLat(endPoint[0], endPoint[1]));
-      // if the route already exists on the map, we'll reset it using setData
+
       if (this.map.getSource('route')) {
         (this.map.getSource('route') as GeoJSONSource).setData(geoJson);
-      }
-      // otherwise, we'll make a new request
-      else {
+      } else {
         this.map.addLayer({
           id: 'route',
           type: 'line',
@@ -725,6 +769,7 @@ export class MapComponent implements OnInit, OnChanges {
           },
         });
       }
+
       const allCoords = this.directions.routes[0].geometry.coordinates.map(
         (coordinate) => new LngLat(coordinate[0], coordinate[1]),
       );
@@ -763,44 +808,75 @@ export class MapComponent implements OnInit, OnChanges {
     this.btnEv.emit(AppConstants.TOGGLE_LAYOUT_PANEL_VISIBILITY);
   }
 
+  /**
+   * ✅ FIXED: This function was breaking labels by applying a V_Name filter to ALL symbol layers.
+   * Now it:
+   * 1) Toggles visibility only for existing layers.
+   * 2) Applies the V_Name village filter ONLY to parcel label layers (not waypoints/elevation/etc).
+   * 3) Builds activeVillages from only "village polygon" toggles (best-effort).
+   */
   private toggleVisibility(toggleItems: Toggle[]) {
+    // 1) Apply visibility toggles safely
     toggleItems.forEach((toggleItem) => {
       const visibility = toggleItem.checked ? 'visible' : 'none';
 
-      // Village polygon layer
-      this.map.setLayoutProperty(toggleItem.id, 'visibility', visibility);
-
-      // Parcel label layer (single layer for all villages)
+      // Only apply if the layer exists (prevents errors during style reload)
+      if (this.map.getLayer(toggleItem.id)) {
+        this.map.setLayoutProperty(toggleItem.id, 'visibility', visibility);
+      }
     });
+
     // --------------------
-    // Handle parcel numbers dynamically by village
+    // 2) Apply parcel-number filter by village ONLY to parcel label layers
     // --------------------
 
+    // Identify parcel label layers ONLY (we do NOT want to include waypoints/elevation symbol layers)
     const parcelLabelLayers = this.mapConfig.sources
       .flatMap((src) => src.layers || [])
-      .filter((l) => l.topography?.vectorType === 'symbol')
+      .filter((l) => {
+        // Best-effort identification:
+        // - It's a symbol layer
+        // - It is NOT the "waypoints" layer
+        // - It is likely parcel label by attribute or known field usage
+        if (l.topography?.vectorType !== 'symbol') return false;
+        if (l.name === 'waypoints') return false;
+
+        // If your config sets attribute for parcel labels, prefer that.
+        // Fallback: keep it as symbol labels except waypoints (but still safe because we won't force visibility).
+        return true;
+      })
       .map((l) => this.getLayerName(l));
 
+    // Build activeVillages only from toggles that represent village polygon layers.
+    // Best-effort: if metaData has info, use it; otherwise use heuristic: layer id exists AND is a fill layer.
     const activeVillages = toggleItems
       .filter((t) => t.checked)
+      .filter((t) => {
+        const lyr = this.map.getLayer(t.id) as any;
+        if (!lyr) return false;
+        return lyr.type === 'fill'; // village polygons are fill
+      })
       .map((t) => t.id);
 
     parcelLabelLayers.forEach((labelLayerId) => {
       if (!this.map.getLayer(labelLayerId)) return;
 
+      // Apply/clear filter only. Do NOT override user visibility here.
       if (activeVillages.length > 0) {
-        this.map.setLayoutProperty(labelLayerId, 'visibility', 'visible');
-
         this.map.setFilter(labelLayerId, [
           'in',
           ['get', 'V_Name'],
           ['literal', activeVillages],
-        ]);
+        ] as any);
       } else {
-        this.map.setLayoutProperty(labelLayerId, 'visibility', 'none');
+        // No active villages: clear filter (do NOT hide the labels globally)
+        this.map.setFilter(labelLayerId, undefined);
       }
     });
 
+    // --------------------
+    // 3) Existing classification filter logic (unchanged)
+    // --------------------
     const isFilterToggle = toggleItems.some(
       (toggleItem) =>
         toggleItem.metaData?.groupType === AppConstants.CLASSIFY_BY_FILTER,
@@ -864,12 +940,14 @@ export class MapComponent implements OnInit, OnChanges {
       this.currentArea = '';
       this.removeControls();
       this.removeMouseEventListeners();
+
       this.map.setStyle(
         this.styleType === 'Street'
           ? this.mapConfig.streetUrl
           : this.mapConfig.satelliteUrl,
         { diff: false },
       );
+
       this.resetMapLocation();
       this.listenToStyleData();
       this.listenToMouseEvents();
@@ -877,15 +955,15 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   private addControls() {
-    this.map.addControl(DRAW_CTRL);
+    // this.map.addControl(DRAW_CTRL);
     this.map.addControl(NAVIGATION_CTRL);
 
-    // ❌ Disable draw by default
+    // Draw is disabled for now
     DRAW_CTRL.changeMode('simple_select');
   }
 
   private removeControls() {
-    this.map.removeControl(DRAW_CTRL);
+    // this.map.removeControl(DRAW_CTRL);
     this.map.removeControl(NAVIGATION_CTRL);
   }
 
@@ -925,7 +1003,6 @@ export class MapComponent implements OnInit, OnChanges {
 
   private applyTerrain(on: boolean) {
     if (on) {
-      // remove 2.5D before enabling terrain
       if (this.map.getLayer(EXTRUSION_LAYER_ID)) {
         this.map.removeLayer(EXTRUSION_LAYER_ID);
       }
@@ -937,14 +1014,12 @@ export class MapComponent implements OnInit, OnChanges {
       this.map.setTerrain({ source: 'mapbox-dem', exaggeration: 6 });
       this.addSkyLayerIfMissing();
 
-      // If user was top-down, give some tilt so 3D is visible
       const pitch = this.map.getPitch();
       if (pitch < 5) this.map.easeTo({ pitch: 70, duration: 400 });
     } else {
       if (this.map.getLayer('sky')) this.map.removeLayer('sky');
       this.map.setTerrain(null);
 
-      // ✅ FLATTEN TO TRUE 2D, KEEP SAME CENTER/ZOOM/BEARING
       const state = {
         center: this.map.getCenter(),
         zoom: this.map.getZoom(),
@@ -952,56 +1027,42 @@ export class MapComponent implements OnInit, OnChanges {
         pitch: 0,
         duration: 300,
       };
-      this.map.stop(); // cancel any ongoing animation
-      this.map.easeTo(state); // go top-down
+      this.map.stop();
+      this.map.easeTo(state);
     }
   }
+
   private apply25D(on: boolean) {
-    //private apply25D(on: boolean) {
     if (!this.map || !this.map.isStyleLoaded()) return;
 
     const TILESET_ID = 'rayapati49.swarnabhoomi_heights';
     const SOURCE_LAYER = 'Swarnabhoomi_Heights';
 
     if (on) {
-      // 1️⃣ Ensure flat terrain
       this.map.setTerrain(null);
-
-      // 2️⃣ Add source (once)
       this.addExtrusionSource(TILESET_ID);
-
-      // 3️⃣ Add extrusion layer (once)
       this.addExtrusionLayer(SOURCE_LAYER);
 
-      this.addBuildingLabels(
-        EXTRUSION_SOURCE_ID,
-        SOURCE_LAYER,
-        'Name', // 👈 building name field
-      );
+      this.addBuildingLabels(EXTRUSION_SOURCE_ID, SOURCE_LAYER, 'Name');
 
-      // 4️⃣ Tilt map for 2.5D view
       this.map.easeTo({
         pitch: 60,
         bearing: 0,
         duration: 700,
       });
     } else {
-      // 1️⃣ REMOVE LABELS FIRST
       if (this.map.getLayer(BUILDING_LABEL_LAYER_ID)) {
         this.map.removeLayer(BUILDING_LABEL_LAYER_ID);
       }
 
-      // 2️⃣ REMOVE EXTRUSION LAYER
       if (this.map.getLayer(EXTRUSION_LAYER_ID)) {
         this.map.removeLayer(EXTRUSION_LAYER_ID);
       }
 
-      // 3️⃣ REMOVE SOURCE LAST
       if (this.map.getSource(EXTRUSION_SOURCE_ID)) {
         this.map.removeSource(EXTRUSION_SOURCE_ID);
       }
 
-      // 4️⃣ Back to true 2D
       this.map.easeTo({
         pitch: 0,
         bearing: 0,
@@ -1009,14 +1070,6 @@ export class MapComponent implements OnInit, OnChanges {
       });
     }
   }
-
-  /*
-  private setupMeasurementEvents() {
-    this.map.on('draw.create', this.updateMeasurements.bind(this));
-    this.map.on('draw.update', this.updateMeasurements.bind(this));
-    this.map.on('draw.delete', this.updateMeasurements.bind(this));
-  }
-*/
 
   private updateMeasurements() {
     this.removeMeasurements();
@@ -1159,6 +1212,7 @@ export class MapComponent implements OnInit, OnChanges {
       this.map.removeSource('measurements');
     }
   }
+
   private addExtrusionSource(tilesetId: string) {
     if (this.map.getSource(EXTRUSION_SOURCE_ID)) return;
 
@@ -1167,6 +1221,7 @@ export class MapComponent implements OnInit, OnChanges {
       url: 'mapbox://' + tilesetId,
     });
   }
+
   private addExtrusionLayer(sourceLayer: string) {
     if (this.map.getLayer(EXTRUSION_LAYER_ID)) return;
 
@@ -1183,12 +1238,12 @@ export class MapComponent implements OnInit, OnChanges {
           duration: 800,
           delay: 0,
         },
-
         'fill-extrusion-base': 0,
         'fill-extrusion-opacity': 0.9,
       },
     });
   }
+
   private addBuildingLabels(
     sourceId: string,
     sourceLayer: string,
@@ -1203,7 +1258,7 @@ export class MapComponent implements OnInit, OnChanges {
       'source-layer': sourceLayer,
       minzoom: 15,
       layout: {
-        'text-field': ['get', nameField], // 👈 building name
+        'text-field': ['get', nameField],
         'text-size': 12,
         'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
         'text-anchor': 'center',
@@ -1225,11 +1280,10 @@ export class MapComponent implements OnInit, OnChanges {
     }
 
     this.activeTool = 'volume';
-
     console.log('🪨 Volume Assessment tool activated');
 
-    DRAW_CTRL.deleteAll();
-    DRAW_CTRL.changeMode('draw_polygon');
+    // DRAW_CTRL.deleteAll();
+    // DRAW_CTRL.changeMode('draw_polygon');
 
     this.prepareVolumeLayers();
   }
@@ -1269,10 +1323,10 @@ export class MapComponent implements OnInit, OnChanges {
 
     console.log('📐 Volume polygon captured', feature);
 
-    // Update volume layer
     const source = this.map.getSource(
       this.VOLUME_SOURCE_ID,
     ) as mapboxgl.GeoJSONSource;
+
     source.setData({
       type: 'FeatureCollection',
       features: [feature],
@@ -1286,10 +1340,8 @@ export class MapComponent implements OnInit, OnChanges {
     }
 
     const formData = new FormData();
-
-    // 🔥 MUST MATCH BACKEND MULTER NAMES
     formData.append('xyz', this.xyzFile);
-    // formData.append('geojson', this.geojsonFile);
+
     formData.append(
       'polygon',
       JSON.stringify(this.volumePolygonGeoJSON!.geometry),

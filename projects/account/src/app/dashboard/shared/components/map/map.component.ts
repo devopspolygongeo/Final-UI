@@ -148,10 +148,58 @@ export class MapComponent implements OnInit {
     }
   }
 
+  // private listenOnLoad() {
+  //   this.map.on('load', () => {
+  //     this.addAllMapSources();
+  //     this.addAllMapLayers();
+
+  //     this.addAllLandmarks();
+  //     this.addControls();
+  //     this.listenToMouseEvents();
+  //     this.mapService.setMapLoaded(true);
+  //   });
+  // }
+
   private listenOnLoad() {
     this.map.on('load', () => {
       this.addAllMapSources();
       this.addAllMapLayers();
+
+      // STEP-2 DEBUG: verify waypoint layer exists + has features
+      setTimeout(() => {
+        try {
+          const wpLayerId =
+            this.layerNames?.find((id) => id.includes('waypoints')) ||
+            '<<not-found>>';
+          console.log(
+            '✅ style loaded, zoom:',
+            this.map.getZoom(),
+            'center:',
+            this.map.getCenter(),
+          );
+          console.log('🧩 waypoint layer id guess:', wpLayerId);
+          console.log('🧩 has waypoint layer:', !!this.map.getLayer(wpLayerId));
+          console.log('🧩 has waypoint source:', this.map.getStyle().sources);
+
+          // IMPORTANT: this only works if the layer exists
+          if (this.map.getLayer(wpLayerId)) {
+            const feats = this.map.queryRenderedFeatures({
+              layers: [wpLayerId],
+            });
+            console.log('📍 waypoint rendered feature count:', feats.length);
+            console.log('📍 sample waypoint feature:', feats[0]);
+          } else {
+            console.log('❌ waypoint layer not found in style layers list');
+            console.log(
+              'All layer ids:',
+              this.map.getStyle().layers?.map((l) => l.id),
+            );
+          }
+        } catch (e) {
+          console.error('❌ waypoint debug failed:', e);
+        }
+      }, 800);
+
       this.addAllLandmarks();
       this.addControls();
       this.listenToMouseEvents();
@@ -712,12 +760,12 @@ export class MapComponent implements OnInit {
   }
 
   private addControls() {
-    this.map.addControl(DRAW_CTRL);
+    // this.map.addControl(DRAW_CTRL);
     this.map.addControl(NAVIGATION_CTRL);
   }
 
   private removeControls() {
-    this.map.removeControl(DRAW_CTRL);
+    // this.map.removeControl(DRAW_CTRL);
     this.map.removeControl(NAVIGATION_CTRL);
   }
 
