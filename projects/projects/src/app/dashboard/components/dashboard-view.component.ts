@@ -55,7 +55,7 @@ export class DashboardViewComponent implements OnChanges {
 
   @Input() errorMsg: string = '';
 
-   @Input() isMiningProject!: boolean;
+  @Input() isMiningProject!: boolean;
 
   @Output() projectChangeEv: EventEmitter<Project> =
     new EventEmitter<Project>();
@@ -79,12 +79,10 @@ export class DashboardViewComponent implements OnChanges {
   isSidebarCollapsed: boolean = false;
 
   buildings3DConfig: {
-  tilesetId: string;
-  layerName: string;
-  heightField?: string;
-} | null = null;
-
-  
+    tilesetId: string;
+    layerName: string;
+    heightField?: string;
+  } | null = null;
 
   public logoClass: string = 'logo';
   public userEmail: string = '';
@@ -132,7 +130,6 @@ export class DashboardViewComponent implements OnChanges {
     private bottomSheet: MatBottomSheet,
     private authService: AuthService,
     private dashboardService: DashboardService,
-    
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -204,12 +201,11 @@ export class DashboardViewComponent implements OnChanges {
   }
 
   onProjectChange(project: Project) {
-  this.projectChangeEv.emit(project);
+    this.projectChangeEv.emit(project);
 
-  // ✅ LOAD 2.5D DATA FOR PROJECT
-  this.loadBuildings3D(project.id);
-}
-
+    // ✅ LOAD 2.5D DATA FOR PROJECT
+    this.loadBuildings3D(project.id);
+  }
 
   onSurveyChange(survey: Survey) {
     this.surveyChangeEv.emit(survey);
@@ -261,15 +257,24 @@ export class DashboardViewComponent implements OnChanges {
 
   updateMapConfig() {
     const streetMap = this.view.mapStyles.find(
-      (style) => style.id == this.selectedProject.streetMapId
+      (style) => style.id == this.selectedProject.streetMapId,
     );
     const satelliteMap = this.view.mapStyles.find(
-      (style) => style.id == this.selectedProject.satelliteMapId
+      (style) => style.id == this.selectedProject.satelliteMapId,
     );
+    console.log(
+      'selectedProject.streetMapId:',
+      this.selectedProject.streetMapId,
+    );
+    console.log(
+      'available mapStyles ids:',
+      this.view.mapStyles.map((s) => s.id),
+    );
+    console.log('streetMap found:', streetMap);
     this.mapConfig = {
       streetUrl: streetMap
         ? streetMap.url
-        : AppConstants.DEFAULT_SATELITE_MAP_URL,
+        : AppConstants.DEFAULT_STREET_MAP_URL,
       satelliteUrl: satelliteMap
         ? satelliteMap.url
         : AppConstants.DEFAULT_SATELITE_MAP_URL,
@@ -306,7 +311,7 @@ export class DashboardViewComponent implements OnChanges {
       this.hoverDetails = [];
       hoverAttributes.forEach((attr) => {
         const prop = properties?.find(
-          (property) => property && property.hasOwnProperty(attr)
+          (property) => property && property.hasOwnProperty(attr),
         );
         if (prop && prop[attr] && prop[attr] != 'na') {
           this.hoverDetails.push({
@@ -325,7 +330,7 @@ export class DashboardViewComponent implements OnChanges {
         ?.map((feature) => feature.properties)
         ?.find(
           (prop) =>
-            prop && clickAttributes.some((attr) => prop.hasOwnProperty(attr))
+            prop && clickAttributes.some((attr) => prop.hasOwnProperty(attr)),
         );
       if (property) this.selectedPlot = property as PlotDetails;
     }
@@ -369,44 +374,42 @@ export class DashboardViewComponent implements OnChanges {
     // Ensure previously selected nav becomes visible again
     if (this.selectedNav) {
       this.navItems.forEach(
-        (nav) => (nav.active = nav.name === this.selectedNav.name)
+        (nav) => (nav.active = nav.name === this.selectedNav.name),
       );
     }
   }
   set2D(): void {
-  this.is25D = false;
+    this.is25D = false;
 
-  if (this.is3D) {
-    this.toggle3D();
+    if (this.is3D) {
+      this.toggle3D();
+    }
   }
-}
-set3D(): void {
-  this.is25D = false;
+  set3D(): void {
+    this.is25D = false;
 
-  if (!this.is3D) {
-    this.toggle3D();
+    if (!this.is3D) {
+      this.toggle3D();
+    }
   }
-}
-set25D(): void {
-  // Ensure full 3D is OFF
-  if (this.is3D) {
-    this.toggle3D();
+  set25D(): void {
+    // Ensure full 3D is OFF
+    if (this.is3D) {
+      this.toggle3D();
+    }
+
+    this.is25D = true;
   }
-
-  this.is25D = true;
-}
-loadBuildings3D(projectId: number): void {
-  this.dashboardService.getBuildings3DSource(projectId).subscribe({
-    next: (config) => {
-      console.log('🏗️ 2.5D config loaded:', config);
-      this.buildings3DConfig = config;
-    },
-    error: () => {
-      console.warn('No 2.5D config for this project');
-      this.buildings3DConfig = null;
-    },
-  });
-}
-
-
+  loadBuildings3D(projectId: number): void {
+    this.dashboardService.getBuildings3DSource(projectId).subscribe({
+      next: (config) => {
+        console.log('🏗️ 2.5D config loaded:', config);
+        this.buildings3DConfig = config;
+      },
+      error: () => {
+        console.warn('No 2.5D config for this project');
+        this.buildings3DConfig = null;
+      },
+    });
+  }
 }
