@@ -88,7 +88,7 @@ export class DashboardComponent {
       this.surveys = [survey];
 
       // 5) Mining flag (keep same logic as existing flow)
-      this.isMiningProject = project.categoryId === 30;
+      this.isMiningProject = project.categoryId === 3;
 
       // 6) Load survey-scoped datasets using existing working method
       await this.onSurveyChange(survey);
@@ -128,7 +128,7 @@ export class DashboardComponent {
 
   async onProjectChange(project: Project) {
     if (project) {
-      this.isMiningProject = project.categoryId === 30;
+      this.isMiningProject = project.categoryId === 3;
       this.surveys = await firstValueFrom(
         this.dashboardService.getSurveys(project.id),
       );
