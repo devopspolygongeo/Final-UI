@@ -58,7 +58,8 @@
     <!-- ================= MAPBOX (BASE LAYER) ================= -->
     <app-map *ngIf="mapConfig" [mapConfig]="mapConfig" [layerVisibility]="layerVisibility"
       [layerPaintChange]="layerPaintChange" [showLandmarks]="showLandmarks" [directions]="directions"
-      [enableTerrain]="is3D" [enable25D]="is25D" (btnEv)="onMapBtnEvents($event)" (mapMouseEv)="mapMouseEvents($event)" [isMiningProject]="isMiningProject">
+      [enableTerrain]="is3D" [enable25D]="is25D" (btnEv)="onMapBtnEvents($event)" (mapMouseEv)="mapMouseEvents($event)"
+      [isMiningProject]="isMiningProject">
     </app-map>
 
 
@@ -104,7 +105,8 @@
       </mat-select>
     </mat-form-field>
 
-    <div class="user-account-menu">
+    <!-- ✅ Hide profile/avatar menu for public share links -->
+    <div class="user-account-menu" *ngIf="!isPublicShare">
       <button mat-icon-button [matMenuTriggerFor]="userMenu" class="account-button">
         <div class="account-avatar">
           {{ getUserInitial() }}
@@ -120,39 +122,24 @@
 
   <!-- ================= 2D / 3D TOGGLE (MOVED OUT) ================= -->
   <!-- ================= 2D / 2.5D / 3D TOGGLE ================= -->
-<div class="view-mode-toggle" role="group" aria-label="Map view mode">
+  <div class="view-mode-toggle" role="group" aria-label="Map view mode">
 
-  <!-- 2D -->
-  <button
-    type="button"
-    class="segbtn"
-    [class.active]="!is3D && !is25D"
-    (click)="set2D()"
-    title="2D">
-    2D
-  </button>
+    <!-- 2D -->
+    <button type="button" class="segbtn" [class.active]="!is3D && !is25D" (click)="set2D()" title="2D">
+      2D
+    </button>
 
-  <!-- 2.5D (NEW) -->
-  <button
-    type="button"
-    class="segbtn"
-    [class.active]="is25D" 
-    (click)="set25D()"
-    title="2.5D">
-    2.5D
-  </button>
+    <!-- 2.5D (NEW) -->
+    <button type="button" class="segbtn" [class.active]="is25D" (click)="set25D()" title="2.5D">
+      2.5D
+    </button>
 
-  <!-- 3D -->
-  <button
-    type="button"
-    class="segbtn"
-    [class.active]="is3D"
-    (click)="set3D()"
-    title="3D">
-    3D
-  </button>
+    <!-- 3D -->
+    <button type="button" class="segbtn" [class.active]="is3D" (click)="set3D()" title="3D">
+      3D
+    </button>
 
-</div>
+  </div>
 
 
 </mat-sidenav-container>

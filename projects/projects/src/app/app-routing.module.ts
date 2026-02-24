@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { DashboardComponent } from './dashboard/pages/dashboard.component';
 
 const routes: Routes = [
   // Default route → login
@@ -9,8 +10,14 @@ const routes: Routes = [
     pathMatch: 'full',
   },
 
+  // ✅ Public share route (no login)
+  {
+    path: 'share/:token',
+    component: DashboardComponent,
+  },
+
   // Login module
- /*{
+  /*{
     path: 'login',
     loadChildren: () =>
       import('./login/login.module').then(
@@ -22,9 +29,7 @@ const routes: Routes = [
   {
     path: 'admin-dashboard',
     loadChildren: () =>
-      import('./admin-ui/admin-ui.module').then(
-        (m) => m.AdminUiModule
-      ),
+      import('./admin-ui/admin-ui.module').then((m) => m.AdminUiModule),
   },
 
   // Plotview Account UI
@@ -32,7 +37,7 @@ const routes: Routes = [
     path: 'plotview-account-ui',
     loadChildren: () =>
       import('./plotview-account-ui/plotview-account-ui.module').then(
-        (m) => m.PlotviewAccountUiModule
+        (m) => m.PlotviewAccountUiModule,
       ),
   },
 

@@ -87,6 +87,9 @@ export class DashboardViewComponent implements OnChanges {
   public logoClass: string = 'logo';
   public userEmail: string = '';
 
+  // ✅ Public share mode flag (added)
+  public isPublicShare: boolean = false;
+
   getUserInitial(): string {
     if (this.userEmail && this.userEmail.length > 0) {
       return this.userEmail.charAt(0).toUpperCase();
@@ -101,6 +104,9 @@ export class DashboardViewComponent implements OnChanges {
   };
 
   ngOnInit() {
+    // ✅ Detect public share mode from URL hash (added)
+    this.isPublicShare = window.location.hash.includes('#/share/');
+
     const userData = this.authService.getUser();
     if (userData && userData.email) {
       this.userEmail = userData.email;
