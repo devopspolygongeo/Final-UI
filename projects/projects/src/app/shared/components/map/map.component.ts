@@ -955,11 +955,11 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   private addControls() {
-    // this.map.addControl(DRAW_CTRL);
-    this.map.addControl(NAVIGATION_CTRL);
-
-    // Draw is disabled for now
-    DRAW_CTRL.changeMode('simple_select');
+    if (!this.map.hasControl(NAVIGATION_CTRL)) {
+      this.map.addControl(NAVIGATION_CTRL);
+    }
+    // Remove DRAW_CTRL.changeMode('simple_select');
+    // It crashes because DRAW_CTRL is not added to the map.
   }
 
   private removeControls() {
