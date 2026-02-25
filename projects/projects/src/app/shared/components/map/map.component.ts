@@ -77,6 +77,7 @@ export class MapComponent implements OnInit, OnChanges {
   map!: mapboxgl.Map;
   layersToBePreserved!: AnyLayer[];
   layerNames: string[] = [];
+  interactionLayerNames: string[] = []; // Track invisible interaction layers
   markers!: mapboxgl.Marker[];
   navigationEnabled = false;
   streetToggleActive = true;
@@ -91,7 +92,6 @@ export class MapComponent implements OnInit, OnChanges {
   volumeResult: any;
 
   private toBool(v: any): boolean {
-    // handles: true/false, 1/0, "1"/"0", "true"/"false", null/undefined
     if (v === true || v === false) return v;
     if (v === 1 || v === 0) return v === 1;
     if (typeof v === 'string') {
@@ -103,7 +103,6 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   private reapplyUiStateToMap(): void {
-    // Apply visibility toggles AFTER layers exist
     if (this.layerVisibility?.length) {
       this.toggleVisibility(this.layerVisibility);
     }
@@ -122,9 +121,7 @@ export class MapComponent implements OnInit, OnChanges {
     this.volumeBaseHeight = value !== null ? Number(value) : undefined;
   }
 
-  // ===== Volume file inputs =====
   xyzFile: File | null = null;
-  //geojsonFile: File | null = null;
 
   onXyzFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -133,14 +130,6 @@ export class MapComponent implements OnInit, OnChanges {
       console.log('📁 XYZ file selected:', this.xyzFile.name);
     }
   }
-
-  /* onGeojsonFileSelect(event: Event): void {
-     const input = event.target as HTMLInputElement;
-     if (input.files && input.files.length > 0) {
-       this.geojsonFile = input.files[0];
-       console.log('📁 GeoJSON file selected:', this.geojsonFile.name);
-     }
-   } */
 
   private readonly VOLUME_SOURCE_ID = 'volume-boundary-source';
   private readonly VOLUME_LAYER_ID = 'volume-boundary-layer';
@@ -160,16 +149,6 @@ export class MapComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     mapboxgl.accessToken = environment.mapBox.accessToken;
-
-    console.log('✅ mapConfig.streetUrl:', this.mapConfig?.streetUrl);
-    console.log('✅ mapConfig.satelliteUrl:', this.mapConfig?.satelliteUrl);
-    console.log('✅ styleType:', this.styleType);
-    console.log(
-      '✅ chosen style:',
-      this.styleType == 'Street'
-        ? this.mapConfig?.streetUrl
-        : this.mapConfig?.satelliteUrl,
-    );
 
     this.map = new mapboxgl.Map({
       container: 'map',
@@ -243,8 +222,6 @@ export class MapComponent implements OnInit, OnChanges {
     ) {
       this.applyTerrain(true);
     }
-
-    // console.log('⛏️ isMiningProject in MAP:', this.isMiningProject);
   }
 
   public resize(): void {
@@ -287,8 +264,6 @@ export class MapComponent implements OnInit, OnChanges {
       this.listenToMouseEvents();
       this.mapService.setMapLoaded(true);
       this.applyTerrain(this.enableTerrain);
-
-      // ✅ important
       this.reapplyUiStateToMap();
     });
   }
@@ -298,9 +273,15 @@ export class MapComponent implements OnInit, OnChanges {
       .flatMap((source) => source.layers || [])
       .map((layer) => this.getLayerName(layer));
 
-    this.map.on('click', this.layerNames, this.onMouseEventFn);
-    this.map.on('mousemove', this.layerNames, this.onMouseEventFn);
-    this.map.on('mouseleave', this.layerNames, this.onMouseEventFn);
+    // Add interaction layers to the mouse event scope
+    const allClickableLayers = [
+      ...this.layerNames,
+      ...this.interactionLayerNames,
+    ];
+
+    this.map.on('click', this.onMouseEventFn);
+    this.map.on('mousemove', allClickableLayers, this.onMouseEventFn);
+    this.map.on('mouseleave', allClickableLayers, this.onMouseEventFn);
   }
 
   private onMouseEvent(event: MapLayerMouseEvent) {
@@ -309,6 +290,16 @@ export class MapComponent implements OnInit, OnChanges {
     } else if (event.type === AppConstants.MAP_MOUSE_LEAVE_EVENT) {
       this.map.getCanvas().style.cursor = '';
     } else if (event.type === AppConstants.MAP_MOUSE_LEFT_CLICK_EVENT) {
+      // FIX: Query the specific interaction layers. These layers are never
+      // filtered and never transparent, so they always catch the click.
+      const features = this.map.queryRenderedFeatures(event.point, {
+        layers: this.interactionLayerNames,
+      });
+
+      if (features.length > 0) {
+        event.features = features;
+      }
+
       if (this.mapConfig.enableHighlight) {
         if (event.features?.length) {
           const ftIndex = Math.max(
@@ -344,8 +335,6 @@ export class MapComponent implements OnInit, OnChanges {
       this.addAllLandmarks();
       this.addControls();
       this.mapService.setMapLoaded(true);
-
-      // ✅ important
       this.reapplyUiStateToMap();
     });
   }
@@ -366,6 +355,7 @@ export class MapComponent implements OnInit, OnChanges {
   private addAllMapLayers() {
     let rasterLayers: { priority: number; layer: AnyLayer }[] = [];
     let vectorLayers: { priority: number; layer: AnyLayer }[] = [];
+    this.interactionLayerNames = []; // Reset interaction layers
 
     this.mapConfig.sources.forEach((source) => {
       if (source.dataType === 'raster') {
@@ -410,15 +400,10 @@ export class MapComponent implements OnInit, OnChanges {
                 type: 'symbol',
                 source: source.name,
                 'source-layer': layer.name,
-
-                minzoom: 16, // ✅ SHOW LABELS ONLY WHEN ZOOMED IN
-
+                minzoom: 16,
                 layout: {
                   visibility: layer.visibility ? 'visible' : 'none',
-
                   'text-field': ['get', layer.attribute],
-
-                  // ✅ dynamic size based on zoom
                   'text-size': [
                     'interpolate',
                     ['linear'],
@@ -430,27 +415,20 @@ export class MapComponent implements OnInit, OnChanges {
                     20,
                     18,
                   ],
-
                   'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                   'text-anchor': 'center',
-
-                  // ✅ PREVENT OVERLAPPING TEXT
                   'text-allow-overlap': false,
                   'text-ignore-placement': false,
                 },
-
                 paint: {
                   'text-color': '#000000',
                 },
               };
-
               vectorLayers.push({
                 priority: layer.priority,
                 layer: wayPointsLayer,
               });
             } else if (layer.topography?.vectorType === 'symbol') {
-              // This block is intended for parcel labels only.
-              // IMPORTANT: It must NOT be affected by toggleVisibility filters except the parcel/village filter.
               let parcelLabelLayer: AnyLayer = {
                 id: layerName,
                 type: 'symbol',
@@ -470,7 +448,6 @@ export class MapComponent implements OnInit, OnChanges {
                   'text-halo-width': 1,
                 },
               };
-
               vectorLayers.push({
                 priority: layer.priority,
                 layer: parcelLabelLayer,
@@ -526,6 +503,28 @@ export class MapComponent implements OnInit, OnChanges {
                     source.name,
                   );
                 }
+
+                // FIX: Add a dedicated interaction layer for every plot fill
+                // This layer is permanent, unfiltered, and always has 0 opacity
+                // so it is invisible but clickable.
+                const interactionLayerId = layerName + '-interaction';
+                const interactionLayer: AnyLayer = {
+                  id: interactionLayerId,
+                  source: source.name,
+                  type: 'fill',
+                  'source-layer': source.name,
+                  layout: { visibility: 'visible' },
+                  paint: {
+                    'fill-color': '#000',
+                    'fill-opacity': 0, // Invisible but clickable
+                  },
+                };
+                vectorLayers.push({
+                  priority: layer.priority,
+                  layer: interactionLayer,
+                });
+                this.interactionLayerNames.push(interactionLayerId);
+
                 const fillLayer: AnyLayer = {
                   id: layerName,
                   layout: {
@@ -828,60 +827,34 @@ export class MapComponent implements OnInit, OnChanges {
     this.btnEv.emit(AppConstants.TOGGLE_LAYOUT_PANEL_VISIBILITY);
   }
 
-  /**
-   * ✅ FIXED: This function was breaking labels by applying a V_Name filter to ALL symbol layers.
-   * Now it:
-   * 1) Toggles visibility only for existing layers.
-   * 2) Applies the V_Name village filter ONLY to parcel label layers (not waypoints/elevation/etc).
-   * 3) Builds activeVillages from only "village polygon" toggles (best-effort).
-   */
   private toggleVisibility(toggleItems: Toggle[]) {
-    // 1) Apply visibility toggles safely
     toggleItems.forEach((toggleItem) => {
       const visibility = toggleItem.checked ? 'visible' : 'none';
-
-      // Only apply if the layer exists (prevents errors during style reload)
       if (this.map.getLayer(toggleItem.id)) {
         this.map.setLayoutProperty(toggleItem.id, 'visibility', visibility);
       }
     });
 
-    // --------------------
-    // 2) Apply parcel-number filter by village ONLY to parcel label layers
-    // --------------------
-
-    // Identify parcel label layers ONLY (we do NOT want to include waypoints/elevation symbol layers)
     const parcelLabelLayers = this.mapConfig.sources
       .flatMap((src) => src.layers || [])
       .filter((l) => {
-        // Best-effort identification:
-        // - It's a symbol layer
-        // - It is NOT the "waypoints" layer
-        // - It is likely parcel label by attribute or known field usage
         if (l.topography?.vectorType !== 'symbol') return false;
         if (l.name === 'waypoints') return false;
-
-        // If your config sets attribute for parcel labels, prefer that.
-        // Fallback: keep it as symbol labels except waypoints (but still safe because we won't force visibility).
         return true;
       })
       .map((l) => this.getLayerName(l));
 
-    // Build activeVillages only from toggles that represent village polygon layers.
-    // Best-effort: if metaData has info, use it; otherwise use heuristic: layer id exists AND is a fill layer.
     const activeVillages = toggleItems
       .filter((t) => t.checked)
       .filter((t) => {
         const lyr = this.map.getLayer(t.id) as any;
         if (!lyr) return false;
-        return lyr.type === 'fill'; // village polygons are fill
+        return lyr.type === 'fill';
       })
       .map((t) => t.id);
 
     parcelLabelLayers.forEach((labelLayerId) => {
       if (!this.map.getLayer(labelLayerId)) return;
-
-      // Apply/clear filter only. Do NOT override user visibility here.
       if (activeVillages.length > 0) {
         this.map.setFilter(labelLayerId, [
           'in',
@@ -889,14 +862,10 @@ export class MapComponent implements OnInit, OnChanges {
           ['literal', activeVillages],
         ] as any);
       } else {
-        // No active villages: clear filter (do NOT hide the labels globally)
         this.map.setFilter(labelLayerId, undefined);
       }
     });
 
-    // --------------------
-    // 3) Existing classification filter logic (unchanged)
-    // --------------------
     const isFilterToggle = toggleItems.some(
       (toggleItem) =>
         toggleItem.metaData?.groupType === AppConstants.CLASSIFY_BY_FILTER,
@@ -978,19 +947,20 @@ export class MapComponent implements OnInit, OnChanges {
     if (!this.map.hasControl(NAVIGATION_CTRL)) {
       this.map.addControl(NAVIGATION_CTRL);
     }
-    // Remove DRAW_CTRL.changeMode('simple_select');
-    // It crashes because DRAW_CTRL is not added to the map.
   }
 
   private removeControls() {
-    // this.map.removeControl(DRAW_CTRL);
     this.map.removeControl(NAVIGATION_CTRL);
   }
 
   private removeMouseEventListeners() {
-    this.map.off('click', this.layerNames, this.onMouseEventFn);
-    this.map.off('mousemove', this.layerNames, this.onMouseEventFn);
-    this.map.off('mouseleave', this.layerNames, this.onMouseEventFn);
+    const allClickableLayers = [
+      ...this.layerNames,
+      ...this.interactionLayerNames,
+    ];
+    this.map.off('click', this.onMouseEventFn);
+    this.map.off('mousemove', allClickableLayers, this.onMouseEventFn);
+    this.map.off('mouseleave', allClickableLayers, this.onMouseEventFn);
     if (this.navigationEnabled) {
       this.map.off('click', this.onMouseEventFn);
     }
@@ -1062,9 +1032,7 @@ export class MapComponent implements OnInit, OnChanges {
       this.map.setTerrain(null);
       this.addExtrusionSource(TILESET_ID);
       this.addExtrusionLayer(SOURCE_LAYER);
-
       this.addBuildingLabels(EXTRUSION_SOURCE_ID, SOURCE_LAYER, 'Name');
-
       this.map.easeTo({
         pitch: 60,
         bearing: 0,
@@ -1074,15 +1042,12 @@ export class MapComponent implements OnInit, OnChanges {
       if (this.map.getLayer(BUILDING_LABEL_LAYER_ID)) {
         this.map.removeLayer(BUILDING_LABEL_LAYER_ID);
       }
-
       if (this.map.getLayer(EXTRUSION_LAYER_ID)) {
         this.map.removeLayer(EXTRUSION_LAYER_ID);
       }
-
       if (this.map.getSource(EXTRUSION_SOURCE_ID)) {
         this.map.removeSource(EXTRUSION_SOURCE_ID);
       }
-
       this.map.easeTo({
         pitch: 0,
         bearing: 0,
@@ -1235,7 +1200,6 @@ export class MapComponent implements OnInit, OnChanges {
 
   private addExtrusionSource(tilesetId: string) {
     if (this.map.getSource(EXTRUSION_SOURCE_ID)) return;
-
     this.map.addSource(EXTRUSION_SOURCE_ID, {
       type: 'vector',
       url: 'mapbox://' + tilesetId,
@@ -1244,7 +1208,6 @@ export class MapComponent implements OnInit, OnChanges {
 
   private addExtrusionLayer(sourceLayer: string) {
     if (this.map.getLayer(EXTRUSION_LAYER_ID)) return;
-
     this.map.addLayer({
       id: EXTRUSION_LAYER_ID,
       type: 'fill-extrusion',
@@ -1270,7 +1233,6 @@ export class MapComponent implements OnInit, OnChanges {
     nameField: string,
   ) {
     if (this.map.getLayer(BUILDING_LABEL_LAYER_ID)) return;
-
     this.map.addLayer({
       id: BUILDING_LABEL_LAYER_ID,
       type: 'symbol',
@@ -1295,32 +1257,18 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   activateVolumeTool() {
-    if (!this.isMiningProject) {
-      return;
-    }
-
+    if (!this.isMiningProject) return;
     this.activeTool = 'volume';
     console.log('🪨 Volume Assessment tool activated');
-
-    // DRAW_CTRL.deleteAll();
-    // DRAW_CTRL.changeMode('draw_polygon');
-
     this.prepareVolumeLayers();
   }
 
   prepareVolumeLayers() {
-    if (!this.map || this.map.getSource(this.VOLUME_SOURCE_ID)) {
-      return;
-    }
-
+    if (!this.map || this.map.getSource(this.VOLUME_SOURCE_ID)) return;
     this.map.addSource(this.VOLUME_SOURCE_ID, {
       type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: [],
-      },
+      data: { type: 'FeatureCollection', features: [] },
     });
-
     this.map.addLayer({
       id: this.VOLUME_LAYER_ID,
       type: 'fill',
@@ -1334,19 +1282,11 @@ export class MapComponent implements OnInit, OnChanges {
 
   onVolumePolygonCreated(e: any) {
     const feature = e.features[0];
-
-    if (!feature || feature.geometry.type !== 'Polygon') {
-      return;
-    }
-
+    if (!feature || feature.geometry.type !== 'Polygon') return;
     this.volumePolygonGeoJSON = feature;
-
-    console.log('📐 Volume polygon captured', feature);
-
     const source = this.map.getSource(
       this.VOLUME_SOURCE_ID,
     ) as mapboxgl.GeoJSONSource;
-
     source.setData({
       type: 'FeatureCollection',
       features: [feature],
@@ -1358,24 +1298,18 @@ export class MapComponent implements OnInit, OnChanges {
       console.error('❌ Missing inputs');
       return;
     }
-
     const formData = new FormData();
     formData.append('xyz', this.xyzFile);
-
     formData.append(
       'polygon',
       JSON.stringify(this.volumePolygonGeoJSON!.geometry),
     );
     formData.append('baseHeight', this.volumeBaseHeight.toString());
 
-    console.log('📤 Sending volume form data');
-
     this.http
       .post('http://localhost:3000/v1/volume/calculate', formData)
       .subscribe({
         next: (res: any) => {
-          console.log('✅ Volume result:', res);
-
           this.volumeResult = {
             volume: res.volume,
             area: res.area,
