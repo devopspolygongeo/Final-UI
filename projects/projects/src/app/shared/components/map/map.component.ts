@@ -77,7 +77,7 @@ export class MapComponent implements OnInit, OnChanges {
   map!: mapboxgl.Map;
   layersToBePreserved!: AnyLayer[];
   layerNames: string[] = [];
-  interactionLayerNames: string[] = []; // Track invisible interaction layers
+  interactionLayerNames: string[] = [];
   markers!: mapboxgl.Marker[];
   navigationEnabled = false;
   streetToggleActive = true;
@@ -86,6 +86,9 @@ export class MapComponent implements OnInit, OnChanges {
   currentMeasurement: string = '';
   currentArea: string = '';
   is25DEnabled: boolean = false;
+
+  // Flag to prevent state leakage between projects
+  private isProjectSwitching: boolean = false;
 
   volumeBaseHeight?: number;
   volumePolygonGeoJSON?: Feature<Polygon>;
@@ -103,6 +106,9 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   private reapplyUiStateToMap(): void {
+    // If we are switching projects, do NOT reapply old UI states
+    if (this.isProjectSwitching) return;
+
     if (this.layerVisibility?.length) {
       this.toggleVisibility(this.layerVisibility);
     }
@@ -178,6 +184,7 @@ export class MapComponent implements OnInit, OnChanges {
       changes['mapConfig'] &&
       changes['mapConfig'].currentValue != changes['mapConfig'].previousValue
     ) {
+      this.isProjectSwitching = true; // Set flag when project changes
       this.reloadMap();
     }
     if (
@@ -185,6 +192,8 @@ export class MapComponent implements OnInit, OnChanges {
       changes['layerVisibility'].currentValue !=
         changes['layerVisibility'].previousValue
     ) {
+      // If parent explicitly sends new toggles, we allow application
+      this.isProjectSwitching = false;
       this.toggleVisibility(this.layerVisibility);
     }
     if (
@@ -231,6 +240,7 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   onStyleTypeChange() {
+    this.isProjectSwitching = false; // Preserving toggles for style change
     this.streetToggleActive = !this.streetToggleActive;
     if (this.styleType === 'Street') {
       this.styleType = 'Satellite';
@@ -265,6 +275,7 @@ export class MapComponent implements OnInit, OnChanges {
       this.mapService.setMapLoaded(true);
       this.applyTerrain(this.enableTerrain);
       this.reapplyUiStateToMap();
+      this.isProjectSwitching = false; // Reset flag after initial load
     });
   }
 
@@ -273,7 +284,6 @@ export class MapComponent implements OnInit, OnChanges {
       .flatMap((source) => source.layers || [])
       .map((layer) => this.getLayerName(layer));
 
-    // Add interaction layers to the mouse event scope
     const allClickableLayers = [
       ...this.layerNames,
       ...this.interactionLayerNames,
@@ -290,8 +300,6 @@ export class MapComponent implements OnInit, OnChanges {
     } else if (event.type === AppConstants.MAP_MOUSE_LEAVE_EVENT) {
       this.map.getCanvas().style.cursor = '';
     } else if (event.type === AppConstants.MAP_MOUSE_LEFT_CLICK_EVENT) {
-      // FIX: Query the specific interaction layers. These layers are never
-      // filtered and never transparent, so they always catch the click.
       const features = this.map.queryRenderedFeatures(event.point, {
         layers: this.interactionLayerNames,
       });
@@ -336,6 +344,7 @@ export class MapComponent implements OnInit, OnChanges {
       this.addControls();
       this.mapService.setMapLoaded(true);
       this.reapplyUiStateToMap();
+      this.isProjectSwitching = false; // Reset flag
     });
   }
 
@@ -355,13 +364,14 @@ export class MapComponent implements OnInit, OnChanges {
   private addAllMapLayers() {
     let rasterLayers: { priority: number; layer: AnyLayer }[] = [];
     let vectorLayers: { priority: number; layer: AnyLayer }[] = [];
-    this.interactionLayerNames = []; // Reset interaction layers
+    this.interactionLayerNames = [];
 
     this.mapConfig.sources.forEach((source) => {
       if (source.dataType === 'raster') {
         let rasterLayer: RasterLayer = {
           id: source.name,
           layout: {
+            // This strictly follows the config of the NEW project
             visibility: source.visibility ? 'visible' : 'none',
           },
           source: source.name,
@@ -504,9 +514,6 @@ export class MapComponent implements OnInit, OnChanges {
                   );
                 }
 
-                // FIX: Add a dedicated interaction layer for every plot fill
-                // This layer is permanent, unfiltered, and always has 0 opacity
-                // so it is invisible but clickable.
                 const interactionLayerId = layerName + '-interaction';
                 const interactionLayer: AnyLayer = {
                   id: interactionLayerId,
@@ -516,7 +523,7 @@ export class MapComponent implements OnInit, OnChanges {
                   layout: { visibility: 'visible' },
                   paint: {
                     'fill-color': '#000',
-                    'fill-opacity': 0, // Invisible but clickable
+                    'fill-opacity': 0,
                   },
                 };
                 vectorLayers.push({
