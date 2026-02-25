@@ -3,8 +3,10 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnInit,
   Output,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { AppConstants } from '../../../core/constants/app.constants';
@@ -26,7 +28,7 @@ type GroupToggle = { toggles: Toggle[]; visibility: boolean; expand: boolean };
   styleUrls: ['./layers.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LayersComponent {
+export class LayersComponent implements OnInit, OnDestroy {
   @Input() sources: Source[] = [];
   @Input() groups: Group[] = [];
 
@@ -65,17 +67,25 @@ export class LayersComponent {
   }
 
   ngOnInit() {
-    // console.log('LayersComponent initialized');
     this.subscriptions.push(
       this.mapService.isMapLoaded().subscribe((isMapLoaded) => {
         if (isMapLoaded) {
           this.resetTogglesVisibility(this.GLOBAL);
           this.resetTogglesVisibility(this.CLASSIC);
           this.resetTogglesVisibility(this.CLASSIFY_BY_CATEGORY);
+
+          // ✅ FALLBACK 1: If map is loaded but no group is selected, pick the first available category
+          if (
+            !this.selectedGroupToggle &&
+            this.categoryLayersToggleMap.size > 0
+          ) {
+            this.selectedGroupToggle = this.categoryLayersToggleMap
+              .keys()
+              .next().value;
+          }
         }
       }),
     );
-    //console.log('LayersComponent initialized',this.mapService);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -115,9 +125,10 @@ export class LayersComponent {
     this.categoryLayersToggleMap = new Map();
     this.filterLayersToggleMap = new Map();
 
-    for (let source of this.sources) {
-      //console.log('📦 Source received:', source.name, source);
+    // Reset selection to allow fresh logic for each project load
+    let fallbackGroupName: string | null = null;
 
+    for (let source of this.sources) {
       if (source.dataType == 'raster') {
         this.globalLayerToggles.push({
           id: source.name,
@@ -125,37 +136,8 @@ export class LayersComponent {
           metaData: { source: source },
         });
       } else if (source.layers) {
-        //console.log(`📄 Layers under source "${source.name}":`, source.layers);
-
         for (let layer of source.layers) {
-          // console.log('entire layer:', layer);
-          // console.log(
-          //   '🔍 Processing layer:',
-          //   layer.name,
-          //   'with group:',
-          //   layer.group?.name,
-          //   'type:',
-          //   layer.group?.type,
-          // );
-
           if (layer.group) {
-            //setting the group visibility for all the layers under it
-            // console.log('SOURCE', source.name, source);
-            // if (source.layers) {
-            //   for (let layer of source.layers) {
-            //     console.log('🔍 Final Layer Object:', layer);
-            //     console.log(
-            //       'LAYER:',
-            //       layer.name,
-            //       'GROUP TYPE:',
-            //       layer.group?.type,
-            //     );
-            //   }
-            // }
-
-            // ✅ IMPORTANT FIX:
-            // checked MUST come from layer.visibility (DB layer-level),
-            // NOT from layer.group.visibility (group-level).
             const toggleItem: Toggle = {
               id: this.getLayerName(layer),
               name: layer.displayName,
@@ -177,8 +159,11 @@ export class LayersComponent {
             } else if (
               layer.group.type === AppConstants.VIEW_BY_CLASSIFICATION
             ) {
-              // selectedGroupToggle is about which category tab is selected,
-              // it can remain group-based if your UX expects "default active category"
+              // ✅ Store the first group name encountered as a fallback
+              if (!fallbackGroupName) {
+                fallbackGroupName = layer.group.name;
+              }
+
               if (this.toBool(layer.group.visibility)) {
                 this.selectedGroupToggle = layer.group.name;
               }
@@ -204,6 +189,11 @@ export class LayersComponent {
         }
       }
     }
+
+    // ✅ FALLBACK 2: If after processing all sources no active group was set by visibility flag
+    if (!this.selectedGroupToggle && fallbackGroupName) {
+      this.selectedGroupToggle = fallbackGroupName;
+    }
   }
 
   getLayerName(layer: Layer) {
@@ -213,14 +203,7 @@ export class LayersComponent {
 
   onLayerToggle(event: MatSlideToggleChange, toggle: Toggle) {
     toggle.checked = event.checked;
-    // console.log(
-    //   'TOGGLE EMIT:',
-    //   toggle.id,
-    //   toggle.metaData?.layer?.name,
-    //   toggle.metaData?.layer?.sourceId,
-    // );
     this.layerToggleEv.emit([toggle]);
-    // console.log('APPLY VISIBILITY TO:', toggle.id);
 
     if (toggle.metaData?.groupType === this.CLASSIFY_BY_FILTER) {
       const paintProps = {
@@ -233,7 +216,6 @@ export class LayersComponent {
 
   resetTogglesVisibility(groupType: string) {
     if (groupType === this.GLOBAL) {
-      //console.log("Resetting global layer toggles visibility", this.globalLayerToggles);
       this.globalLayerToggles.forEach((toggle) => {
         if (toggle.metaData?.source)
           toggle.checked = this.toBool(toggle.metaData.source.visibility);
@@ -242,13 +224,11 @@ export class LayersComponent {
       });
       this.layerToggleEv.emit(this.globalLayerToggles);
     } else if (groupType === this.CLASSIC) {
-      //console.log("Resetting classic layer toggles visibility", this.classicLayersToggleMap);
       if (this.classicLayersToggleMap.size) {
         const allToggles = Array.from(
           this.classicLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
 
-        // ✅ IMPORTANT FIX: reset based on layer.visibility (not group.visibility)
         allToggles.forEach(
           (toggle) =>
             (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),
@@ -264,20 +244,17 @@ export class LayersComponent {
         this.layerPaintChangeEv.emit(paintProperties);
       }
     } else if (groupType === this.CLASSIFY_BY_CATEGORY) {
-      //  console.log("Resetting category layer toggles visibility-categorywise", this.categoryLayersToggleMap);
       if (this.categoryLayersToggleMap.size) {
         const allToggles = Array.from(
           this.categoryLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
 
-        // ✅ IMPORTANT FIX: reset based on layer.visibility (not group.visibility)
         allToggles.forEach(
           (toggle) =>
             (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),
         );
         this.layerToggleEv.emit(allToggles);
 
-        // keep selected group based on group.visibility (existing UX)
         this.selectedGroupToggle =
           allToggles.find((toggle) =>
             this.toBool(toggle.metaData.layer.group.visibility),
@@ -292,16 +269,11 @@ export class LayersComponent {
         this.layerPaintChangeEv.emit(paintProperties);
       }
     } else if (groupType === this.CLASSIFY_BY_FILTER) {
-      console.log(
-        'Resetting filter layer toggles visibility-filterwise',
-        this.filterLayersToggleMap,
-      );
       if (this.filterLayersToggleMap.size) {
         const allToggles = Array.from(
           this.filterLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
 
-        // ✅ IMPORTANT FIX: reset based on layer.visibility (not group.visibility)
         allToggles.forEach(
           (toggle) =>
             (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),

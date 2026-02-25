@@ -145,6 +145,10 @@ export class DashboardViewComponent implements OnChanges {
     ) {
       this.styles = this.view.mapStyles;
     }
+    if (changes['layouts']) {
+      console.log('📑 Layouts updated for project:', this.selectedProject?.id);
+      console.log('🔍 First Layout data:', this.layouts[0]);
+    }
 
     if (
       changes['projects'] &&
