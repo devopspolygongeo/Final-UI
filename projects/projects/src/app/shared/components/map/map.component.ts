@@ -410,20 +410,40 @@ export class MapComponent implements OnInit, OnChanges {
                 type: 'symbol',
                 source: source.name,
                 'source-layer': layer.name,
+
+                minzoom: 16, // ✅ SHOW LABELS ONLY WHEN ZOOMED IN
+
                 layout: {
-                  visibility: this.toBool(layer.visibility)
-                    ? 'visible'
-                    : 'none',
-                  // keep as-is; if attribute missing, it will show blank text (still ok)
-                  'text-field': ['format', ['get', layer.attribute]],
-                  'text-size': 10,
-                  'text-justify': 'auto',
+                  visibility: layer.visibility ? 'visible' : 'none',
+
+                  'text-field': ['get', layer.attribute],
+
+                  // ✅ dynamic size based on zoom
+                  'text-size': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    16,
+                    10,
+                    18,
+                    14,
+                    20,
+                    18,
+                  ],
+
                   'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                  // help avoid “disappears due to collision” in dense areas
-                  'text-allow-overlap': true,
-                  'text-ignore-placement': true,
+                  'text-anchor': 'center',
+
+                  // ✅ PREVENT OVERLAPPING TEXT
+                  'text-allow-overlap': false,
+                  'text-ignore-placement': false,
+                },
+
+                paint: {
+                  'text-color': '#000000',
                 },
               };
+
               vectorLayers.push({
                 priority: layer.priority,
                 layer: wayPointsLayer,
