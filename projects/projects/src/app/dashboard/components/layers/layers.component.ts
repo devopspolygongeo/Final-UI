@@ -116,7 +116,7 @@ export class LayersComponent {
     this.filterLayersToggleMap = new Map();
 
     for (let source of this.sources) {
-      console.log('📦 Source received:', source.name, source);
+      //console.log('📦 Source received:', source.name, source);
 
       if (source.dataType == 'raster') {
         this.globalLayerToggles.push({
@@ -125,33 +125,33 @@ export class LayersComponent {
           metaData: { source: source },
         });
       } else if (source.layers) {
-        console.log(`📄 Layers under source "${source.name}":`, source.layers);
+        //console.log(`📄 Layers under source "${source.name}":`, source.layers);
 
         for (let layer of source.layers) {
-          console.log('entire layer:', layer);
-          console.log(
-            '🔍 Processing layer:',
-            layer.name,
-            'with group:',
-            layer.group?.name,
-            'type:',
-            layer.group?.type,
-          );
+          // console.log('entire layer:', layer);
+          // console.log(
+          //   '🔍 Processing layer:',
+          //   layer.name,
+          //   'with group:',
+          //   layer.group?.name,
+          //   'type:',
+          //   layer.group?.type,
+          // );
 
           if (layer.group) {
             //setting the group visibility for all the layers under it
-            console.log('SOURCE', source.name, source);
-            if (source.layers) {
-              for (let layer of source.layers) {
-                console.log('🔍 Final Layer Object:', layer);
-                console.log(
-                  'LAYER:',
-                  layer.name,
-                  'GROUP TYPE:',
-                  layer.group?.type,
-                );
-              }
-            }
+            // console.log('SOURCE', source.name, source);
+            // if (source.layers) {
+            //   for (let layer of source.layers) {
+            //     console.log('🔍 Final Layer Object:', layer);
+            //     console.log(
+            //       'LAYER:',
+            //       layer.name,
+            //       'GROUP TYPE:',
+            //       layer.group?.type,
+            //     );
+            //   }
+            // }
 
             // ✅ IMPORTANT FIX:
             // checked MUST come from layer.visibility (DB layer-level),
@@ -213,14 +213,14 @@ export class LayersComponent {
 
   onLayerToggle(event: MatSlideToggleChange, toggle: Toggle) {
     toggle.checked = event.checked;
-    console.log(
-      'TOGGLE EMIT:',
-      toggle.id,
-      toggle.metaData?.layer?.name,
-      toggle.metaData?.layer?.sourceId,
-    );
+    // console.log(
+    //   'TOGGLE EMIT:',
+    //   toggle.id,
+    //   toggle.metaData?.layer?.name,
+    //   toggle.metaData?.layer?.sourceId,
+    // );
     this.layerToggleEv.emit([toggle]);
-    console.log('APPLY VISIBILITY TO:', toggle.id);
+    // console.log('APPLY VISIBILITY TO:', toggle.id);
 
     if (toggle.metaData?.groupType === this.CLASSIFY_BY_FILTER) {
       const paintProps = {

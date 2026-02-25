@@ -244,7 +244,7 @@ export class MapComponent implements OnInit, OnChanges {
       this.applyTerrain(true);
     }
 
-    console.log('⛏️ isMiningProject in MAP:', this.isMiningProject);
+    // console.log('⛏️ isMiningProject in MAP:', this.isMiningProject);
   }
 
   public resize(): void {
