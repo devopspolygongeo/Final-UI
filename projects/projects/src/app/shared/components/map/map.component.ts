@@ -410,26 +410,29 @@ export class MapComponent implements OnInit, OnChanges {
                 type: 'symbol',
                 source: source.name,
                 'source-layer': layer.name,
-                minzoom: 16,
+                minzoom: 0,
                 layout: {
                   visibility: layer.visibility ? 'visible' : 'none',
                   'text-field': ['get', layer.attribute],
+
                   'text-size': [
                     'interpolate',
                     ['linear'],
                     ['zoom'],
-                    16,
-                    10,
-                    18,
-                    14,
-                    20,
-                    18,
+                    12, 8,
+                    15, 10,
+                    18, 14
                   ],
+
                   'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
                   'text-anchor': 'center',
+
                   'text-allow-overlap': false,
                   'text-ignore-placement': false,
+
+                  'symbol-spacing': 200
                 },
+
                 paint: {
                   'text-color': '#000000',
                 },
