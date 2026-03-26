@@ -558,14 +558,22 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
                 return p && (clickAttributes.length ? clickAttributes.some(attr => p.hasOwnProperty(attr)) : true);
             });
 
-            if (matched) {
-                // Capture stable id for save (bracket access to appease TS4111)
-                const p = matched.properties || {};
-               this.selectedPlotNo =p['plot_no'] ??        
-                // existing hydrate
-                this.hydratePlotModelFromFeatureProps(p);
-                console.log('[PlotDetails] click → selectedPlotNo:', this.selectedPlotNo, 'props:', p);
-            }
+if (matched) {
+    const p = matched.properties || {};
+
+    this.selectedPlotNo = p['plot_no'] || p['plotNo'];
+
+    if (!this.selectedPlotNo) {
+        console.warn('No plot_no found in feature:', p);
+        return;
+    }
+
+    this.plotModel.plotNo = String(this.selectedPlotNo);
+
+    this.hydratePlotModelFromFeatureProps(p);
+
+    console.log('[PlotDetails] click → selectedPlotNo:', this.selectedPlotNo, 'props:', p);
+}
         }
     }
 
