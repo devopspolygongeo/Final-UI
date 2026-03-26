@@ -561,9 +561,7 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
             if (matched) {
                 // Capture stable id for save (bracket access to appease TS4111)
                 const p = matched.properties || {};
-                this.selectedPlotNo =
-                    p['plot_no']  ?? undefined;
-
+               this.selectedPlotNo =p['plot_no'] ??        
                 // existing hydrate
                 this.hydratePlotModelFromFeatureProps(p);
                 console.log('[PlotDetails] click → selectedPlotNo:', this.selectedPlotNo, 'props:', p);
@@ -587,13 +585,20 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
 
         const newStatus = this.normalizeStatus(this.plotModel.salestatus);
 
-        const payload = {
+       /* const payload = {
             surveyId: Number(this.selectedSurvey?.id ?? this.surveyId ?? 0),
             tilesetId: this.tilesetId!,
             datasetId: this.datasetId!,     // clean id derived from tileset
             plotNo: this.selectedPlotNo,    // ✅ send plot number
             newStatus
-        };
+        }; */
+const payload = {
+  surveyId: Number(this.selectedSurvey?.id ?? this.surveyId ?? 0),
+  tilesetId: this.tilesetId!,
+  datasetId: this.datasetIdFromTileset(this.tilesetId), // ✅ FIXED
+  plotNo: this.selectedPlotNo,
+  newStatus: this.normalizeStatus(this.plotModel.salestatus)
+};
         console.log('[PlotDetails] request payload →', payload);
 
         try {
