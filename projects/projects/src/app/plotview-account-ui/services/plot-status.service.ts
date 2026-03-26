@@ -57,9 +57,19 @@ export class PlotStatusService {
     constructor(private http: HttpClient) { }
 
     // --- Plot status ---
-    updateStatus(body: PlotStatusUpdateReq): Observable<PlotStatusUpdateRes> {
-        return this.http.post<PlotStatusUpdateRes>(`${this.mapboxBase}/plot-status`, body);
-    }
+   updateStatus(body: PlotStatusUpdateReq): Observable<PlotStatusUpdateRes> {
+    const token = localStorage.getItem('polygon_user_a_token'); // or your actual key
+
+    return this.http.post<PlotStatusUpdateRes>(
+        `${this.mapboxBase}/plot-status`,
+        body,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+}
 
     // --- Assets ---
     getAssets(surveyId: number): Observable<AssetRow[]> {
