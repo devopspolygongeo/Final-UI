@@ -23,5 +23,10 @@ export interface PlotDetails {
     facing: string,
     layer: string,
     plot_no: string,
-    salestatus: string
+    salestatus: string,
+
+    ownerName: string,        // ✅ add
+    development: string       // ✅ add (optional)
+    
+
 }
