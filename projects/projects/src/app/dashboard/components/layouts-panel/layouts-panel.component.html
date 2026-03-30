@@ -1,20 +1,11 @@
 <div id="layouts-panel" *ngIf="showLayoutPanel">
-  <mat-tab-group
-    [selectedIndex]="selectedTabIndex"
-    [backgroundColor]="'primary'"
-  >
+  <mat-tab-group [selectedIndex]="selectedTabIndex" [backgroundColor]="'primary'">
     <mat-tab>
       <ng-template mat-tab-label>
-        <i
-          title="Layout Details"
-          class="fa-solid fa-square-poll-horizontal"
-        ></i>
+        <i title="Layout Details" class="fa-solid fa-square-poll-horizontal"></i>
       </ng-template>
       <div class="d-flex flex-column">
-        <div
-          class="layout-item d-flex flex-row p-2"
-          *ngFor="let layout of layoutDetails"
-        >
+        <div class="layout-item d-flex flex-row p-2" *ngFor="let layout of layoutDetails">
           <span class="layout-icon {{ layout.attribute }} me-2"></span>
           <span class="layout-label"> {{ layout.name | titlecase }} </span>
           <span class="layout-value"> {{ layout.value }}</span>
@@ -75,8 +66,24 @@
                 <span class="layout-label">Sale Status</span>
                 <span class="layout-value">{{ plot.salestatus }}</span>
               </div>
+
+              <div class="layout-item d-flex flex-row">
+                <span class="layout-icon owner me-2"></span>
+                <span class="layout-label">Owner</span>
+                <span class="layout-value">{{ plot.ownerName }}</span>
+              </div>
+
+              <div class="layout-item d-flex flex-row">
+                <span class="layout-icon developer me-2"></span>
+                <span class="layout-label">Developer</span>
+                <span class="layout-value">{{ plot.development }}</span>
+              </div>
+
+
             </div>
           </div>
+
+
 
           <!-- Request Button -->
           <div class="d-flex justify-content-center">
@@ -91,11 +98,7 @@
 </div>
 
 <div *ngIf="showInfoBox" class="information-box">
-  <div
-    class="d-flex justify-content-end me-1 mt-1"
-    title="Close the Info Box"
-    (click)="closeInfoBox()"
-  >
+  <div class="d-flex justify-content-end me-1 mt-1" title="Close the Info Box" (click)="closeInfoBox()">
     <i class="fa-solid fa-xmark"></i>
   </div>
   <div *ngIf="!showInterestForm" class="pb-3">
@@ -106,12 +109,7 @@
     <form [formGroup]="requestPlotForm" (ngSubmit)="onInterestSubmission()">
       <p>
         <mat-form-field [hideRequiredMarker]="false">
-          <input
-            type="text"
-            matInput
-            placeholder="Enter name"
-            formControlName="userName"
-          />
+          <input type="text" matInput placeholder="Enter name" formControlName="userName" />
           <mat-error *ngIf="requestPlotForm.controls['userName'].invalid">
             Username is required
           </mat-error>
@@ -119,12 +117,7 @@
       </p>
       <p>
         <mat-form-field [hideRequiredMarker]="false">
-          <input
-            type="text"
-            matInput
-            placeholder="Enter email"
-            formControlName="email"
-          />
+          <input type="text" matInput placeholder="Enter email" formControlName="email" />
           <mat-error *ngIf="requestPlotForm.controls['email'].invalid">
             Email is required
           </mat-error>
@@ -132,24 +125,14 @@
       </p>
       <p>
         <mat-form-field [hideRequiredMarker]="false">
-          <input
-            type="text"
-            matInput
-            placeholder="Enter Phone no."
-            formControlName="phoneNo"
-          />
+          <input type="text" matInput placeholder="Enter Phone no." formControlName="phoneNo" />
           <mat-error *ngIf="requestPlotForm.controls['phoneNo'].invalid">
             Phone No is required
           </mat-error>
         </mat-form-field>
       </p>
       <div class="d-flex justify-content-center">
-        <button
-          id="interest-submit-button"
-          class="py-2 px-5 mb-2"
-          type="submit"
-          mat-raised-button
-        >
+        <button id="interest-submit-button" class="py-2 px-5 mb-2" type="submit" mat-raised-button>
           Submit
         </button>
       </div>
