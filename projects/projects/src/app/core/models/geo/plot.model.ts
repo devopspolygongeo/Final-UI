@@ -1,32 +1,30 @@
 export interface Plot {
-    id: number,
-    no: string,
-    layoutId: number,
-    area: string,
-    east: string,
-    west: string,
-    north: string,
-    south: string,
-    facing: string,
-    saleStatus: string,
-    ownerName: string,
-    ownerAddress: string,
-    development: string
+  id: number;
+  no: string;
+  layoutId: number;
+  area: string;
+  east: string;
+  west: string;
+  north: string;
+  south: string;
+  facing: string;
+  saleStatus: string;
+  ownerName: string;
+  ownerAddress: string;
+  development: string;
 }
 
 export interface PlotDetails {
-    area: string,
-    east: string,
-    west: string,
-    north: string,
-    south: string,
-    facing: string,
-    layer: string,
-    plot_no: string,
-    salestatus: string,
+  area: string;
+  east: string;
+  west: string;
+  north: string;
+  south: string;
+  facing: string;
+  layer: string;
+  plot_no: string;
+  salestatus: string;
 
-    ownerName: string,        // ✅ add
-    development: string       // ✅ add (optional)
-    
-
+  ownername: string; // ✅ add
+  Developer: string; // ✅ add (optional)
 }
