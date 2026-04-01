@@ -324,6 +324,8 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
         south: '',
         salestatus: '' as Status,
         facing: '',
+        ownername:'',
+        Developer:'',
         priceMin: '',
         priceMax: '',
         priceUnit: 'Sq ft'
@@ -331,6 +333,9 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
 
     /** Allowed statuses (UI) */
     saleStatusOptions: Status[] = ['Available', 'In Progress', 'Sold'];
+    ownersList: string[] = [];
+    developersList: string[] = [];
+    
 
     // Dirty tracking
     private originalModel: any = {};
@@ -438,7 +443,38 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
 
             layers.forEach((l: any) => { if (this.view?.topographies) l.topography = this.view.topographies.find((t: any) => l.topoId == t.id); l.groupId = l.groupid; });
             srcs.forEach((s: any) => s.layers = layers.filter((l: any) => l.sourceId == s.id));
-            this.sources = srcs as Source[]; this.groups = groups as any; this.layouts = layouts as any;
+            this.sources = srcs as Source[]; 
+            // ✅ Extract all owners from GeoJSON features
+this.ownersList = [];
+this.developersList = [];
+
+this.sources.forEach((src: any) => {
+    if (src?.data?.features) {
+        src.data.features.forEach((f: any) => {
+            const owner =
+                f.properties?.ownername ||
+                f.properties?.owner_name ||
+                f.properties?.owner;
+
+            if (owner && !this.ownersList.includes(owner)) {
+                this.ownersList.push(owner);
+            }
+
+             const Developer =
+                f.properties?.Developer ||
+                f.properties?.Developer ||
+                f.properties?.Devloper;
+
+            if (Developer && !this.developersList.includes(Developer)) {
+                this.developersList.push(Developer);
+            }
+        });
+    }
+});
+
+console.log('Owners List →', this.ownersList);
+            
+            this.groups = groups as any; this.layouts = layouts as any;
 
             this.buildMapConfigFromViewProjectSurvey(survey, this.sources);
 
@@ -515,7 +551,7 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
     private resetPlotModel() {
         this.plotModel = {
             plotNo: '', east: '', west: '', north: '', south: '',
-            salestatus: 'Available', facing: '', priceMin: '', priceMax: '', priceUnit: 'Sq ft'
+            salestatus: 'Available', facing: '',ownername:'',Developer:'', priceMin: '', priceMax: '', priceUnit: 'Sq ft'
         };
         this.isDirty = false;
     }
@@ -532,6 +568,23 @@ export class PlotviewPlotDetailsComponent implements OnInit, OnDestroy, AfterVie
         this.plotModel.facing = this.getProp(props, ['facing'], '');
         // map storage -> UI exactly (Available | In Progress | Sold)
         this.plotModel.salestatus = storageToUI(this.getProp(props, ['salestatus', 'sale_status', 'status'], ''));
+
+        const owner = this.getProp(props, ['ownername'], '');
+
+this.plotModel.ownername = owner;
+
+// ✅ Add to dropdown
+if (owner && !this.ownersList.includes(owner)) {
+    this.ownersList.push(owner);
+}
+        const Developer = this.getProp(props, ['Developer', 'Developer', 'Devloper'], '');
+
+this.plotModel.Developer = Developer;
+
+// ✅ Add to dropdown dynamically
+if (Developer && !this.developersList.includes(Developer)) {
+    this.developersList.push(Developer);
+}
         const priceMin = this.getProp(props, ['priceMin', 'price_min'], '');
         const priceMax = this.getProp(props, ['priceMax', 'price_max'], '');
         if (priceMin || priceMax) {
@@ -570,7 +623,13 @@ if (matched) {
 
     this.plotModel.plotNo = String(this.selectedPlotNo);
 
-    this.hydratePlotModelFromFeatureProps(p);
+   this.hydratePlotModelFromFeatureProps(p);
+
+// ✅ Force update (IMPORTANT)
+setTimeout(() => {
+    this.plotModel.ownername = p['ownername'] || '';
+    this.plotModel.Developer = p['Developer'] || p['developer'] || '';
+});
 
     console.log('[PlotDetails] click → selectedPlotNo:', this.selectedPlotNo, 'props:', p);
 }
@@ -585,6 +644,7 @@ if (matched) {
         this.originalModel = JSON.parse(JSON.stringify(this.plotModel));
         this.isDirty = false;
     }
+    
 
     async onSave() {
         if (!this.isDirty) return;
@@ -605,7 +665,10 @@ const payload = {
   tilesetId: this.tilesetId!,
   datasetId: this.datasetIdFromTileset(this.tilesetId), // ✅ FIXED
   plotNo: this.selectedPlotNo,
-  newStatus: this.normalizeStatus(this.plotModel.salestatus)
+  newStatus: this.normalizeStatus(this.plotModel.salestatus),
+ownername: this.plotModel.ownername,   // ✅ ADD THIS
+Developer: this.plotModel.Developer    // ✅ optional
+   
 };
         console.log('[PlotDetails] request payload →', payload);
 
@@ -614,7 +677,7 @@ const payload = {
             this.commitBaseline();
         } catch (e) {
             console.error(e);
-            alert('Failed to update sale status.');
+            alert('Failed to update');
         }
     }
 
