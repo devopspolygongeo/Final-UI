@@ -9,8 +9,12 @@ export interface PlotStatusUpdateReq {
     surveyId: number;
     tilesetId: string;
     datasetId: string;
-    featureId: string;
+    plotNo: string | number;
     newStatus: 'Available' | 'In Progress' | 'Sold';
+    ownername?: string;     // ✅ ADD THIS
+    Developer?: string;     // ✅ OPTIONAL
+
+    
 }
 export interface PlotStatusUpdateRes {
     ok: boolean;
@@ -70,6 +74,8 @@ export class PlotStatusService {
         }
     );
 }
+
+
 
     // --- Assets ---
     getAssets(surveyId: number): Observable<AssetRow[]> {
