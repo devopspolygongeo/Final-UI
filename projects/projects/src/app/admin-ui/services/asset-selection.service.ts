@@ -50,7 +50,7 @@ export class AssetSelectionService {
 
 getAllProjects(): Observable<Project[]> {
   const userId = localStorage.getItem('userId');
-  const url = `${environment.apiUrl}/projects/all?userId=${userId}`;
+ const url = `${environment.apiUrl}/projects?userId=${userId}`;
 
   return this.http.get<Project[]>(url);
 }
