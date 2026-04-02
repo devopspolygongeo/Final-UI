@@ -6,91 +6,166 @@ import { environment } from '../../../environments/environment';
 
 // ------- Plot Status types -------
 export interface PlotStatusUpdateReq {
-    surveyId: number;
-    tilesetId: string;
-    datasetId: string;
-    plotNo: string | number;
-    newStatus: 'Available' | 'In Progress' | 'Sold';
-    ownername?: string;     // ✅ ADD THIS
-    Developer?: string;     // ✅ OPTIONAL
-
-    
+  surveyId: number;
+  tilesetId: string;
+  datasetId: string;
+  plotNo?: string | number;
+  featureId?: string;
+  newStatus: 'Available' | 'In Progress' | 'Sold';
+  ownername?: string;
+  Developer?: string;
 }
+
+export interface PlotDetails {
+  plotNo: string;
+  east: string;
+  west: string;
+  north: string;
+  south: string;
+  salestatus: 'Available' | 'In Progress' | 'Sold' | string;
+  facing: string;
+  ownername: string;
+  Developer: string;
+  priceMin: string;
+  priceMax: string;
+  priceUnit: string;
+}
+
 export interface PlotStatusUpdateRes {
-    ok: boolean;
-    message?: string;
-    jobId?: string;
+  ok: boolean;
+  message?: string;
+  jobId?: string;
+  datasetId?: string;
+  featureId?: string;
+  plot?: PlotDetails;
+}
+
+// ------- Plot Details types -------
+export interface PlotDetailsReq {
+  surveyId: number;
+  tilesetId: string;
+  plotNo?: string | number;
+  featureId?: string;
+}
+
+export interface PlotDetailsRes {
+  ok: boolean;
+  message?: string;
+  datasetId?: string;
+  featureId?: string;
+  plot?: PlotDetails;
 }
 
 // ------- Asset API types -------
 export type AssetKind = 'image' | 'video' | 'document' | 'panorama';
+
 export interface AssetRow {
-    id: number;
-    asset_type?: 1 | 2 | 3 | 4;
-    type?: AssetKind;
-    url: string;
-    name?: string;
-    size?: number;
-    created_at?: string;
-    thumbnail?: string;
+  id: number;
+  asset_type?: 1 | 2 | 3 | 4;
+  type?: AssetKind;
+  url: string;
+  name?: string;
+  size?: number;
+  created_at?: string;
+  thumbnail?: string;
 }
+
 export interface PresignRequest {
-    surveyId: number;
-    assetType: AssetKind;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
+  surveyId: number;
+  assetType: AssetKind;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
 }
+
 export interface PresignResponse {
-    uploadUrl: string;
-    key: string;
-    publicUrl: string;
+  uploadUrl: string;
+  key: string;
+  publicUrl: string;
 }
+
 export interface CreateAssetRequest {
-    survey_id: number;
-    asset_type: 1 | 2 | 3 | 4;
-    name: string;
-    url: string;
+  survey_id: number;
+  asset_type: 1 | 2 | 3 | 4;
+  name: string;
+  url: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class PlotStatusService {
-    private mapboxBase = `${environment.apiUrl}/mapbox`;
-    private assetsBase = `${environment.apiUrl}/assets`;
+  private mapboxBase = `${environment.apiUrl}/mapbox`;
+  private assetsBase = `${environment.apiUrl}/assets`;
 
-    constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-    // --- Plot status ---
-   updateStatus(body: PlotStatusUpdateReq): Observable<PlotStatusUpdateRes> {
-    const token = localStorage.getItem('polygon_user_a_token'); // or your actual key
+  // --- Plot status ---
+  updateStatus(body: PlotStatusUpdateReq): Observable<PlotStatusUpdateRes> {
+    const token = localStorage.getItem('polygon_user_a_token');
 
     return this.http.post<PlotStatusUpdateRes>(
-        `${this.mapboxBase}/plot-status`,
-        body,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }
+      `${this.mapboxBase}/plot-status`,
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
     );
-}
+  }
 
+  // --- Plot details from dataset ---
+  getPlotDetails(params: PlotDetailsReq): Observable<PlotDetailsRes> {
+    const token = localStorage.getItem('polygon_user_a_token');
 
+    const queryParams: any = {
+      surveyId: params.surveyId,
+      tilesetId: params.tilesetId,
+      _ts: Date.now(), // cache buster
+    };
 
-    // --- Assets ---
-    getAssets(surveyId: number): Observable<AssetRow[]> {
-        return this.http.get<AssetRow[]>(`${this.assetsBase}`, { params: { surveyId } as any });
+    if (params.featureId) {
+      queryParams.featureId = params.featureId;
     }
 
-    presign(body: PresignRequest): Observable<PresignResponse> {
-        return this.http.post<PresignResponse>(`${this.assetsBase}/presign`, body);
+    if (
+      params.plotNo !== undefined &&
+      params.plotNo !== null &&
+      String(params.plotNo).trim() !== ''
+    ) {
+      queryParams.plotNo = params.plotNo;
     }
 
-    create(body: CreateAssetRequest): Observable<{ id: number } & CreateAssetRequest> {
-        return this.http.post<{ id: number } & CreateAssetRequest>(`${this.assetsBase}`, body);
-    }
+    return this.http.get<PlotDetailsRes>(`${this.mapboxBase}/plot-details`, {
+      params: queryParams,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
+  }
 
-    delete(id: number): Observable<{ id: number }> {
-        return this.http.delete<{ id: number }>(`${this.assetsBase}/${id}`);
-    }
+  // --- Assets ---
+  getAssets(surveyId: number): Observable<AssetRow[]> {
+    return this.http.get<AssetRow[]>(`${this.assetsBase}`, {
+      params: { surveyId } as any,
+    });
+  }
+
+  presign(body: PresignRequest): Observable<PresignResponse> {
+    return this.http.post<PresignResponse>(`${this.assetsBase}/presign`, body);
+  }
+
+  create(
+    body: CreateAssetRequest,
+  ): Observable<{ id: number } & CreateAssetRequest> {
+    return this.http.post<{ id: number } & CreateAssetRequest>(
+      `${this.assetsBase}`,
+      body,
+    );
+  }
+
+  delete(id: number): Observable<{ id: number }> {
+    return this.http.delete<{ id: number }>(`${this.assetsBase}/${id}`);
+  }
 }
