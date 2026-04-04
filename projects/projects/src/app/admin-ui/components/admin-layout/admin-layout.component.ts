@@ -4,11 +4,10 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-admin-layout',
   templateUrl: './admin-layout.component.html',
-  styleUrls: ['./admin-layout.component.css']
+  styleUrls: ['./admin-layout.component.css'],
 })
 export class AdminLayoutComponent {
-
-  constructor(public router: Router) { }
+  constructor(public router: Router) {}
 
   dropdownOpen = false;
 
@@ -20,7 +19,6 @@ export class AdminLayoutComponent {
     this.dropdownOpen = false;
     this.router.navigate(['/admin-dashboard/admin-account-settings']);
   }
-
 
   isActiveRoute(path: string): boolean {
     return this.router.url === path;
