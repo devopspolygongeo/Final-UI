@@ -19,8 +19,6 @@ import { LayersComponent } from './components/layers/layers.component';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './pages/dashboard.component';
 import { DashboardService } from './services/dashboard.service';
-
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutsPanelComponent } from './components/layouts-panel/layouts-panel.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatChipsModule } from '@angular/material/chips';
@@ -29,8 +27,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { View360Component } from './components/view-360/view-360.component';
 import { LandmarksMobileViewComponent } from './components/landmarks-mobile-view/landmarks.component';
 import { MatSelectModule } from '@angular/material/select';
-import { MatMenuModule } from "@angular/material/menu";
-
+import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
   imports: [
@@ -45,13 +42,13 @@ import { MatMenuModule } from "@angular/material/menu";
     MatInputModule,
     MatAutocompleteModule,
     MatDialogModule,
-    //   BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
     HttpClientModule,
     MatSelectModule,
-    MatMenuModule
+    MatMenuModule,
+    DashboardRoutingModule,
   ],
   declarations: [
     DashboardViewComponent,
@@ -63,17 +60,15 @@ import { MatMenuModule } from "@angular/material/menu";
     LandmarksComponent,
     AccessibilityComponent,
     View360Component,
-    LandmarksMobileViewComponent
+    LandmarksMobileViewComponent,
   ],
-  providers: [
-    DashboardService
-  ],
+  providers: [DashboardService],
   exports: [
     DashboardRoutingModule,
-    SharedModule,              // re-export so <app-map> is visible
-    LayersComponent,           // <app-layers>
+    SharedModule,
+    LayersComponent,
     LayoutsPanelComponent,
-    LandmarksComponent
-  ]
+    LandmarksComponent,
+  ],
 })
-export class DashboardModule { }
+export class DashboardModule {}

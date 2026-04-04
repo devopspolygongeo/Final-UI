@@ -7,6 +7,7 @@ import {
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import { StorageConstants } from '../constants/storage.constants';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -16,47 +17,69 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
-    // ✅ Bypass auth header injection when No-Auth is explicitly set
+    console.log('[INTERCEPTOR] request url =', req.url);
+    console.log('[INTERCEPTOR] No-Auth header =', req.headers.get('No-Auth'));
+
     if (req.headers.get('No-Auth') === 'True') {
+      console.log('[INTERCEPTOR] bypassing auth for request');
       return next.handle(req.clone());
     }
 
-    // ✅ If refresh token exists, attach Authorization header
-    if (localStorage.getItem('polygon_user_r_token') != null) {
+    const accessToken = localStorage.getItem(StorageConstants.LS_ACCESS_TOKEN);
+    console.log('[INTERCEPTOR] access token =', accessToken);
+    console.log('[INTERCEPTOR] current router url =', this.router.url);
+
+    if (accessToken != null) {
       const clonedreq = req.clone({
-        headers: req.headers.set(
-          'Authorization',
-          'Bearer ' + localStorage.getItem('polygon_user_r_token'),
-        ),
+        headers: req.headers.set('Authorization', 'Bearer ' + accessToken),
       });
+
+      console.log('[INTERCEPTOR] attached Authorization header');
 
       return next.handle(clonedreq).pipe(
         tap({
           next: () => {},
           error: (err) => {
+            console.error('[INTERCEPTOR] request failed', {
+              url: req.url,
+              status: err.status,
+              routerUrl: this.router.url,
+            });
+
             if (err.status === 401) {
-              this.router.navigateByUrl('/login');
+              console.log(
+                '[INTERCEPTOR] redirecting to login with returnUrl =',
+                this.router.url,
+              );
+              this.router.navigate(['/login'], {
+                queryParams: { returnUrl: this.router.url },
+              });
             } else if (err.status === 403) {
-              // ✅ FIXED: was err.status = 403 (assignment). Now correct comparison.
               this.router.navigateByUrl('/forbidden');
-            } else {
-              // do nothing
             }
           },
         }),
       );
     } else {
-      // ✅ Allow public share routes to work without forcing login redirect
       const isShareRoute = window.location.hash.includes('#/share/');
+      console.log(
+        '[INTERCEPTOR] no access token, isShareRoute =',
+        isShareRoute,
+      );
 
       if (isShareRoute) {
-        // proceed without Authorization header
         return next.handle(req.clone());
       }
 
-      // Normal behavior for protected pages
-      this.router.navigateByUrl('/login');
-      return new Observable<HttpEvent<any>>((observer) => observer.complete()); // avoid return type error
+      console.log(
+        '[INTERCEPTOR] redirecting to login because token missing. returnUrl =',
+        this.router.url,
+      );
+      this.router.navigate(['/login'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+
+      return new Observable<HttpEvent<any>>((observer) => observer.complete());
     }
   }
 }
