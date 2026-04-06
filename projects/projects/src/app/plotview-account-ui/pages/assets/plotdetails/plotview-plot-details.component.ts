@@ -36,6 +36,7 @@ import {
 /** --- Status helpers (UI <-> storage) --- */
 const STATUS_UI = ['Available', 'In Progress', 'Sold'] as const;
 type Status = (typeof STATUS_UI)[number];
+type PlotSourceType = 'dataset' | 'tileset';
 
 function storageToUI(s: any): Status {
   const t = String(s || '')
@@ -54,7 +55,7 @@ function uiToStorage(s: any): Status {
   if (t.startsWith('avail')) return 'Available';
   if (t.startsWith('sold')) return 'Sold';
   if (t.includes('progress') || t.startsWith('in')) return 'In Progress';
-  return 'Available';
+  return 'In Progress' === s ? 'In Progress' : 'Available';
 }
 
 @Component({
@@ -93,6 +94,11 @@ export class PlotviewPlotDetailsComponent
   private tilesetId?: string;
   private datasetId?: string;
   private selectedFeatureId?: string;
+  private selectedFeatureProps: any;
+
+  // source mode
+  plotSourceType: PlotSourceType = 'dataset';
+  isTilesetOnlyReadOnly = false;
 
   // RIGHT: editable plot details model
   plotModel = {
@@ -451,7 +457,50 @@ export class PlotviewPlotDetailsComponent
       priceMax: '',
       priceUnit: 'Sq ft',
     };
+    this.plotSourceType = 'dataset';
+    this.isTilesetOnlyReadOnly = false;
+    this.selectedFeatureProps = undefined;
     this.isDirty = false;
+  }
+
+  private mapFeaturePropertiesToPlot(
+    props: any,
+    plotNoFallback: string | number = '',
+  ): PlotDetails {
+    const p = props || {};
+
+    const getProp = (keys: string[], fallback = ''): string => {
+      for (const k of keys) {
+        if (p?.[k] !== undefined && p?.[k] !== null) {
+          return String(p[k]);
+        }
+      }
+      return fallback;
+    };
+
+    const priceMin = getProp(['priceMin', 'price_min'], '');
+    const priceMax = getProp(['priceMax', 'price_max'], '');
+    const priceRange = getProp(['priceRange', 'price_range'], '');
+    const rangeMatch =
+      !priceMin && !priceMax ? priceRange.match(/(\d+)\s*-\s*(\d+)/) : null;
+
+    return {
+      plotNo: getProp(
+        ['plotNo', 'plot_no', 'name', 'plot'],
+        String(plotNoFallback),
+      ),
+      east: getProp(['east', 'eastBoundary', 'east_boundary'], ''),
+      west: getProp(['west', 'westBoundary', 'west_boundary'], ''),
+      north: getProp(['north', 'northBoundary', 'north_boundary'], ''),
+      south: getProp(['south', 'southBoundary', 'south_boundary'], ''),
+      salestatus: getProp(['salestatus', 'sale_status', 'status'], 'Available'),
+      facing: getProp(['facing'], ''),
+      ownername: getProp(['ownername', 'owner_name', 'owner'], ''),
+      Developer: getProp(['Developer', 'developer', 'Devloper'], ''),
+      priceMin: priceMin || (rangeMatch ? rangeMatch[1] : ''),
+      priceMax: priceMax || (rangeMatch ? rangeMatch[2] : ''),
+      priceUnit: getProp(['priceUnit', 'price_unit'], 'Sq ft'),
+    };
   }
 
   private hydratePlotModelFromDataset(plot: PlotDetails) {
@@ -485,6 +534,36 @@ export class PlotviewPlotDetailsComponent
     this.commitBaseline();
   }
 
+  private hydratePlotModelFromTilesetProperties(props: any) {
+    const plot = this.mapFeaturePropertiesToPlot(
+      props,
+      this.selectedPlotNo ?? '',
+    );
+
+    this.plotSourceType = 'tileset';
+    this.isTilesetOnlyReadOnly = true;
+
+    this.hydratePlotModelFromDataset(plot);
+
+    console.log('[PlotDetails] using tileset properties fallback →', plot);
+  }
+
+  private shouldFallbackToTileset(err: any): boolean {
+    const status = Number(err?.status ?? err?.error?.status ?? 0);
+    const message = String(
+      err?.error?.message || err?.message || '',
+    ).toLowerCase();
+
+    return (
+      !!this.selectedFeatureProps &&
+      (status === 404 ||
+        message.includes('dataset') ||
+        message.includes('datasetsref') ||
+        message.includes('failed to fetch dataset id') ||
+        message.includes('no dataset found'))
+    );
+  }
+
   private async fetchPlotDetailsFromDataset(showError = true): Promise<void> {
     if (!this.tilesetId) {
       console.warn('[PlotDetails] fetch skipped: missing tilesetId');
@@ -510,6 +589,9 @@ export class PlotviewPlotDetailsComponent
 
       console.log('[PlotDetails] dataset response →', res);
 
+      this.plotSourceType = 'dataset';
+      this.isTilesetOnlyReadOnly = false;
+
       if (res?.datasetId) {
         this.datasetId = res.datasetId;
       }
@@ -523,13 +605,24 @@ export class PlotviewPlotDetailsComponent
       } else {
         console.warn('[PlotDetails] No plot object returned from dataset API');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(
         '[PlotDetails] Failed to fetch plot details from dataset',
         e,
       );
+
+      if (this.shouldFallbackToTileset(e)) {
+        console.warn(
+          '[PlotDetails] dataset not available, falling back to tileset feature properties',
+        );
+        this.selectedFeatureId = undefined;
+        this.datasetId = undefined;
+        this.hydratePlotModelFromTilesetProperties(this.selectedFeatureProps);
+        return;
+      }
+
       if (showError) {
-        alert('Failed to load plot details from dataset');
+        alert('Failed to load plot details');
       }
     }
   }
@@ -565,6 +658,9 @@ export class PlotviewPlotDetailsComponent
 
         // important: clear old featureId when selecting a different plot from map
         this.selectedFeatureId = undefined;
+        this.selectedFeatureProps = p;
+        this.plotSourceType = 'dataset';
+        this.isTilesetOnlyReadOnly = false;
 
         if (!this.selectedPlotNo) {
           console.warn('No plot number found in feature:', p);
@@ -586,6 +682,11 @@ export class PlotviewPlotDetailsComponent
   }
 
   markDirty() {
+    if (this.isTilesetOnlyReadOnly) {
+      this.isDirty = false;
+      return;
+    }
+
     this.isDirty =
       JSON.stringify(this.plotModel) !== JSON.stringify(this.originalModel);
   }
@@ -596,6 +697,13 @@ export class PlotviewPlotDetailsComponent
   }
 
   async onSave() {
+    if (this.isTilesetOnlyReadOnly || this.plotSourceType === 'tileset') {
+      alert(
+        'This project is tileset-only. Viewing is supported, but editing is not available.',
+      );
+      return;
+    }
+
     if (!this.isDirty || this.isSaving) return;
 
     if (!this.selectedPlotNo && !this.selectedFeatureId) {
@@ -638,6 +746,8 @@ export class PlotviewPlotDetailsComponent
       }
 
       if (updateRes?.plot) {
+        this.plotSourceType = 'dataset';
+        this.isTilesetOnlyReadOnly = false;
         this.hydratePlotModelFromDataset(updateRes.plot);
       }
 
