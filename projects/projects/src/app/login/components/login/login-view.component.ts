@@ -15,20 +15,30 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class LoginViewComponent {
   @Input() errorMessage!: string;
-  @Output() submitEM = new EventEmitter();
+  @Output() submitEM = new EventEmitter<{
+    userName: string;
+    password: string;
+    loginTarget: string;
+  }>();
 
   public loginForm!: FormGroup;
-  public logoPath: string = 'assets/images/polygon_logo.png'; // Default logo
+  public logoPath: string = 'assets/images/polygon_logo.png';
 
-  constructor(private fb: FormBuilder) { }
+  public loginTargets = [
+    { label: 'Dashboard', value: '/dashboard' },
+    { label: 'Admin Dashboard', value: '/admin-dashboard' },
+    { label: 'Plotview Account', value: '/plotview-account-ui/dashboard' },
+  ];
+
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit() {
     this.loginForm = this.fb.group({
       userName: ['', Validators.required],
       password: ['', Validators.required],
+      loginTarget: [''],
     });
 
-    // ✅ White-labeling logic: switch logo based on domain
     const host = window.location.hostname;
     if (host.includes('maprx.aero360.co.in')) {
       this.logoPath = 'assets/images/Aero360LoginLogo.png';
@@ -37,6 +47,7 @@ export class LoginViewComponent {
 
   submit() {
     this.errorMessage = '';
+
     if (this.loginForm.valid) {
       this.submitEM.emit(this.loginForm.value);
     }

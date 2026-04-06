@@ -20,52 +20,38 @@ export class LoginComponent {
   ) {}
 
   ngOnInit() {
-    console.log(
-      '[LOGIN] query params =',
-      this.activatedRoute.snapshot.queryParams,
-    );
+    const shouldReload = sessionStorage.getItem('reloadLoginOnce');
+
+    if (shouldReload === 'true') {
+      sessionStorage.removeItem('reloadLoginOnce');
+      window.location.reload();
+      return;
+    }
   }
 
-  loginClick(event: { userName: string; password: string }) {
-    console.log('[LOGIN] loginClick fired with userName =', event.userName);
-    console.log(
-      '[LOGIN] current query params before login =',
-      this.activatedRoute.snapshot.queryParams,
-    );
-
+  loginClick(event: {
+    userName: string;
+    password: string;
+    loginTarget: string;
+  }) {
     this.authService.login(event.userName, event.password).subscribe({
       next: (resp: UserResponse) => {
-        console.log('[LOGIN] login API success');
-        console.log('[LOGIN] response =', resp);
-        console.log(
-          '[LOGIN] access token after login =',
-          localStorage.getItem('polygon_user_a_token'),
-        );
-        console.log(
-          '[LOGIN] refresh token after login =',
-          localStorage.getItem('polygon_user_r_token'),
-        );
-        console.log(
-          '[LOGIN] expires_at after login =',
-          localStorage.getItem('expires_at'),
-        );
-
         if (resp) {
           localStorage.setItem('currentUser', JSON.stringify(resp.user));
 
+          const selectedTarget = event.loginTarget?.trim();
           const returnUrl =
-            this.activatedRoute.snapshot.queryParams['returnUrl'] ||
-            AppConstants.DASHBOARD_URL;
+            this.activatedRoute.snapshot.queryParams['returnUrl'];
 
-          console.log('[LOGIN] navigating to returnUrl =', returnUrl);
-          this.router.navigateByUrl(returnUrl);
+          const finalTarget =
+            selectedTarget || returnUrl || AppConstants.DASHBOARD_URL;
+
+          this.router.navigateByUrl(finalTarget);
         } else {
-          console.error('[LOGIN] resp is empty');
+          console.error('Error in logging in the user');
         }
       },
       error: (error: HttpErrorResponse) => {
-        console.error('[LOGIN] login API error =', error);
-
         if (error.error.code == 401) {
           this.errorMessage = error.error.message;
         } else {

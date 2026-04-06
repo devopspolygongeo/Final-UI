@@ -141,20 +141,25 @@ export class DashboardViewComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (
       changes['view'] &&
-      changes['view'].currentValue != changes['view'].previousValue
+      changes['view'].currentValue !== changes['view'].previousValue &&
+      this.view?.mapStyles
     ) {
       this.styles = this.view.mapStyles;
     }
+
     if (changes['layouts']) {
       console.log('📑 Layouts updated for project:', this.selectedProject?.id);
-      console.log('🔍 First Layout data:', this.layouts[0]);
+      console.log(
+        '🔍 First Layout data:',
+        this.layouts?.length ? this.layouts[0] : null,
+      );
     }
 
     if (
       changes['projects'] &&
-      changes['projects'].currentValue != changes['projects'].previousValue
+      changes['projects'].currentValue !== changes['projects'].previousValue
     ) {
-      if (this.projects.length) {
+      if (this.projects?.length) {
         this.selectedProject = this.projects[0];
         this.onProjectChange(this.selectedProject);
       }
@@ -162,9 +167,9 @@ export class DashboardViewComponent implements OnChanges {
 
     if (
       changes['surveys'] &&
-      changes['surveys'].currentValue != changes['surveys'].previousValue
+      changes['surveys'].currentValue !== changes['surveys'].previousValue
     ) {
-      if (this.surveys.length) {
+      if (this.surveys?.length) {
         this.selectedSurvey = this.surveys[this.surveys.length - 1];
         this.onSurveyChange(this.selectedSurvey);
         this.showLayoutPanel = true;
@@ -174,9 +179,14 @@ export class DashboardViewComponent implements OnChanges {
 
     if (
       changes['sources'] &&
-      changes['sources'].currentValue != changes['sources'].previousValue
+      changes['sources'].currentValue !== changes['sources'].previousValue
     ) {
-      if (this.sources.length) {
+      if (
+        this.sources?.length &&
+        this.view &&
+        this.selectedProject &&
+        this.selectedSurvey
+      ) {
         this.updateMapConfig();
       }
     }
@@ -266,12 +276,21 @@ export class DashboardViewComponent implements OnChanges {
   }
 
   updateMapConfig() {
+    if (
+      !this.view?.mapStyles ||
+      !this.selectedProject ||
+      !this.selectedSurvey
+    ) {
+      return;
+    }
+
     const streetMap = this.view.mapStyles.find(
       (style) => style.id == this.selectedProject.streetMapId,
     );
     const satelliteMap = this.view.mapStyles.find(
       (style) => style.id == this.selectedProject.satelliteMapId,
     );
+
     console.log(
       'selectedProject.streetMapId:',
       this.selectedProject.streetMapId,
@@ -281,6 +300,7 @@ export class DashboardViewComponent implements OnChanges {
       this.view.mapStyles.map((s) => s.id),
     );
     console.log('streetMap found:', streetMap);
+
     this.mapConfig = {
       streetUrl: streetMap
         ? streetMap.url
@@ -294,8 +314,8 @@ export class DashboardViewComponent implements OnChanges {
       minZoom: this.selectedSurvey.zoomMin,
       maxZoom: this.selectedSurvey.zoomMax,
       enableHighlight: this.selectedSurvey.plotView ? true : false,
-      sources: this.sources,
-      landmarks: this.landmarks,
+      sources: this.sources || [],
+      landmarks: this.landmarks || [],
     };
   }
 

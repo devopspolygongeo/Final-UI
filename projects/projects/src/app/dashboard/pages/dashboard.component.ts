@@ -197,11 +197,12 @@ export class DashboardComponent {
   }
 
   onLogout(isLoggedOut: boolean) {
-    // ✅ In share mode, ignore logout clicks (prevents /login routing error)
+    // In share mode, ignore logout clicks
     if (this.isShareMode) return;
 
     if (isLoggedOut) {
       this.authService.logout().subscribe(() => {
+        sessionStorage.setItem('reloadLoginOnce', 'true');
         this.router.navigateByUrl(AppConstants.LOGIN_URL);
       });
     }
