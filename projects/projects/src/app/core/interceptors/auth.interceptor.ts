@@ -18,6 +18,11 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
     console.log('[INTERCEPTOR] request url =', req.url);
+
+    if (req.url.includes('amazonaws.com')) {
+    console.log('[INTERCEPTOR] skipping auth for S3 request');
+    return next.handle(req);
+  }
     console.log('[INTERCEPTOR] No-Auth header =', req.headers.get('No-Auth'));
 
     if (req.headers.get('No-Auth') === 'True') {
