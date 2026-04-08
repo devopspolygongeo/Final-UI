@@ -13,7 +13,7 @@
             <input matInput type="password" placeholder="Password" formControlName="password" />
          </mat-form-field>
 
-         <div class="target-field">
+         <!-- <div class="target-field">
             <label for="loginTarget" class="target-label">Login to</label>
             <select id="loginTarget" formControlName="loginTarget" class="target-select">
                <option value="">Use requested page</option>
@@ -21,7 +21,7 @@
                   {{ item.label }}
                </option>
             </select>
-         </div>
+         </div> -->
 
          <div *ngIf="errorMessage" class="error-message">
             {{ errorMessage }}
