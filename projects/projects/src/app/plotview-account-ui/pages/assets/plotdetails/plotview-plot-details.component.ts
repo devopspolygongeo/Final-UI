@@ -76,6 +76,12 @@ export class PlotviewPlotDetailsComponent
   // search context
   searchPlotNo = '';
   isSearchingPlot = false;
+  isPlotSelected = false;
+
+  // add new option context
+  readonly ADD_NEW_OPTION = 'Add new';
+  customOwnerName = '';
+  customDeveloperName = '';
 
   // map context
   view!: View;
@@ -357,16 +363,24 @@ export class PlotviewPlotDetailsComponent
 
       console.log('[PlotDetails] meta response →', res);
 
-      if (res?.owners) {
-        this.ownersList = [...res.owners];
-      }
+      const owners = Array.isArray(res?.owners) ? res.owners : [];
+      const developers = Array.isArray(res?.developers) ? res.developers : [];
 
-      if (res?.developers) {
-        this.developersList = [...res.developers];
-      }
+      this.ownersList = this.withAddNewOption(owners);
+      this.developersList = this.withAddNewOption(developers);
     } catch (e) {
       console.error('[PlotDetails] Failed to fetch owners/developers', e);
+      this.ownersList = this.withAddNewOption([]);
+      this.developersList = this.withAddNewOption([]);
     }
+  }
+
+  private withAddNewOption(values: string[]): string[] {
+    const clean = values
+      .map((v) => String(v || '').trim())
+      .filter((v) => !!v && v !== this.ADD_NEW_OPTION);
+
+    return [this.ADD_NEW_OPTION, ...Array.from(new Set(clean))];
   }
 
   private async loadSurveyDataAndBuildMap(survey: Survey): Promise<void> {
@@ -435,7 +449,9 @@ export class PlotviewPlotDetailsComponent
         (this.tilesetId
           ? this.datasetIdFromTileset(this.tilesetId)
           : undefined);
+
       await this.loadOwnersAndDevelopersFromDataset();
+
       console.log(
         '[PlotDetails] ids → tilesetId =',
         this.tilesetId,
@@ -448,6 +464,8 @@ export class PlotviewPlotDetailsComponent
       this.groups = [];
       this.layouts = [];
       this.buildMinimalMapConfig();
+      this.ownersList = this.withAddNewOption([]);
+      this.developersList = this.withAddNewOption([]);
     }
   }
 
@@ -523,6 +541,9 @@ export class PlotviewPlotDetailsComponent
       priceMax: '',
       priceUnit: 'Sq ft',
     };
+    this.customOwnerName = '';
+    this.customDeveloperName = '';
+    this.isPlotSelected = false;
     this.plotSourceType = 'dataset';
     this.isTilesetOnlyReadOnly = false;
     this.selectedFeatureProps = undefined;
@@ -570,6 +591,9 @@ export class PlotviewPlotDetailsComponent
   }
 
   private hydratePlotModelFromDataset(plot: PlotDetails) {
+    const ownerValue = String(plot?.ownername ?? '').trim();
+    const developerValue = String(plot?.Developer ?? '').trim();
+
     this.plotModel.plotNo = String(plot?.plotNo ?? '');
     this.plotModel.east = String(plot?.east ?? '');
     this.plotModel.west = String(plot?.west ?? '');
@@ -577,24 +601,24 @@ export class PlotviewPlotDetailsComponent
     this.plotModel.south = String(plot?.south ?? '');
     this.plotModel.facing = String(plot?.facing ?? '');
     this.plotModel.salestatus = storageToUI(plot?.salestatus ?? 'Available');
-    this.plotModel.ownername = String(plot?.ownername ?? '');
-    this.plotModel.Developer = String(plot?.Developer ?? '');
+    this.plotModel.ownername = ownerValue;
+    this.plotModel.Developer = developerValue;
     this.plotModel.priceMin = String(plot?.priceMin ?? '');
     this.plotModel.priceMax = String(plot?.priceMax ?? '');
     this.plotModel.priceUnit = String(plot?.priceUnit ?? 'Sq ft');
 
-    if (
-      this.plotModel.ownername &&
-      !this.ownersList.includes(this.plotModel.ownername)
-    ) {
-      this.ownersList.push(this.plotModel.ownername);
+    this.customOwnerName = '';
+    this.customDeveloperName = '';
+
+    if (ownerValue && !this.ownersList.includes(ownerValue)) {
+      this.ownersList = this.withAddNewOption([...this.ownersList, ownerValue]);
     }
 
-    if (
-      this.plotModel.Developer &&
-      !this.developersList.includes(this.plotModel.Developer)
-    ) {
-      this.developersList.push(this.plotModel.Developer);
+    if (developerValue && !this.developersList.includes(developerValue)) {
+      this.developersList = this.withAddNewOption([
+        ...this.developersList,
+        developerValue,
+      ]);
     }
 
     this.commitBaseline();
@@ -700,6 +724,42 @@ export class PlotviewPlotDetailsComponent
     }
   }
 
+  isAddNewOwnerSelected(): boolean {
+    return this.plotModel.ownername === this.ADD_NEW_OPTION;
+  }
+
+  isAddNewDeveloperSelected(): boolean {
+    return this.plotModel.Developer === this.ADD_NEW_OPTION;
+  }
+
+  onOwnerDropdownChange() {
+    if (!this.isAddNewOwnerSelected()) {
+      this.customOwnerName = '';
+    }
+    this.markDirty();
+  }
+
+  onDeveloperDropdownChange() {
+    if (!this.isAddNewDeveloperSelected()) {
+      this.customDeveloperName = '';
+    }
+    this.markDirty();
+  }
+
+  private getFinalOwnerValue(): string {
+    if (this.isAddNewOwnerSelected()) {
+      return String(this.customOwnerName || '').trim();
+    }
+    return String(this.plotModel.ownername || '').trim();
+  }
+
+  private getFinalDeveloperValue(): string {
+    if (this.isAddNewDeveloperSelected()) {
+      return String(this.customDeveloperName || '').trim();
+    }
+    return String(this.plotModel.Developer || '').trim();
+  }
+
   async onSearchPlot(): Promise<void> {
     const plotNo = String(this.searchPlotNo || '').trim();
 
@@ -717,6 +777,7 @@ export class PlotviewPlotDetailsComponent
 
     try {
       this.selectedPlotNo = plotNo;
+      this.isPlotSelected = true;
       this.selectedFeatureId = undefined;
       this.selectedFeatureProps = undefined;
       this.plotSourceType = 'dataset';
@@ -773,6 +834,7 @@ export class PlotviewPlotDetailsComponent
           return;
         }
 
+        this.isPlotSelected = true;
         this.searchPlotNo = String(this.selectedPlotNo);
         this.plotModel.plotNo = String(this.selectedPlotNo);
 
@@ -794,12 +856,30 @@ export class PlotviewPlotDetailsComponent
       return;
     }
 
+    const comparableModel = {
+      ...this.plotModel,
+      customOwnerName: this.customOwnerName,
+      customDeveloperName: this.customDeveloperName,
+    };
+
+    const comparableOriginal = {
+      ...this.originalModel,
+      customOwnerName: this.originalModel?.customOwnerName ?? '',
+      customDeveloperName: this.originalModel?.customDeveloperName ?? '',
+    };
+
     this.isDirty =
-      JSON.stringify(this.plotModel) !== JSON.stringify(this.originalModel);
+      JSON.stringify(comparableModel) !== JSON.stringify(comparableOriginal);
   }
 
   private commitBaseline() {
-    this.originalModel = JSON.parse(JSON.stringify(this.plotModel));
+    this.originalModel = JSON.parse(
+      JSON.stringify({
+        ...this.plotModel,
+        customOwnerName: this.customOwnerName,
+        customDeveloperName: this.customDeveloperName,
+      }),
+    );
     this.isDirty = false;
   }
 
@@ -823,6 +903,19 @@ export class PlotviewPlotDetailsComponent
       return;
     }
 
+    const finalOwnerName = this.getFinalOwnerValue();
+    const finalDeveloperName = this.getFinalDeveloperValue();
+
+    if (this.isAddNewOwnerSelected() && !finalOwnerName) {
+      alert('Please enter the new owner name.');
+      return;
+    }
+
+    if (this.isAddNewDeveloperSelected() && !finalDeveloperName) {
+      alert('Please enter the new developer name.');
+      return;
+    }
+
     const payload = {
       surveyId: Number(this.selectedSurvey?.id ?? this.surveyId ?? 0),
       tilesetId: this.tilesetId,
@@ -830,8 +923,8 @@ export class PlotviewPlotDetailsComponent
       featureId: this.selectedFeatureId,
       plotNo: this.selectedFeatureId ? undefined : this.selectedPlotNo,
       newStatus: this.normalizeStatus(this.plotModel.salestatus),
-      ownername: this.plotModel.ownername,
-      Developer: this.plotModel.Developer,
+      ownername: finalOwnerName,
+      Developer: finalDeveloperName,
     };
 
     console.log('[PlotDetails] request payload →', payload);
@@ -850,6 +943,23 @@ export class PlotviewPlotDetailsComponent
 
       if (updateRes?.featureId) {
         this.selectedFeatureId = updateRes.featureId;
+      }
+
+      if (finalOwnerName && !this.ownersList.includes(finalOwnerName)) {
+        this.ownersList = this.withAddNewOption([
+          ...this.ownersList,
+          finalOwnerName,
+        ]);
+      }
+
+      if (
+        finalDeveloperName &&
+        !this.developersList.includes(finalDeveloperName)
+      ) {
+        this.developersList = this.withAddNewOption([
+          ...this.developersList,
+          finalDeveloperName,
+        ]);
       }
 
       if (updateRes?.plot) {

@@ -27,13 +27,14 @@
   <!-- RIGHT -->
   <div class="right-section">
     <div class="right-form-card">
+      <div *ngIf="!isPlotSelected" style="color: #999; margin-bottom: 10px;">
+        Please select a plot on the map or search to enable editing.
+      </div>
+
+      <!-- SEARCH -->
       <div class="form-group">
         <label>Search Plot</label>
-        <div style="
-            display: flex;
-            gap: 10px;
-            align-items: center;
-          ">
+        <div style="display: flex; gap: 10px; align-items: center;">
           <input class="form-control" [(ngModel)]="searchPlotNo" (keydown.enter)="onSearchPlotEnter($event)"
             placeholder="Enter plot number" />
           <button type="button" class="save-btn" [disabled]="isSearchingPlot" (click)="onSearchPlot()"
@@ -43,60 +44,24 @@
         </div>
       </div>
 
+      <!-- PLOT NO -->
       <div class="form-group">
         <label>Plot No</label>
-        <input class="form-control" [(ngModel)]="plotModel.plotNo" (ngModelChange)="markDirty()" />
+        <input class="form-control" [(ngModel)]="plotModel.plotNo" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" />
       </div>
 
-      <!--
-      <div class="form-group">
-        <label>East</label>
-        <input
-          class="form-control"
-          [(ngModel)]="plotModel.east"
-          (ngModelChange)="markDirty()"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>West</label>
-        <input
-          class="form-control"
-          [(ngModel)]="plotModel.west"
-          (ngModelChange)="markDirty()"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>North</label>
-        <input
-          class="form-control"
-          [(ngModel)]="plotModel.north"
-          (ngModelChange)="markDirty()"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>South</label>
-        <input
-          class="form-control"
-          [(ngModel)]="plotModel.south"
-          (ngModelChange)="markDirty()"
-        />
-      </div>
-      -->
-
-      <!-- CHANGED: input -> dropdown -->
+      <!-- SALE STATUS -->
       <div class="form-group">
         <label>Sale Status</label>
         <div class="select-wrapper">
-          <select class="form-control" [(ngModel)]="plotModel.salestatus" (ngModelChange)="markDirty()">
+          <select class="form-control" [(ngModel)]="plotModel.salestatus" (ngModelChange)="markDirty()"
+            [disabled]="!isPlotSelected">
             <option *ngFor="let s of saleStatusOptions" [ngValue]="s">
               {{ s }}
             </option>
           </select>
 
-          <!-- chevron (non-clickable) -->
           <span class="select-caret" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -105,42 +70,62 @@
         </div>
       </div>
 
+      <!-- FACING -->
       <div class="form-group">
         <label>Facing</label>
-        <input class="form-control" [(ngModel)]="plotModel.facing" (ngModelChange)="markDirty()" />
+        <input class="form-control" [(ngModel)]="plotModel.facing" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" />
       </div>
 
+      <!-- OWNER -->
       <div class="form-group">
         <label>Owner</label>
+
         <div class="select-wrapper">
-          <select class="form-control" [(ngModel)]="plotModel.ownername" (ngModelChange)="markDirty()">
-            <option *ngFor="let o of ownersList" [ngValue]="o">
+          <select class="form-control" [(ngModel)]="plotModel.ownername" (ngModelChange)="onOwnerDropdownChange()"
+            [disabled]="!isPlotSelected">
+            <option [ngValue]="ADD_NEW_OPTION">Add new</option>
+
+            <option *ngFor="let o of ownersList" [ngValue]="o" [hidden]="o === ADD_NEW_OPTION">
               {{ o }}
             </option>
           </select>
         </div>
+
+        <input *ngIf="isAddNewOwnerSelected()" class="form-control" style="margin-top: 8px;"
+          placeholder="Enter new owner name" [(ngModel)]="customOwnerName" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" />
       </div>
 
+      <!-- DEVELOPER -->
       <div class="form-group">
         <label>Developer</label>
 
         <div class="select-wrapper">
-          <select class="form-control" [(ngModel)]="plotModel.Developer" (ngModelChange)="markDirty()">
-            <option *ngFor="let d of developersList" [ngValue]="d">
+          <select class="form-control" [(ngModel)]="plotModel.Developer" (ngModelChange)="onDeveloperDropdownChange()"
+            [disabled]="!isPlotSelected">
+            <option [ngValue]="ADD_NEW_OPTION">Add new</option>
+
+            <option *ngFor="let d of developersList" [ngValue]="d" [hidden]="d === ADD_NEW_OPTION">
               {{ d }}
             </option>
           </select>
         </div>
+
+        <input *ngIf="isAddNewDeveloperSelected()" class="form-control" style="margin-top: 8px;"
+          placeholder="Enter new developer name" [(ngModel)]="customDeveloperName" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" />
       </div>
 
+      <!-- PRICE -->
       <div class="form-group">
         <label>Price Range</label>
         <div class="price-range-container">
           <div class="price-inputs">
-            <input class="price-input" placeholder="Min" [(ngModel)]="plotModel.priceMin"
-              (ngModelChange)="markDirty()" />
-            <input class="price-input" placeholder="Max" [(ngModel)]="plotModel.priceMax"
-              (ngModelChange)="markDirty()" />
+            <input class="price-input" placeholder="Min" [(ngModel)]="plotModel.priceMin" (ngModelChange)="markDirty()"
+              [disabled]="!isPlotSelected" />
+            <input class="price-input" placeholder="Max" [(ngModel)]="plotModel.priceMax" (ngModelChange)="markDirty()"
+              [disabled]="!isPlotSelected" />
             <div class="price-unit-dropdown">
               <div class="dropdown-input">
                 <span>{{ plotModel.priceUnit }}</span>
@@ -150,9 +135,9 @@
         </div>
       </div>
 
-      <!-- NEW: Save button -->
+      <!-- SAVE -->
       <div class="actions-row">
-        <button class="save-btn" [disabled]="!isDirty" (click)="onSave()">
+        <button class="save-btn" [disabled]="!isDirty || !isPlotSelected" (click)="onSave()">
           Save
         </button>
       </div>
