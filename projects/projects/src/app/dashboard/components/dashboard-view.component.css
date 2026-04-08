@@ -93,18 +93,20 @@
 /* Floating left panel - now positioned after the vertical nav */
 
 .nav-expand.accessibility_content,
-.nav-expand.docs_content,
 .nav-expand.logo_content,
 .nav-expand.layers_content {
   width: 19rem !important;
 }
 
-.nav-expand.proximity_content {
-  width: 22rem !important ;
-}
+.nav-expand.docs_content,
 .nav-expand.gallery_content {
-  width: 34rem !important;
+  width: 70vw !important;
 }
+
+.nav-expand.proximity_content {
+  width: 22rem !important;
+}
+
 .nav-expand.view-360_content {
   width: 1rem !important;
 }
@@ -121,7 +123,9 @@
   max-height: none;
   padding: 0;
   overflow: visible;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 /* Collapsed state for nav-expand */
@@ -149,7 +153,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    left 0.3s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
   padding: 0;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
   border-color: #5e19ea;
@@ -164,17 +171,16 @@
 
 /* When sidebar is expanded, button moves with it */
 .sidebar-toggle.expanded {
-  left: calc(
-    70px + 19rem - 1px
-  ); /* Nav width + sidebar width - border overlap */
+  left: calc(70px + 19rem - 1px);
 }
 
 .sidebar-toggle.expanded.proximity {
   left: calc(70px + 22rem - 1px);
 }
 
-.sidebar-toggle.expanded.gallery {
-  left: calc(70px + 34rem - 1px);
+.sidebar-toggle.expanded.gallery,
+.sidebar-toggle.expanded.docs {
+  left: calc(70px + 70vw - 1px);
 }
 
 .sidebar-toggle.expanded.view-360 {
@@ -189,7 +195,9 @@
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
   border-right: 6px solid #9ca3af;
-  transition: transform 0.3s ease, border-color 0.2s ease;
+  transition:
+    transform 0.3s ease,
+    border-color 0.2s ease;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -640,7 +648,9 @@ mat-label {
   margin-bottom: 10px;
   flex: 0 0 auto;
   cursor: pointer;
-  transition: transform 0.12s ease, background-color 0.12s ease;
+  transition:
+    transform 0.12s ease,
+    background-color 0.12s ease;
   position: relative;
 }
 

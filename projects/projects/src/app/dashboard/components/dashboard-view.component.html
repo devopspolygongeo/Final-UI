@@ -16,6 +16,7 @@
       expanded: !isSidebarCollapsed,
       proximity: selectedNav.name === 'proximity',
       gallery: selectedNav.name === 'gallery',
+      docs: selectedNav.name === 'docs',
       'view-360': selectedNav.name === 'view-360'
     }" (click)="toggleSidebar()" title="{{ isSidebarCollapsed ? 'Show Sidebar' : 'Hide Sidebar' }}">
   </div>
