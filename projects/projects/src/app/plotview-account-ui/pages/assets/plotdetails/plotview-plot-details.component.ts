@@ -31,6 +31,7 @@ import { MapLayerMouseEvent, MapMouseEvent } from 'mapbox-gl';
 import {
   PlotStatusService,
   PlotDetails,
+  PlotBBox,
 } from '../../../services/plot-status.service';
 
 /** --- Status helpers (UI <-> storage) --- */
@@ -71,6 +72,10 @@ export class PlotviewPlotDetailsComponent
   projectId?: number;
   surveyId?: number;
   private selectedPlotNo?: string | number;
+
+  // search context
+  searchPlotNo = '';
+  isSearchingPlot = false;
 
   // map context
   view!: View;
@@ -195,6 +200,64 @@ export class PlotviewPlotDetailsComponent
     setTimeout(() => window.dispatchEvent(new Event('resize')), 300);
   }
 
+  private getMapInstance(): any {
+    return (
+      this.mapCmp?.map ||
+      this.mapCmp?.mapInstance ||
+      this.mapCmp?._map ||
+      this.mapCmp?.mbMap ||
+      this.mapCmp
+    );
+  }
+
+  private zoomToBBox(bbox?: PlotBBox): void {
+    if (!bbox || bbox.length !== 4) {
+      return;
+    }
+
+    const [minX, minY, maxX, maxY] = bbox;
+
+    if (
+      [minX, minY, maxX, maxY].some(
+        (v) => typeof v !== 'number' || Number.isNaN(v),
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const map = this.getMapInstance();
+
+      if (map?.fitBounds) {
+        map.fitBounds(
+          [
+            [minX, minY],
+            [maxX, maxY],
+          ],
+          {
+            padding: { top: 60, bottom: 60, left: 60, right: 60 },
+            duration: 1000,
+            maxZoom: 20,
+          },
+        );
+        return;
+      }
+
+      if (map?.flyTo) {
+        const centerLng = (minX + maxX) / 2;
+        const centerLat = (minY + maxY) / 2;
+
+        map.flyTo({
+          center: [centerLng, centerLat],
+          zoom: 18,
+          duration: 1000,
+        });
+      }
+    } catch (e) {
+      console.warn('[PlotDetails] zoomToBBox failed', e);
+    }
+  }
+
   private async resolveProject(projectId?: number): Promise<Project> {
     try {
       const projects = await firstValueFrom(this.adminAssets.getAllProjects());
@@ -276,6 +339,36 @@ export class PlotviewPlotDetailsComponent
     );
   }
 
+  private async loadOwnersAndDevelopersFromDataset(): Promise<void> {
+    if (!this.tilesetId || !this.selectedSurvey?.id) {
+      console.warn(
+        '[PlotDetails] meta fetch skipped: missing tilesetId/surveyId',
+      );
+      return;
+    }
+
+    try {
+      const res = await firstValueFrom(
+        this.plotStatusSvc.getPlotMeta({
+          surveyId: Number(this.selectedSurvey.id),
+          tilesetId: this.tilesetId,
+        }),
+      );
+
+      console.log('[PlotDetails] meta response →', res);
+
+      if (res?.owners) {
+        this.ownersList = [...res.owners];
+      }
+
+      if (res?.developers) {
+        this.developersList = [...res.developers];
+      }
+    } catch (e) {
+      console.error('[PlotDetails] Failed to fetch owners/developers', e);
+    }
+  }
+
   private async loadSurveyDataAndBuildMap(survey: Survey): Promise<void> {
     if (!survey || !survey.id) {
       this.buildMinimalMapConfig();
@@ -314,33 +407,6 @@ export class PlotviewPlotDetailsComponent
 
       this.sources = srcs as Source[];
 
-      this.ownersList = [];
-      this.developersList = [];
-
-      this.sources.forEach((src: any) => {
-        if (src?.data?.features) {
-          src.data.features.forEach((f: any) => {
-            const owner =
-              f.properties?.ownername ||
-              f.properties?.owner_name ||
-              f.properties?.owner;
-
-            if (owner && !this.ownersList.includes(owner)) {
-              this.ownersList.push(owner);
-            }
-
-            const Developer =
-              f.properties?.Developer ||
-              f.properties?.developer ||
-              f.properties?.Devloper;
-
-            if (Developer && !this.developersList.includes(Developer)) {
-              this.developersList.push(Developer);
-            }
-          });
-        }
-      });
-
       console.log('Owners List →', this.ownersList);
 
       this.groups = groups as any;
@@ -369,7 +435,7 @@ export class PlotviewPlotDetailsComponent
         (this.tilesetId
           ? this.datasetIdFromTileset(this.tilesetId)
           : undefined);
-
+      await this.loadOwnersAndDevelopersFromDataset();
       console.log(
         '[PlotDetails] ids → tilesetId =',
         this.tilesetId,
@@ -564,7 +630,10 @@ export class PlotviewPlotDetailsComponent
     );
   }
 
-  private async fetchPlotDetailsFromDataset(showError = true): Promise<void> {
+  private async fetchPlotDetailsFromDataset(
+    showError = true,
+    zoomToPlot = false,
+  ): Promise<void> {
     if (!this.tilesetId) {
       console.warn('[PlotDetails] fetch skipped: missing tilesetId');
       return;
@@ -605,6 +674,10 @@ export class PlotviewPlotDetailsComponent
       } else {
         console.warn('[PlotDetails] No plot object returned from dataset API');
       }
+
+      if (zoomToPlot && res?.bbox) {
+        this.zoomToBBox(res.bbox);
+      }
     } catch (e: any) {
       console.error(
         '[PlotDetails] Failed to fetch plot details from dataset',
@@ -625,6 +698,39 @@ export class PlotviewPlotDetailsComponent
         alert('Failed to load plot details');
       }
     }
+  }
+
+  async onSearchPlot(): Promise<void> {
+    const plotNo = String(this.searchPlotNo || '').trim();
+
+    if (!plotNo) {
+      alert('Please enter a plot number');
+      return;
+    }
+
+    if (!this.tilesetId) {
+      alert('Tileset mapping is missing for this survey.');
+      return;
+    }
+
+    this.isSearchingPlot = true;
+
+    try {
+      this.selectedPlotNo = plotNo;
+      this.selectedFeatureId = undefined;
+      this.selectedFeatureProps = undefined;
+      this.plotSourceType = 'dataset';
+      this.isTilesetOnlyReadOnly = false;
+
+      await this.fetchPlotDetailsFromDataset(true, true);
+    } finally {
+      this.isSearchingPlot = false;
+    }
+  }
+
+  onSearchPlotEnter(event: Event): void {
+    event.preventDefault();
+    this.onSearchPlot();
   }
 
   onMapMouseEvents(mapEvent: MapLayerMouseEvent | MapMouseEvent) {
@@ -667,6 +773,7 @@ export class PlotviewPlotDetailsComponent
           return;
         }
 
+        this.searchPlotNo = String(this.selectedPlotNo);
         this.plotModel.plotNo = String(this.selectedPlotNo);
 
         console.log(

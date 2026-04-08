@@ -3,19 +3,13 @@
   <!-- LEFT -->
   <div class="left-section" #leftCol>
     <ng-container *ngIf="mapConfig; else noMap">
-      <app-map
-        #mapCmp
-        [mapConfig]="mapConfig"
-        [showLandmarks]="false"
-        [enableTerrain]="is3D"
-        (mapMouseEv)="onMapMouseEvents($event)"
-      >
+      <app-map #mapCmp [mapConfig]="mapConfig" [showLandmarks]="false" [enableTerrain]="is3D"
+        (mapMouseEv)="onMapMouseEvents($event)">
       </app-map>
     </ng-container>
 
     <ng-template #noMap>
-      <div
-        style="
+      <div style="
           height: 70vh;
           min-height: 520px;
           display: flex;
@@ -24,8 +18,7 @@
           border: 1px dashed #ddd;
           border-radius: 8px;
           color: #888;
-        "
-      >
+        ">
         No mapConfig (waiting for data)…
       </div>
     </ng-template>
@@ -35,14 +28,27 @@
   <div class="right-section">
     <div class="right-form-card">
       <div class="form-group">
-        <label>Plot No</label>
-        <input
-          class="form-control"
-          [(ngModel)]="plotModel.plotNo"
-          (ngModelChange)="markDirty()"
-        />
+        <label>Search Plot</label>
+        <div style="
+            display: flex;
+            gap: 10px;
+            align-items: center;
+          ">
+          <input class="form-control" [(ngModel)]="searchPlotNo" (keydown.enter)="onSearchPlotEnter($event)"
+            placeholder="Enter plot number" />
+          <button type="button" class="save-btn" [disabled]="isSearchingPlot" (click)="onSearchPlot()"
+            style="min-width: 110px">
+            {{ isSearchingPlot ? 'Searching...' : 'Search Plot' }}
+          </button>
+        </div>
       </div>
-<!--
+
+      <div class="form-group">
+        <label>Plot No</label>
+        <input class="form-control" [(ngModel)]="plotModel.plotNo" (ngModelChange)="markDirty()" />
+      </div>
+
+      <!--
       <div class="form-group">
         <label>East</label>
         <input
@@ -77,17 +83,14 @@
           [(ngModel)]="plotModel.south"
           (ngModelChange)="markDirty()"
         />
-      </div>-->
+      </div>
+      -->
 
       <!-- CHANGED: input -> dropdown -->
       <div class="form-group">
         <label>Sale Status</label>
         <div class="select-wrapper">
-          <select
-            class="form-control"
-            [(ngModel)]="plotModel.salestatus"
-            (ngModelChange)="markDirty()"
-          >
+          <select class="form-control" [(ngModel)]="plotModel.salestatus" (ngModelChange)="markDirty()">
             <option *ngFor="let s of saleStatusOptions" [ngValue]="s">
               {{ s }}
             </option>
@@ -95,14 +98,7 @@
 
           <!-- chevron (non-clickable) -->
           <span class="select-caret" aria-hidden="true">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
@@ -111,64 +107,40 @@
 
       <div class="form-group">
         <label>Facing</label>
-        <input
-          class="form-control"
-          [(ngModel)]="plotModel.facing"
-          (ngModelChange)="markDirty()"
-        />
+        <input class="form-control" [(ngModel)]="plotModel.facing" (ngModelChange)="markDirty()" />
       </div>
-
 
       <div class="form-group">
         <label>Owner</label>
         <div class="select-wrapper">
-  <select
-    class="form-control"
-    [(ngModel)]="plotModel.ownername"
-    (ngModelChange)="markDirty()"
-  >
-    <option *ngFor="let o of ownersList" [ngValue]="o">
-      {{ o }}
-    </option>  
-  </select>
-</div>
+          <select class="form-control" [(ngModel)]="plotModel.ownername" (ngModelChange)="markDirty()">
+            <option *ngFor="let o of ownersList" [ngValue]="o">
+              {{ o }}
+            </option>
+          </select>
+        </div>
       </div>
 
-
       <div class="form-group">
-  <label>Developer</label>
+        <label>Developer</label>
 
-  <div class="select-wrapper">
-    <select
-      class="form-control"
-      [(ngModel)]="plotModel.Developer"
-      (ngModelChange)="markDirty()"
-    >
-      <option *ngFor="let d of developersList" [ngValue]="d">
-        {{ d }}
-      </option>
-    </select>
-  </div>
-</div>
-
-      
+        <div class="select-wrapper">
+          <select class="form-control" [(ngModel)]="plotModel.Developer" (ngModelChange)="markDirty()">
+            <option *ngFor="let d of developersList" [ngValue]="d">
+              {{ d }}
+            </option>
+          </select>
+        </div>
+      </div>
 
       <div class="form-group">
         <label>Price Range</label>
         <div class="price-range-container">
           <div class="price-inputs">
-            <input
-              class="price-input"
-              placeholder="Min"
-              [(ngModel)]="plotModel.priceMin"
-              (ngModelChange)="markDirty()"
-            />
-            <input
-              class="price-input"
-              placeholder="Max"
-              [(ngModel)]="plotModel.priceMax"
-              (ngModelChange)="markDirty()"
-            />
+            <input class="price-input" placeholder="Min" [(ngModel)]="plotModel.priceMin"
+              (ngModelChange)="markDirty()" />
+            <input class="price-input" placeholder="Max" [(ngModel)]="plotModel.priceMax"
+              (ngModelChange)="markDirty()" />
             <div class="price-unit-dropdown">
               <div class="dropdown-input">
                 <span>{{ plotModel.priceUnit }}</span>

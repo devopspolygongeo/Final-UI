@@ -48,12 +48,29 @@ export interface PlotDetailsReq {
   featureId?: string;
 }
 
+export type PlotBBox = [number, number, number, number];
+
 export interface PlotDetailsRes {
   ok: boolean;
   message?: string;
   datasetId?: string;
   featureId?: string;
+  bbox?: PlotBBox;
   plot?: PlotDetails;
+}
+
+// ------- Plot Meta types -------
+export interface PlotMetaReq {
+  surveyId: number;
+  tilesetId: string;
+}
+
+export interface PlotMetaRes {
+  ok: boolean;
+  message?: string;
+  datasetId?: string;
+  owners?: string[];
+  developers?: string[];
 }
 
 // ------- Asset API types -------
@@ -137,6 +154,24 @@ export class PlotStatusService {
 
     return this.http.get<PlotDetailsRes>(`${this.mapboxBase}/plot-details`, {
       params: queryParams,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
+  }
+
+  // --- Plot meta from dataset ---
+  getPlotMeta(params: PlotMetaReq): Observable<PlotMetaRes> {
+    const token = localStorage.getItem('polygon_user_a_token');
+
+    return this.http.get<PlotMetaRes>(`${this.mapboxBase}/plot-meta`, {
+      params: {
+        surveyId: params.surveyId,
+        tilesetId: params.tilesetId,
+        _ts: Date.now(),
+      } as any,
       headers: {
         Authorization: `Bearer ${token}`,
         'Cache-Control': 'no-cache',
