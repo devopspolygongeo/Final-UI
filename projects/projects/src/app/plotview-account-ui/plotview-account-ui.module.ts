@@ -12,6 +12,7 @@ import { PlotviewProximityComponent } from './pages/assets/proximity/plotview-pr
 import { PlotviewGalleryComponent } from './pages/assets/gallery/plotview-gallery.component';
 import { PlotviewDocumentsComponent } from './pages/assets/documents/plotview-documents.component';
 import { PlotviewLeadManagementComponent } from './pages/assets/lead-management/plotview-lead-management.component';
+import { PlotviewReportsComponent } from './pages/assets/reports/plotview-reports.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PlotViewSubscriptionComponent } from './pages/subscription/plotview-subscription.component';
 import { PlotviewInvoicesComponent } from './pages/invoices/plotview-invoices.component';
@@ -19,28 +20,29 @@ import { PlotviewSupportComponent } from './pages/support/plotview-support.compo
 import { DashboardModule } from '../dashboard/dashboard.module';
 
 @NgModule({
-    declarations: [
-        PlotviewDashboardComponent,
-        PlotviewAssetsComponent,
-        PlotviewLayoutComponent,
-        PlotviewBasicDetailsComponent,
-        PlotviewPlotDetailsComponent,
-        PlotviewProximityComponent,
-        PlotviewGalleryComponent,
-        PlotviewDocumentsComponent,
-        PlotviewLeadManagementComponent,
-        PlotViewSubscriptionComponent,
-        PlotviewInvoicesComponent,
-        PlotviewSupportComponent,
-        // Add more components here
-    ],
-    imports: [
-        CommonModule,
-        PlotviewAccountUiRoutingModule,
-        MatTabsModule,
-        FormsModule,
-        ReactiveFormsModule,
-        DashboardModule, 
-    ]
+  declarations: [
+    PlotviewDashboardComponent,
+    PlotviewAssetsComponent,
+    PlotviewLayoutComponent,
+    PlotviewBasicDetailsComponent,
+    PlotviewPlotDetailsComponent,
+    PlotviewProximityComponent,
+    PlotviewGalleryComponent,
+    PlotviewDocumentsComponent,
+    PlotviewLeadManagementComponent,
+    PlotviewReportsComponent,
+    PlotViewSubscriptionComponent,
+    PlotviewInvoicesComponent,
+    PlotviewSupportComponent,
+    // Add more components here
+  ],
+  imports: [
+    CommonModule,
+    PlotviewAccountUiRoutingModule,
+    MatTabsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    DashboardModule,
+  ],
 })
-export class PlotviewAccountUiModule { }
+export class PlotviewAccountUiModule {}

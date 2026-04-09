@@ -1,0 +1,89 @@
+<div class="reports-wrapper">
+  <div class="reports-header">
+    <div>
+      <h3>Reports</h3>
+      <div class="reports-subtitle" *ngIf="reportName">
+        File: {{ reportName }}
+      </div>
+    </div>
+
+    <div class="header-actions" *ngIf="!loading && !errorMessage && rows.length">
+      <button class="secondary-btn" (click)="clearAllFilters()">
+        Clear Filters
+      </button>
+      <button class="primary-btn" (click)="downloadFilteredCsv()">
+        Download CSV
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="reports-state">
+    Loading report...
+  </div>
+
+  <div *ngIf="!loading && errorMessage" class="reports-state error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && !rows.length" class="reports-state">
+    No report data available.
+  </div>
+
+  <ng-container *ngIf="!loading && !errorMessage && rows.length">
+    <div class="filters-panel">
+      <div class="global-search-block">
+        <label class="filter-label">Search</label>
+        <input class="global-search-input" type="text" [(ngModel)]="globalSearch" (input)="applyFilters()"
+          placeholder="Search across all columns" />
+      </div>
+
+      <div class="filters-summary">
+        <div class="summary-chip">
+          Total Rows: <strong>{{ rows.length }}</strong>
+        </div>
+        <div class="summary-chip">
+          Filtered Rows: <strong>{{ filteredRows.length }}</strong>
+        </div>
+        <div class="summary-chip">
+          Active Column Filters: <strong>{{ getActiveColumnFilterCount() }}</strong>
+        </div>
+      </div>
+
+      <div class="column-filters-grid">
+        <div class="filter-item" *ngFor="let col of columns; trackBy: trackByColumn">
+          <label class="filter-label">{{ col }}</label>
+          <input class="column-filter-input" type="text" [(ngModel)]="columnFilters[col]" (input)="applyFilters()"
+            [placeholder]="'Filter ' + col" />
+        </div>
+      </div>
+    </div>
+
+    <div class="reports-table-wrap">
+      <div class="table-scroll">
+        <table class="reports-table">
+          <thead>
+            <tr>
+              <th *ngFor="let col of columns; trackBy: trackByColumn">
+                {{ col }}
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="!filteredRows.length">
+              <td class="no-results-cell" [attr.colspan]="columns.length">
+                No matching rows found for the current filters.
+              </td>
+            </tr>
+
+            <tr *ngFor="let row of filteredRows; trackBy: trackByIndex">
+              <td *ngFor="let col of columns; trackBy: trackByColumn">
+                {{ row[col] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

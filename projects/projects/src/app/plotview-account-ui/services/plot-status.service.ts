@@ -108,10 +108,24 @@ export interface CreateAssetRequest {
   url: string;
 }
 
+// ------- CSV Data / Reports types -------
+export interface CsvDataMeta {
+  id: number;
+  survey_id: number;
+  file_name: string;
+  csv_url: string;
+}
+
+export interface ParsedCsvDataRes extends CsvDataMeta {
+  columns: string[];
+  rows: Record<string, any>[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlotStatusService {
   private mapboxBase = `${environment.apiUrl}/mapbox`;
   private assetsBase = `${environment.apiUrl}/assets`;
+  private csvDataBase = `${environment.apiUrl}/csv-data`;
 
   constructor(private http: HttpClient) {}
 
@@ -137,7 +151,7 @@ export class PlotStatusService {
     const queryParams: any = {
       surveyId: params.surveyId,
       tilesetId: params.tilesetId,
-      _ts: Date.now(), // cache buster
+      _ts: Date.now(),
     };
 
     if (params.featureId) {
@@ -202,5 +216,30 @@ export class PlotStatusService {
 
   delete(id: number): Observable<{ id: number }> {
     return this.http.delete<{ id: number }>(`${this.assetsBase}/${id}`);
+  }
+
+  // --- Reports / CSV Data ---
+  getCsvDataMeta(surveyId: number): Observable<CsvDataMeta> {
+    const token = localStorage.getItem('polygon_user_a_token');
+
+    return this.http.get<CsvDataMeta>(`${this.csvDataBase}`, {
+      params: { surveyId } as any,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  getParsedCsvData(surveyId: number): Observable<ParsedCsvDataRes> {
+    const token = localStorage.getItem('polygon_user_a_token');
+
+    return this.http.get<ParsedCsvDataRes>(`${this.csvDataBase}/parsed`, {
+      params: { surveyId } as any,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
   }
 }
