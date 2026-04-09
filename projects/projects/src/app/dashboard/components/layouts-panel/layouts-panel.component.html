@@ -59,27 +59,32 @@
               <div class="layout-item d-flex flex-row">
                 <span class="layout-icon facing me-2"></span>
                 <span class="layout-label">Facing</span>
-                <span class="layout-value">{{ plot.facing }}</span>
+                <span class="layout-value">{{ plot?.facing }}</span>
               </div>
+
               <div class="layout-item d-flex flex-row">
                 <span class="layout-icon saleStatus me-2"></span>
                 <span class="layout-label">Sale Status</span>
-                <span class="layout-value">{{ plot.salestatus }}</span>
+                <span class="layout-value">{{ plot?.salestatus }}</span>
               </div>
 
               <div class="layout-item d-flex flex-row">
                 <span class="layout-icon owner me-2"></span>
                 <span class="layout-label">Owner</span>
-                <span class="layout-value">{{ plot.ownername }}</span>
+                <span class="layout-value">{{ plot?.ownername }}</span>
               </div>
 
               <div class="layout-item d-flex flex-row">
                 <span class="layout-icon owner me-2"></span>
                 <span class="layout-label">Developer</span>
-                <span class="layout-value">{{ plot.Developer }}</span>
+                <span class="layout-value">{{ plot?.Developer }}</span>
               </div>
 
-
+              <div class="layout-item d-flex flex-row">
+                <span class="layout-icon owner me-2"></span>
+                <span class="layout-label">Document No</span>
+                <span class="layout-value">{{ plot?.doc_no }}</span>
+              </div>
             </div>
           </div>
 

@@ -151,7 +151,7 @@ export class MapComponent implements OnInit, OnChanges {
     private http: HttpClient,
     private readonly mapService: MapService,
     private volumeService: VolumeService,
-  ) { }
+  ) {}
 
   ngOnInit() {
     mapboxgl.accessToken = environment.mapBox.accessToken;
@@ -190,7 +190,7 @@ export class MapComponent implements OnInit, OnChanges {
     if (
       changes['layerVisibility'] &&
       changes['layerVisibility'].currentValue !=
-      changes['layerVisibility'].previousValue
+        changes['layerVisibility'].previousValue
     ) {
       // If parent explicitly sends new toggles, we allow application
       this.isProjectSwitching = false;
@@ -199,14 +199,14 @@ export class MapComponent implements OnInit, OnChanges {
     if (
       changes['layerPaintChange'] &&
       changes['layerPaintChange'].currentValue !=
-      changes['layerPaintChange'].previousValue
+        changes['layerPaintChange'].previousValue
     ) {
       this.changeLayerColor(this.layerPaintChange);
     }
     if (
       changes['showLandmarks'] &&
       changes['showLandmarks'].currentValue !=
-      changes['showLandmarks'].previousValue
+        changes['showLandmarks'].previousValue
     ) {
       this.toggleMarkersAndNavigation();
     }
@@ -236,7 +236,7 @@ export class MapComponent implements OnInit, OnChanges {
   public resize(): void {
     try {
       this.map?.resize();
-    } catch { }
+    } catch {}
   }
 
   onStyleTypeChange() {
@@ -300,34 +300,24 @@ export class MapComponent implements OnInit, OnChanges {
     } else if (event.type === AppConstants.MAP_MOUSE_LEAVE_EVENT) {
       this.map.getCanvas().style.cursor = '';
     } else if (event.type === AppConstants.MAP_MOUSE_LEFT_CLICK_EVENT) {
-      if (event.features && event.features.length > 0) {
-        const props: any = event.features[0].properties;
-
-        console.log('Clicked Properties:', props);
-
-        // 👉 Extract required fields
-        const plotDetails = {
-          plot_no: props.plot_no,
-          facing: props.facing,
-          salestatus: props.salestatus,
-          owner: props.ownername,     // ✅ FIXED
-          development: props.Developer     // (if exists in geojson)
-        };
-
-        console.log('Final Data:', plotDetails);
-
-        // 👉 Send to parent (UI panel)
-        this.mapMouseEv.emit({
-          ...event,
-          plotDetails: plotDetails
-        } as any);
-      }
       const features = this.map.queryRenderedFeatures(event.point, {
         layers: this.interactionLayerNames,
       });
 
+      console.log('Clicked features =>', features);
+
       if (features.length > 0) {
         event.features = features;
+
+        const props: any = features[0].properties || {};
+
+        // console.log('Clicked Properties full object =>', props);
+        // console.log('Clicked Properties keys =>', Object.keys(props));
+        // console.log('doc_no =>', props?.doc_no);
+        // console.log('docNo =>', props?.docNo);
+        // console.log('document_no =>', props?.document_no);
+        // console.log('ownername =>', props?.ownername);
+        // console.log('Developer =>', props?.Developer);
       }
 
       if (this.mapConfig.enableHighlight) {
@@ -441,9 +431,12 @@ export class MapComponent implements OnInit, OnChanges {
                     'interpolate',
                     ['linear'],
                     ['zoom'],
-                    12, 8,
-                    15, 10,
-                    18, 14
+                    12,
+                    8,
+                    15,
+                    10,
+                    18,
+                    14,
                   ],
 
                   'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
@@ -452,7 +445,7 @@ export class MapComponent implements OnInit, OnChanges {
                   'text-allow-overlap': false,
                   'text-ignore-placement': false,
 
-                  'symbol-spacing': 200
+                  'symbol-spacing': 200,
                 },
 
                 paint: {
@@ -1196,9 +1189,9 @@ export class MapComponent implements OnInit, OnChanges {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

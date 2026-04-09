@@ -25,6 +25,7 @@ export interface PlotDetails {
   plot_no: string;
   salestatus: string;
 
-  ownername: string; // ✅ add
-  Developer: string; // ✅ add (optional)
+  ownername: string;
+  Developer: string;
+  doc_no?: string;
 }
