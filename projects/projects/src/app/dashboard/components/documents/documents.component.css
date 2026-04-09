@@ -1,12 +1,11 @@
 /* ===============================
    DOCUMENTS COMPONENT STYLES
-   Enhanced to match layer styling
+   Updated for document-name list + live search
    =============================== */
 
-/* Import attractive fonts (consistent with layers) */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;600&display=swap");
 
-/* Main header styling - matches layers component */
+/* Main header styling */
 h5 {
   color: #1e293b;
   font-family: "Poppins", sans-serif;
@@ -69,12 +68,62 @@ h5 {
   padding: 0 16px;
 }
 
-/* PDF/document wrapper styling */
-.pdf-wrapper {
-  max-width: 200px;
-  max-height: 200px;
+/* Search section */
+.search-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 0 16px;
+}
+
+.document-search-input {
+  flex: 1;
+  min-width: 240px;
+  height: 42px;
+  padding: 0 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.document-search-input:focus {
+  border-color: #5e19ea;
+  box-shadow: 0 0 0 3px rgba(94, 25, 234, 0.08);
+}
+
+.document-clear-btn {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+}
+
+.document-clear-btn:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+/* Document card styling */
+.document-name-card {
+  width: 240px;
+  min-height: 90px;
   cursor: pointer;
   margin: 16px;
+  padding: 16px;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -82,27 +131,27 @@ h5 {
   border: 2px solid #e2e8f0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: fadeInUp 0.3s ease-out;
 }
 
-.pdf-wrapper:hover {
+.document-name-card:hover {
   background: linear-gradient(135deg, #ffffff 0%, #f7f0ff 100%);
   border-color: #5e19ea;
   box-shadow: 0 8px 24px rgba(94, 25, 234, 0.12);
   transform: translateY(-2px);
 }
 
-.pdf-wrapper:active {
+.document-name-card:active {
   transform: translateY(0);
 }
 
-/* Gradient overlay effect on hover */
-.pdf-wrapper::before {
+.document-name-card::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(
     135deg,
     rgba(94, 25, 234, 0.08) 0%,
@@ -112,22 +161,44 @@ h5 {
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
 }
 
-.pdf-wrapper:hover::before {
+.document-name-card:hover::before {
   opacity: 1;
 }
 
-/* Document object styling */
-.document {
-  width: 200px;
-  height: 200px;
+.document-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   border-radius: 10px;
-  pointer-events: none;
+  background: linear-gradient(135deg, #ede9fe, #f3e8ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
-/* Empty state message styling */
+.document-icon i {
+  font-size: 18px;
+  color: #5e19ea;
+}
+
+.document-name {
+  position: relative;
+  z-index: 1;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Empty state */
 .empty-document-message {
   font-family: "Inter", sans-serif;
   font-size: 14px;
@@ -141,7 +212,7 @@ h5 {
   border: 2px dashed #e2e8f0;
 }
 
-/* Flex container for documents */
+/* Flex container */
 .d-flex {
   display: flex;
 }
@@ -152,6 +223,10 @@ h5 {
 
 /* Margin utilities */
 .mt-4 {
+  margin-top: 1rem !important;
+}
+
+.mt-3 {
   margin-top: 1rem !important;
 }
 
@@ -167,19 +242,8 @@ h5 {
   margin: 1.5rem !important;
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 768px) {
-  .pdf-wrapper {
-    max-width: 160px;
-    max-height: 160px;
-    margin: 12px;
-  }
-
-  .document {
-    width: 160px;
-    height: 160px;
-  }
-
   h5 {
     padding: 0 12px;
     font-size: 16px;
@@ -188,9 +252,23 @@ h5 {
   .container {
     padding: 0 12px;
   }
+
+  .search-section {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  .document-search-input {
+    min-width: 100%;
+  }
+
+  .document-name-card {
+    width: 100%;
+    margin: 10px 0;
+  }
 }
 
-/* Animation for document entries */
+/* Entry animation */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -200,8 +278,4 @@ h5 {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.pdf-wrapper {
-  animation: fadeInUp 0.3s ease-out;
 }
