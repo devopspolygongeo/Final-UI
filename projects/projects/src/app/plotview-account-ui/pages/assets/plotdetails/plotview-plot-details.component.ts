@@ -114,6 +114,7 @@ export class PlotviewPlotDetailsComponent
   // RIGHT: editable plot details model
   plotModel = {
     plotNo: '',
+    doc_no: '',
     east: '',
     west: '',
     north: '',
@@ -529,6 +530,7 @@ export class PlotviewPlotDetailsComponent
   private resetPlotModel() {
     this.plotModel = {
       plotNo: '',
+      doc_no: '',
       east: '',
       west: '',
       north: '',
@@ -576,6 +578,7 @@ export class PlotviewPlotDetailsComponent
         ['plotNo', 'plot_no', 'name', 'plot'],
         String(plotNoFallback),
       ),
+      doc_no: getProp(['doc_no', 'docNo', 'document_no', 'documentNo'], ''),
       east: getProp(['east', 'eastBoundary', 'east_boundary'], ''),
       west: getProp(['west', 'westBoundary', 'west_boundary'], ''),
       north: getProp(['north', 'northBoundary', 'north_boundary'], ''),
@@ -595,6 +598,7 @@ export class PlotviewPlotDetailsComponent
     const developerValue = String(plot?.Developer ?? '').trim();
 
     this.plotModel.plotNo = String(plot?.plotNo ?? '');
+    this.plotModel.doc_no = String(plot?.doc_no ?? '');
     this.plotModel.east = String(plot?.east ?? '');
     this.plotModel.west = String(plot?.west ?? '');
     this.plotModel.north = String(plot?.north ?? '');
@@ -905,6 +909,7 @@ export class PlotviewPlotDetailsComponent
 
     const finalOwnerName = this.getFinalOwnerValue();
     const finalDeveloperName = this.getFinalDeveloperValue();
+    const finalDocNo = String(this.plotModel.doc_no || '').trim();
 
     if (this.isAddNewOwnerSelected() && !finalOwnerName) {
       alert('Please enter the new owner name.');
@@ -925,6 +930,7 @@ export class PlotviewPlotDetailsComponent
       newStatus: this.normalizeStatus(this.plotModel.salestatus),
       ownername: finalOwnerName,
       Developer: finalDeveloperName,
+      doc_no: finalDocNo,
     };
 
     console.log('[PlotDetails] request payload →', payload);

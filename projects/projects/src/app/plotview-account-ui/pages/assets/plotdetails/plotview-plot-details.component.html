@@ -51,6 +51,13 @@
           [disabled]="!isPlotSelected" />
       </div>
 
+      <!-- DOC NO -->
+      <div class="form-group">
+        <label>Doc No</label>
+        <input class="form-control" [(ngModel)]="plotModel.doc_no" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" />
+      </div>
+
       <!-- SALE STATUS -->
       <div class="form-group">
         <label>Sale Status</label>
@@ -71,11 +78,11 @@
       </div>
 
       <!-- FACING -->
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label>Facing</label>
         <input class="form-control" [(ngModel)]="plotModel.facing" (ngModelChange)="markDirty()"
           [disabled]="!isPlotSelected" />
-      </div>
+      </div> -->
 
       <!-- OWNER -->
       <div class="form-group">
@@ -98,7 +105,7 @@
       </div>
 
       <!-- DEVELOPER -->
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label>Developer</label>
 
         <div class="select-wrapper">
@@ -115,10 +122,10 @@
         <input *ngIf="isAddNewDeveloperSelected()" class="form-control" style="margin-top: 8px;"
           placeholder="Enter new developer name" [(ngModel)]="customDeveloperName" (ngModelChange)="markDirty()"
           [disabled]="!isPlotSelected" />
-      </div>
+      </div> -->
 
       <!-- PRICE -->
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label>Price Range</label>
         <div class="price-range-container">
           <div class="price-inputs">
@@ -133,7 +140,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- SAVE -->
       <div class="actions-row">

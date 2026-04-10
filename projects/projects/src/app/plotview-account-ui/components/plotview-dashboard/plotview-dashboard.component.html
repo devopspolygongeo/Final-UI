@@ -22,38 +22,20 @@
         </div>
         <div class="card-content">
           <div class="tab-navigation">
-            <button
-              *ngFor="let tab of tabs"
-              (click)="setActiveTab(tab)"
-              [class.tab-active]="activeTab === tab"
-              class="tab-button"
-            >
+            <button *ngFor="let tab of tabs" (click)="setActiveTab(tab)" [class.tab-active]="activeTab === tab"
+              class="tab-button">
               {{ tab }}
             </button>
           </div>
 
           <div class="search-container">
             <div class="search-input-wrapper">
-              <svg
-                class="search-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input
-                type="text"
-                placeholder="Enter asset name"
-                [(ngModel)]="searchTerm"
-                class="search-input"
-              />
+              <input type="text" placeholder="Enter asset name" [(ngModel)]="searchTerm" class="search-input" />
             </div>
           </div>
 
@@ -65,76 +47,46 @@
                   <p class="asset-date">{{ asset.date }}</p>
                 </div>
                 <div class="asset-actions">
-  <!-- Status -->
-  <span
-    class="status-badge"
-    [class.active]="asset.status === 'Active'"
-    [class.inactive]="asset.status === 'Inactive'"
-  >
-    {{ asset.status }}
-    <span *ngIf="asset.validTill">
-      till : {{ asset.validTill }}
-    </span>
-  </span>
+                  <!-- Status -->
+                  <span class="status-badge" [class.active]="asset.status === 'Active'"
+                    [class.inactive]="asset.status === 'Inactive'">
+                    {{ asset.status }}
+                    <span *ngIf="asset.validTill">
+                      till : {{ asset.validTill }}
+                    </span>
+                  </span>
 
-  <!-- Edit -->
-  <button
-    type="button"
-    class="action-btn"
-    title="Edit"
-    (click)="onEditAsset(asset)"
-  >
-    <svg
-      class="action-icon"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path
-        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-      ></path>
-      <path
-        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-      ></path>
-    </svg>
-  </button>
+                  <!-- Edit -->
+                  <button type="button" class="action-btn" title="Edit" (click)="onEditAsset(asset)">
+                    <svg class="action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
 
-  <!-- More menu -->
+                  <!-- More menu -->
 
-  
-</div>
+
+                </div>
 
               </div>
 
               <div class="asset-footer">
                 <p class="asset-location">{{ asset.location }}</p>
                 <div class="asset-url-section">
-  <span class="asset-url">{{ asset.url }}</span>
+                  <span class="asset-url">{{ asset.url }}</span>
 
-  <!-- Copy button -->
-  <button
-    type="button"
-    class="copy-btn"
-    (click)="copyAssetUrl(asset.url)"
-    title="Copy URL"
-  >
-    Copy
-  </button>
+                  <!-- Copy button -->
+                  <button type="button" class="copy-btn" (click)="copyAssetUrl(asset.url)" title="Copy URL">
+                    Copy
+                  </button>
 
-  <!-- View button -->
-  <button
-    type="button"
-    class="view-btn"
-    (click)="onViewAsset(asset)"
-  >
-    View
-  </button>
-</div>
+                  <!-- View button -->
+                  <button type="button" class="view-btn" (click)="onViewAsset(asset)">
+                    View
+                  </button>
+                </div>
 
 
               </div>
@@ -162,7 +114,7 @@
       </div>
 
       <!-- Subscription -->
-      <div class="subscription-card">
+      <!-- <div class="subscription-card">
         <div class="subscription-header">
           <select
             class="subscription-select"
@@ -200,17 +152,13 @@
             {{ dashboardData.subscription.validDate }}
           </p>
         </div>
-      </div>
+      </div> -->
 
       <!-- Impressions -->
       <div class="impressions-card">
         <div class="impressions-header">
           <p class="impressions-label">Plot Impressions</p>
-          <select
-            [value]="selectedPeriod"
-            (change)="onPeriodChange($event)"
-            class="period-select"
-          >
+          <select [value]="selectedPeriod" (change)="onPeriodChange($event)" class="period-select">
             <option value="Month">Month</option>
             <option value="Week">Week</option>
             <option value="Year">Year</option>
@@ -227,12 +175,12 @@
       </div>
 
 
-      
-         
+
+
       <!-- Stats -->
-       
-          <!-- Temporarily hidden -->
-  <!--
+
+      <!-- Temporarily hidden -->
+      <!--
       <div class="stats-grid">
         <div class="stat-card">
           <svg

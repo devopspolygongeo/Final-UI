@@ -9,7 +9,7 @@ import { AuthService } from '../../../login/services/auth.service';
 })
 export class PlotviewAccountSettingsComponent {
   activeComponent: string = 'profile';
-  userName: string = 'Rayapati Rajasekhar';
+  userName: string = 'Speed Admin';
 
   constructor(
     private authService: AuthService,

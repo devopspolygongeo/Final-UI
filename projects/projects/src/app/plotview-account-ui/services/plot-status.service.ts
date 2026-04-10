@@ -14,10 +14,12 @@ export interface PlotStatusUpdateReq {
   newStatus: 'Available' | 'In Progress' | 'Sold';
   ownername?: string;
   Developer?: string;
+  doc_no?: string;
 }
 
 export interface PlotDetails {
   plotNo: string;
+  doc_no?: string;
   east: string;
   west: string;
   north: string;
