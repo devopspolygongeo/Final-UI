@@ -123,6 +123,32 @@ export interface ParsedCsvDataRes extends CsvDataMeta {
   rows: Record<string, any>[];
 }
 
+// ------- CSV Filters / Reports types -------
+export interface CsvFilterItemRes {
+  id: number;
+  groupId: number;
+  attribute: string;
+  value: string;
+  label: string;
+  priority: number;
+  visibility: boolean;
+}
+
+export interface CsvFilterGroupRes {
+  id: number;
+  surveyId: number;
+  type: number | string;
+  priority: number;
+  name: string;
+  visibility: boolean;
+  items: CsvFilterItemRes[];
+}
+
+export interface ParsedCsvFiltersRes {
+  surveyId: number;
+  groups: CsvFilterGroupRes[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlotStatusService {
   private mapboxBase = `${environment.apiUrl}/mapbox`;
@@ -236,6 +262,19 @@ export class PlotStatusService {
     const token = localStorage.getItem('polygon_user_a_token');
 
     return this.http.get<ParsedCsvDataRes>(`${this.csvDataBase}/parsed`, {
+      params: { surveyId } as any,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
+  }
+
+  getParsedCsvFilters(surveyId: number): Observable<ParsedCsvFiltersRes> {
+    const token = localStorage.getItem('polygon_user_a_token');
+
+    return this.http.get<ParsedCsvFiltersRes>(`${this.csvDataBase}/filters`, {
       params: { surveyId } as any,
       headers: {
         Authorization: `Bearer ${token}`,

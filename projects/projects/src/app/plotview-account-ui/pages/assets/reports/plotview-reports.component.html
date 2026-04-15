@@ -7,10 +7,10 @@
       </div>
     </div>
 
-    <div class="header-actions" *ngIf="!loading && !errorMessage && rows.length">
-      <!-- <button class="secondary-btn" (click)="clearAllFilters()">
+    <div class="header-actions" *ngIf="!loading && !errorMessage && filteredRows.length">
+      <button class="secondary-btn" (click)="clearAllFilters()">
         Clear Filters
-      </button> -->
+      </button>
       <button class="primary-btn" (click)="downloadFilteredCsv()">
         Download CSV
       </button>
@@ -25,18 +25,16 @@
     {{ errorMessage }}
   </div>
 
-  <div *ngIf="!loading && !errorMessage && !rows.length" class="reports-state">
+  <div *ngIf="!loading && !errorMessage && !displayColumnKeys.length" class="reports-state">
+    No report columns available.
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && displayColumnKeys.length && !rows.length" class="reports-state">
     No report data available.
   </div>
 
-  <ng-container *ngIf="!loading && !errorMessage && rows.length">
-    <!-- <div class="filters-panel">
-      <div class="global-search-block">
-        <label class="filter-label">Search</label>
-        <input class="global-search-input" type="text" [(ngModel)]="globalSearch" (input)="applyFilters()"
-          placeholder="Search across all columns" />
-      </div>
-
+  <ng-container *ngIf="!loading && !errorMessage && displayColumnKeys.length && rows.length">
+    <div class="filters-panel" *ngIf="filterGroups.length">
       <div class="filters-summary">
         <div class="summary-chip">
           Total Rows: <strong>{{ rows.length }}</strong>
@@ -45,40 +43,58 @@
           Filtered Rows: <strong>{{ filteredRows.length }}</strong>
         </div>
         <div class="summary-chip">
-          Active Column Filters: <strong>{{ getActiveColumnFilterCount() }}</strong>
+          Active Group Filters:
+          <strong>{{ getActiveGroupedFilterCount() }}</strong>
         </div>
       </div>
 
-      <div class="column-filters-grid">
-        <div class="filter-item" *ngFor="let col of columns; trackBy: trackByColumn">
-          <label class="filter-label">{{ col }}</label>
-          <input class="column-filter-input" type="text" [(ngModel)]="columnFilters[col]" (input)="applyFilters()"
-            [placeholder]="'Filter ' + col" />
+      <div class="filter-groups-grid">
+        <div class="filter-group-card" *ngFor="let group of filterGroups; trackBy: trackByFilterGroup">
+          <button type="button" class="filter-group-header" (click)="toggleFilterGroup(group.id)">
+            <span class="filter-group-arrow" [class.expanded]="isFilterGroupExpanded(group.id)">
+              ›
+            </span>
+
+            <span class="filter-group-title-wrap">
+              <span class="filter-group-title">{{ group.name }}</span>
+              <span class="filter-group-count" *ngIf="getGroupSelectedCount(group) > 0">
+                {{ getGroupSelectedCount(group) }} selected
+              </span>
+            </span>
+          </button>
+
+          <div class="filter-group-body" *ngIf="isFilterGroupExpanded(group.id)">
+            <label class="filter-checkbox-item" *ngFor="let item of group.items; trackBy: trackByFilterItem">
+              <input type="checkbox" [checked]="isFilterItemSelected(group, item)"
+                (change)="onFilterItemChange(group, item, $event)" />
+              <span>{{ item.label }}</span>
+            </label>
+          </div>
         </div>
       </div>
-    </div> -->
+    </div>
 
     <div class="reports-table-wrap">
       <div class="table-scroll">
         <table class="reports-table">
           <thead>
             <tr>
-              <th *ngFor="let col of columns; trackBy: trackByColumn">
-                {{ col }}
+              <th *ngFor="let col of displayColumns; trackBy: trackByColumn">
+                {{ col.label }}
               </th>
             </tr>
           </thead>
 
           <tbody>
             <tr *ngIf="!filteredRows.length">
-              <td class="no-results-cell" [attr.colspan]="columns.length">
-                No matching rows found for the current filters.
+              <td class="no-results-cell" [attr.colspan]="displayColumnKeys.length">
+                No matching rows found.
               </td>
             </tr>
 
             <tr *ngFor="let row of filteredRows; trackBy: trackByIndex">
-              <td *ngFor="let col of columns; trackBy: trackByColumn">
-                {{ row[col] }}
+              <td *ngFor="let col of displayColumns; trackBy: trackByColumn">
+                {{ row[col.key] }}
               </td>
             </tr>
           </tbody>

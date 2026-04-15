@@ -3,7 +3,19 @@ import { ActivatedRoute } from '@angular/router';
 import {
   PlotStatusService,
   ParsedCsvDataRes,
+  ParsedCsvFiltersRes,
+  CsvFilterGroupRes,
+  CsvFilterItemRes,
 } from '../../../services/plot-status.service';
+import {
+  REPORT_COLUMN_CONFIG,
+  normalizeReportConfigKey,
+} from './report-columns.config';
+
+interface ResolvedDisplayColumn {
+  key: string;
+  label: string;
+}
 
 @Component({
   selector: 'app-plotview-reports',
@@ -18,12 +30,23 @@ export class PlotviewReportsComponent implements OnInit {
   errorMessage = '';
 
   reportName = '';
+
   columns: string[] = [];
   rows: Record<string, any>[] = [];
+
+  displayColumns: ResolvedDisplayColumn[] = [];
+  displayColumnKeys: string[] = [];
   filteredRows: Record<string, any>[] = [];
+
+  filterGroups: CsvFilterGroupRes[] = [];
+  selectedFilterValues: Record<string, string[]> = {};
+  expandedFilterGroups: Record<number, boolean> = {};
 
   globalSearch = '';
   columnFilters: Record<string, string> = {};
+
+  private reportLoaded = false;
+  private filtersLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -39,56 +62,234 @@ export class PlotviewReportsComponent implements OnInit {
       this.surveyId = surveyIdStr ? Number(surveyIdStr) : undefined;
 
       if (this.surveyId && Number.isFinite(this.surveyId)) {
+        this.resetStateForReload();
         this.loadReport(this.surveyId);
+        this.loadFilters(this.surveyId);
       } else {
         this.errorMessage = 'Survey ID is missing.';
-        this.columns = [];
-        this.rows = [];
-        this.filteredRows = [];
+        this.resetAllState();
       }
     });
   }
 
-  loadReport(surveyId: number): void {
+  resetStateForReload(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.reportLoaded = false;
+    this.filtersLoaded = false;
+    this.reportName = '';
+    this.columns = [];
+    this.rows = [];
+    this.displayColumns = [];
+    this.displayColumnKeys = [];
+    this.filteredRows = [];
+    this.filterGroups = [];
+    this.selectedFilterValues = {};
+    this.expandedFilterGroups = {};
+    this.globalSearch = '';
+    this.columnFilters = {};
+  }
 
+  resetAllState(): void {
+    this.reportName = '';
+    this.columns = [];
+    this.rows = [];
+    this.displayColumns = [];
+    this.displayColumnKeys = [];
+    this.filteredRows = [];
+    this.filterGroups = [];
+    this.selectedFilterValues = {};
+    this.expandedFilterGroups = {};
+    this.globalSearch = '';
+    this.columnFilters = {};
+    this.loading = false;
+  }
+
+  loadReport(surveyId: number): void {
     this.plotStatusService.getParsedCsvData(surveyId).subscribe({
       next: (resp: ParsedCsvDataRes) => {
         this.reportName = resp.file_name || 'Report';
         this.columns = Array.isArray(resp.columns) ? resp.columns : [];
         this.rows = Array.isArray(resp.rows) ? resp.rows : [];
-        this.filteredRows = [...this.rows];
+
+        this.setupDisplayColumns();
         this.initializeColumnFilters();
-        this.loading = false;
+
+        this.reportLoaded = true;
+        this.finishLoadAndApplyFiltersIfReady();
       },
       error: (err: any) => {
         console.error('Failed to load report data', err);
         this.errorMessage = 'Failed to load report data.';
-        this.columns = [];
-        this.rows = [];
-        this.filteredRows = [];
-        this.loading = false;
+        this.resetAllState();
       },
     });
   }
 
+  loadFilters(surveyId: number): void {
+    this.plotStatusService.getParsedCsvFilters(surveyId).subscribe({
+      next: (resp: ParsedCsvFiltersRes) => {
+        this.filterGroups = Array.isArray(resp.groups) ? resp.groups : [];
+        this.initializeSelectedFilterValues();
+        this.initializeExpandedFilterGroups();
+        this.filtersLoaded = true;
+        this.finishLoadAndApplyFiltersIfReady();
+      },
+      error: (err: any) => {
+        console.error('Failed to load report filters', err);
+        this.filterGroups = [];
+        this.selectedFilterValues = {};
+        this.expandedFilterGroups = {};
+        this.filtersLoaded = true;
+        this.finishLoadAndApplyFiltersIfReady();
+      },
+    });
+  }
+
+  finishLoadAndApplyFiltersIfReady(): void {
+    if (!this.reportLoaded || !this.filtersLoaded) {
+      return;
+    }
+
+    this.applyFilters();
+    this.loading = false;
+  }
+
+  setupDisplayColumns(): void {
+    const normalizedReportKey = normalizeReportConfigKey(this.reportName);
+    const configuredColumns = REPORT_COLUMN_CONFIG[normalizedReportKey] || [];
+    const availableColumnSet = new Set(this.columns);
+
+    if (configuredColumns.length) {
+      this.displayColumns = configuredColumns
+        .map((configCol) => {
+          const matchedKey = configCol.keys.find((key) =>
+            availableColumnSet.has(key),
+          );
+
+          if (!matchedKey) {
+            return null;
+          }
+
+          return {
+            key: matchedKey,
+            label: configCol.label,
+          } as ResolvedDisplayColumn;
+        })
+        .filter((col): col is ResolvedDisplayColumn => !!col);
+    } else {
+      this.displayColumns = this.columns.map((col) => ({
+        key: col,
+        label: this.toDisplayLabel(col),
+      }));
+    }
+
+    this.displayColumnKeys = this.displayColumns.map((col) => col.key);
+  }
+
   initializeColumnFilters(): void {
     const nextFilters: Record<string, string> = {};
-    this.columns.forEach((col) => {
+
+    this.displayColumnKeys.forEach((col) => {
       nextFilters[col] = this.columnFilters[col] || '';
     });
+
     this.columnFilters = nextFilters;
+  }
+
+  initializeSelectedFilterValues(): void {
+    const nextSelected: Record<string, string[]> = {};
+
+    this.filterGroups.forEach((group) => {
+      const key = this.getGroupSelectionKey(group);
+      nextSelected[key] = this.selectedFilterValues[key] || [];
+    });
+
+    this.selectedFilterValues = nextSelected;
+  }
+
+  initializeExpandedFilterGroups(): void {
+    const nextExpanded: Record<number, boolean> = {};
+
+    this.filterGroups.forEach((group, index) => {
+      nextExpanded[group.id] =
+        this.expandedFilterGroups[group.id] ?? index === 0;
+    });
+
+    this.expandedFilterGroups = nextExpanded;
+  }
+
+  toggleFilterGroup(groupId: number): void {
+    this.expandedFilterGroups[groupId] = !this.expandedFilterGroups[groupId];
+  }
+
+  isFilterGroupExpanded(groupId: number): boolean {
+    return !!this.expandedFilterGroups[groupId];
+  }
+
+  getGroupSelectionKey(group: CsvFilterGroupRes): string {
+    return `${group.id}__${group.name}`;
+  }
+
+  getGroupSelectedCount(group: CsvFilterGroupRes): number {
+    const groupKey = this.getGroupSelectionKey(group);
+    return (this.selectedFilterValues[groupKey] || []).length;
+  }
+
+  onFilterItemChange(
+    group: CsvFilterGroupRes,
+    item: CsvFilterItemRes,
+    event: Event,
+  ): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const groupKey = this.getGroupSelectionKey(group);
+    const currentValues = [...(this.selectedFilterValues[groupKey] || [])];
+    const itemValue = this.normalize(item.value);
+
+    if (checked) {
+      if (!currentValues.includes(itemValue)) {
+        currentValues.push(itemValue);
+      }
+      this.selectedFilterValues[groupKey] = currentValues;
+    } else {
+      this.selectedFilterValues[groupKey] = currentValues.filter(
+        (value) => value !== itemValue,
+      );
+    }
+
+    this.applyFilters();
+  }
+
+  isFilterItemSelected(
+    group: CsvFilterGroupRes,
+    item: CsvFilterItemRes,
+  ): boolean {
+    const groupKey = this.getGroupSelectionKey(group);
+    const selectedValues = this.selectedFilterValues[groupKey] || [];
+    return selectedValues.includes(this.normalize(item.value));
+  }
+
+  clearAllFilters(): void {
+    this.globalSearch = '';
+
+    this.displayColumnKeys.forEach((col) => {
+      this.columnFilters[col] = '';
+    });
+
+    Object.keys(this.selectedFilterValues).forEach((key) => {
+      this.selectedFilterValues[key] = [];
+    });
+
     this.applyFilters();
   }
 
   applyFilters(): void {
     const globalTerm = this.normalize(this.globalSearch);
 
-    this.filteredRows = this.rows.filter((row) => {
+    const filtered = this.rows.filter((row) => {
       const matchesGlobal =
         !globalTerm ||
-        this.columns.some((col) =>
+        this.displayColumnKeys.some((col) =>
           this.normalize(row[col]).includes(globalTerm),
         );
 
@@ -96,7 +297,7 @@ export class PlotviewReportsComponent implements OnInit {
         return false;
       }
 
-      const matchesColumnFilters = this.columns.every((col) => {
+      const matchesColumnFilters = this.displayColumnKeys.every((col) => {
         const filterValue = this.normalize(this.columnFilters[col]);
         if (!filterValue) {
           return true;
@@ -105,20 +306,48 @@ export class PlotviewReportsComponent implements OnInit {
         return this.normalize(row[col]).includes(filterValue);
       });
 
-      return matchesColumnFilters;
-    });
-  }
+      if (!matchesColumnFilters) {
+        return false;
+      }
 
-  clearAllFilters(): void {
-    this.globalSearch = '';
-    this.columns.forEach((col) => {
-      this.columnFilters[col] = '';
+      const matchesGroupedFilters = this.filterGroups.every((group) => {
+        const groupKey = this.getGroupSelectionKey(group);
+        const selectedValues = this.selectedFilterValues[groupKey] || [];
+
+        if (!selectedValues.length) {
+          return true;
+        }
+
+        const attributeKeys = group.items
+          .map((item) => item.attribute)
+          .filter(
+            (value, index, arr) => !!value && arr.indexOf(value) === index,
+          );
+
+        if (!attributeKeys.length) {
+          return true;
+        }
+
+        return attributeKeys.some((attributeKey) => {
+          const rowValue = this.normalize(row[attributeKey]);
+          return selectedValues.includes(rowValue);
+        });
+      });
+
+      return matchesGroupedFilters;
     });
-    this.applyFilters();
+
+    const plotNoKey =
+      this.displayColumns.find((col) => col.label === 'Plot No')?.key ||
+      'plotNo';
+
+    this.filteredRows = [...filtered].sort((a, b) =>
+      this.comparePlotNumbers(a?.[plotNoKey], b?.[plotNoKey]),
+    );
   }
 
   downloadFilteredCsv(): void {
-    if (!this.columns.length) {
+    if (!this.displayColumnKeys.length) {
       return;
     }
 
@@ -143,11 +372,14 @@ export class PlotviewReportsComponent implements OnInit {
   }
 
   buildCsvContent(rows: Record<string, any>[]): string {
-    const headerLine = this.columns
-      .map((col) => this.escapeCsvValue(col))
+    const headerLine = this.displayColumns
+      .map((col) => this.escapeCsvValue(col.label))
       .join(',');
+
     const dataLines = rows.map((row) =>
-      this.columns.map((col) => this.escapeCsvValue(row[col])).join(','),
+      this.displayColumnKeys
+        .map((colKey) => this.escapeCsvValue(row[colKey]))
+        .join(','),
     );
 
     return [headerLine, ...dataLines].join('\n');
@@ -165,16 +397,75 @@ export class PlotviewReportsComponent implements OnInit {
       .toLowerCase();
   }
 
+  comparePlotNumbers(a: any, b: any): number {
+    const aStr = String(a ?? '').trim();
+    const bStr = String(b ?? '').trim();
+
+    const aNum = Number(aStr);
+    const bNum = Number(bStr);
+
+    const aIsNumeric = aStr !== '' && !Number.isNaN(aNum);
+    const bIsNumeric = bStr !== '' && !Number.isNaN(bNum);
+
+    if (aIsNumeric && bIsNumeric) {
+      return aNum - bNum;
+    }
+
+    if (aIsNumeric && !bIsNumeric) {
+      return -1;
+    }
+
+    if (!aIsNumeric && bIsNumeric) {
+      return 1;
+    }
+
+    return aStr.localeCompare(bStr, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    });
+  }
+
+  toDisplayLabel(key: string): string {
+    const normalized = String(key || '').trim();
+
+    if (!normalized) {
+      return '';
+    }
+
+    return normalized
+      .replace(/_/g, ' ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
   getActiveColumnFilterCount(): number {
-    return this.columns.filter((col) => this.normalize(this.columnFilters[col]))
-      .length;
+    return this.displayColumnKeys.filter((col) =>
+      this.normalize(this.columnFilters[col]),
+    ).length;
+  }
+
+  getActiveGroupedFilterCount(): number {
+    return Object.values(this.selectedFilterValues).reduce(
+      (count, values) => count + values.length,
+      0,
+    );
   }
 
   trackByIndex(index: number): number {
     return index;
   }
 
-  trackByColumn(_index: number, col: string): string {
-    return col;
+  trackByColumn(_index: number, col: ResolvedDisplayColumn): string {
+    return col.key;
+  }
+
+  trackByFilterGroup(_index: number, group: CsvFilterGroupRes): number {
+    return group.id;
+  }
+
+  trackByFilterItem(_index: number, item: CsvFilterItemRes): number {
+    return item.id;
   }
 }
