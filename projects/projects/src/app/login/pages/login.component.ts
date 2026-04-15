@@ -29,6 +29,19 @@ export class LoginComponent {
     }
   }
 
+  private getDashboardUrlByRole(role: number): string {
+    switch (role) {
+      case 1:
+        return '/admin-dashboard';
+      case 2:
+        return '/plotview-account-ui';
+      case 3:
+        return AppConstants.DASHBOARD_URL;
+      default:
+        return AppConstants.DASHBOARD_URL;
+    }
+  }
+
   loginClick(event: {
     userName: string;
     password: string;
@@ -39,14 +52,9 @@ export class LoginComponent {
         if (resp) {
           localStorage.setItem('currentUser', JSON.stringify(resp.user));
 
-          const selectedTarget = event.loginTarget?.trim();
-          const returnUrl =
-            this.activatedRoute.snapshot.queryParams['returnUrl'];
+          const roleBasedTarget = this.getDashboardUrlByRole(resp.user.role);
 
-          const finalTarget =
-            selectedTarget || returnUrl || AppConstants.DASHBOARD_URL;
-
-          this.router.navigateByUrl(finalTarget);
+          this.router.navigateByUrl(roleBasedTarget);
         } else {
           console.error('Error in logging in the user');
         }
