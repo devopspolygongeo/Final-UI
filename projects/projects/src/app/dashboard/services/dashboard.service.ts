@@ -11,7 +11,7 @@ import {
   Project,
   Source,
   Survey,
-  View,
+  View,   
 } from '../../core/models';
 
 @Injectable()
@@ -142,19 +142,24 @@ export class DashboardService {
     return this.assetsMap$.get(surveyId) || of([]);
   }
 
-  public getLandmarks(surveyId: number): Observable<Landmark[]> {
-    if (!this.landmarksMap$ || !this.landmarksMap$.has(surveyId)) {
-      this.landmarksMap$.set(
-        surveyId,
-        this.http
-          .get<
-            Landmark[]
-          >(environment.apiUrl + '/landmarks?surveyId=' + surveyId)
-          .pipe(shareReplay(1)),
-      );
-    }
-    return this.landmarksMap$.get(surveyId) || of([]);
-  }
+
+  
+public getLandmarks(surveyId: number): Observable<Landmark[]> {
+  return this.http.get<Landmark[]>(
+    environment.apiUrl + '/landmarks?surveyId=' + surveyId
+  );
+}
+
+  public createLandmark(data: any): Observable<any> {
+  return this.http.post(environment.apiUrl + '/landmarks', data);
+}
+
+public deleteLandmark(id: number) {
+  return this.http.delete(environment.apiUrl + '/landmarks/' + id);
+}
+
+
+  
 
   public getBuildings3DSource(projectId: number) {
     return this.http.get<{

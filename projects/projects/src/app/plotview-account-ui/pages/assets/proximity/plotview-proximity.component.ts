@@ -229,21 +229,65 @@ export class PlotviewProximityComponent implements OnInit, OnDestroy {
             }
             if (!lnglat) return;
 
-            const lm: Landmark = {
-                id: 0,
-                surveyId: this.selectedSurvey?.id ?? 0,
-                name: s.name || s.full_address || 'Place',
-                description: s.full_address || '',
-                longitude: lnglat[0],
-                latitude: lnglat[1],
-                metaData: {} as any
-            };
+const distance = this.calculateDistance(
+    this.mapConfig.latitude,
+    this.mapConfig.longitude,
+    lnglat[1],
+    lnglat[0]
+);
 
-            this.landmarks = [...this.landmarks, lm];
-            this.mapConfig = { ...this.mapConfig, landmarks: this.landmarks };
+let distanceText = '';
 
+if (distance < 1) {
+    distanceText = (distance * 1000).toFixed(0) + ' m';
+} else {
+    distanceText = distance.toFixed(2) + ' km';
+}
+
+const lm: Landmark = {
+    id: 0,
+    surveyId: this.selectedSurvey?.id ?? 0,
+    name: s.name || s.full_address || 'Place',
+    description: s.full_address || '',
+    longitude: lnglat[0],
+    latitude: lnglat[1],
+    metaData: {
+        distance: distanceText   // 🔥 ONLY THIS
+    }
+};
+
+            //is.landmarks = [...this.landmarks, lm];
+            //is.mapConfig = { ...this.mapConfig, landmarks: this.landmarks };
+            this.dashboard.createLandmark(lm).subscribe({
+  next: (saved: any) => {
+
+    console.log("Saved landmark:", saved);
+
+    // update UI using DB response
+    saved.id = Date.now(); // 🔥 force unique id
+
+this.landmarks = [...this.landmarks, saved];
+
+    this.mapConfig = {
+      ...this.mapConfig,
+      landmarks: this.landmarks
+    };
+
+    // preview route
+    this.focusLandmark(saved);
+
+    // clear UI
+    this.searchText = '';
+    this.suggestions = [];
+
+    this.cdr.detectChanges();
+  },
+  error: (err) => {
+    console.error("Error saving landmark:", err);
+  }
+});
             // preview route immediately
-            this.focusLandmark(lm);
+            //this.focusLandmark(lm);
 
             // clear UI
             this.searchText = '';
@@ -259,10 +303,32 @@ export class PlotviewProximityComponent implements OnInit, OnDestroy {
         this.mapSvc.getRoute(startLL, endLL).subscribe(d => (this.directions = d));
     }
 
-    removeLandmark(i: number) {
+   /* removeLandmark(i: number) {
         this.landmarks = this.landmarks.filter((_, idx) => idx !== i);
         this.mapConfig = { ...this.mapConfig, landmarks: this.landmarks };
-    }
+    } */
+removeLandmark(i: number) {
+    const lm = this.landmarks[i];
+
+    this.dashboard.deleteLandmark(lm.id).subscribe({
+        next: () => {
+
+            console.log("Deleted landmark:", lm.id);
+
+            this.landmarks = this.landmarks.filter((_, idx) => idx !== i);
+
+            this.mapConfig = {
+                ...this.mapConfig,
+                landmarks: this.landmarks
+            };
+
+            this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+            console.error("Delete failed:", err);
+        }
+    });
+}
 
     // map events (right-click route etc.)
     onMapMouseEvents(ev: any) {
@@ -273,4 +339,20 @@ export class PlotviewProximityComponent implements OnInit, OnDestroy {
             this.mapSvc.getRoute(startLL, endLL).subscribe(d => (this.directions = d));
         }
     }
+
+    calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
 }
+} 
