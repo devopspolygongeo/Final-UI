@@ -87,42 +87,23 @@
       <!-- OWNER -->
       <div class="form-group">
         <label>Owner</label>
-
-        <div class="select-wrapper">
-          <select class="form-control" [(ngModel)]="plotModel.ownername" (ngModelChange)="onOwnerDropdownChange()"
-            [disabled]="!isPlotSelected">
-            <option [ngValue]="ADD_NEW_OPTION">Add new</option>
-
-            <option *ngFor="let o of ownersList" [ngValue]="o" [hidden]="o === ADD_NEW_OPTION">
-              {{ o }}
-            </option>
-          </select>
-        </div>
-
-        <input *ngIf="isAddNewOwnerSelected()" class="form-control" style="margin-top: 8px;"
-          placeholder="Enter new owner name" [(ngModel)]="customOwnerName" (ngModelChange)="markDirty()"
-          [disabled]="!isPlotSelected" />
+        <input class="form-control" [(ngModel)]="plotModel.ownername" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" list="owners-suggestions" placeholder="Enter owner name" autocomplete="off" />
+        <datalist id="owners-suggestions">
+          <option *ngFor="let o of ownersList" [value]="o"></option>
+        </datalist>
       </div>
 
       <!-- DEVELOPER -->
-      <!-- <div class="form-group">
+      <div class="form-group">
         <label>Developer</label>
-
-        <div class="select-wrapper">
-          <select class="form-control" [(ngModel)]="plotModel.Developer" (ngModelChange)="onDeveloperDropdownChange()"
-            [disabled]="!isPlotSelected">
-            <option [ngValue]="ADD_NEW_OPTION">Add new</option>
-
-            <option *ngFor="let d of developersList" [ngValue]="d" [hidden]="d === ADD_NEW_OPTION">
-              {{ d }}
-            </option>
-          </select>
-        </div>
-
-        <input *ngIf="isAddNewDeveloperSelected()" class="form-control" style="margin-top: 8px;"
-          placeholder="Enter new developer name" [(ngModel)]="customDeveloperName" (ngModelChange)="markDirty()"
-          [disabled]="!isPlotSelected" />
-      </div> -->
+        <input class="form-control" [(ngModel)]="plotModel.Developer" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" list="developers-suggestions" placeholder="Enter developer name"
+          autocomplete="off" />
+        <datalist id="developers-suggestions">
+          <option *ngFor="let d of developersList" [value]="d"></option>
+        </datalist>
+      </div>
 
       <!-- PRICE -->
       <!-- <div class="form-group">

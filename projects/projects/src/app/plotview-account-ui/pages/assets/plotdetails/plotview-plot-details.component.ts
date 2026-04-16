@@ -78,11 +78,6 @@ export class PlotviewPlotDetailsComponent
   isSearchingPlot = false;
   isPlotSelected = false;
 
-  // add new option context
-  readonly ADD_NEW_OPTION = 'Add new';
-  customOwnerName = '';
-  customDeveloperName = '';
-
   // map context
   view!: View;
   selectedProject!: Project;
@@ -367,21 +362,19 @@ export class PlotviewPlotDetailsComponent
       const owners = Array.isArray(res?.owners) ? res.owners : [];
       const developers = Array.isArray(res?.developers) ? res.developers : [];
 
-      this.ownersList = this.withAddNewOption(owners);
-      this.developersList = this.withAddNewOption(developers);
+      this.ownersList = this.cleanSuggestionList(owners);
+      this.developersList = this.cleanSuggestionList(developers);
     } catch (e) {
       console.error('[PlotDetails] Failed to fetch owners/developers', e);
-      this.ownersList = this.withAddNewOption([]);
-      this.developersList = this.withAddNewOption([]);
+      this.ownersList = [];
+      this.developersList = [];
     }
   }
 
-  private withAddNewOption(values: string[]): string[] {
-    const clean = values
-      .map((v) => String(v || '').trim())
-      .filter((v) => !!v && v !== this.ADD_NEW_OPTION);
-
-    return [this.ADD_NEW_OPTION, ...Array.from(new Set(clean))];
+  private cleanSuggestionList(values: string[]): string[] {
+    return Array.from(
+      new Set(values.map((v) => String(v || '').trim()).filter((v) => !!v)),
+    );
   }
 
   private async loadSurveyDataAndBuildMap(survey: Survey): Promise<void> {
@@ -465,8 +458,8 @@ export class PlotviewPlotDetailsComponent
       this.groups = [];
       this.layouts = [];
       this.buildMinimalMapConfig();
-      this.ownersList = this.withAddNewOption([]);
-      this.developersList = this.withAddNewOption([]);
+      this.ownersList = [];
+      this.developersList = [];
     }
   }
 
@@ -543,8 +536,6 @@ export class PlotviewPlotDetailsComponent
       priceMax: '',
       priceUnit: 'Sq ft',
     };
-    this.customOwnerName = '';
-    this.customDeveloperName = '';
     this.isPlotSelected = false;
     this.plotSourceType = 'dataset';
     this.isTilesetOnlyReadOnly = false;
@@ -611,15 +602,15 @@ export class PlotviewPlotDetailsComponent
     this.plotModel.priceMax = String(plot?.priceMax ?? '');
     this.plotModel.priceUnit = String(plot?.priceUnit ?? 'Sq ft');
 
-    this.customOwnerName = '';
-    this.customDeveloperName = '';
-
     if (ownerValue && !this.ownersList.includes(ownerValue)) {
-      this.ownersList = this.withAddNewOption([...this.ownersList, ownerValue]);
+      this.ownersList = this.cleanSuggestionList([
+        ...this.ownersList,
+        ownerValue,
+      ]);
     }
 
     if (developerValue && !this.developersList.includes(developerValue)) {
-      this.developersList = this.withAddNewOption([
+      this.developersList = this.cleanSuggestionList([
         ...this.developersList,
         developerValue,
       ]);
@@ -728,39 +719,11 @@ export class PlotviewPlotDetailsComponent
     }
   }
 
-  isAddNewOwnerSelected(): boolean {
-    return this.plotModel.ownername === this.ADD_NEW_OPTION;
-  }
-
-  isAddNewDeveloperSelected(): boolean {
-    return this.plotModel.Developer === this.ADD_NEW_OPTION;
-  }
-
-  onOwnerDropdownChange() {
-    if (!this.isAddNewOwnerSelected()) {
-      this.customOwnerName = '';
-    }
-    this.markDirty();
-  }
-
-  onDeveloperDropdownChange() {
-    if (!this.isAddNewDeveloperSelected()) {
-      this.customDeveloperName = '';
-    }
-    this.markDirty();
-  }
-
   private getFinalOwnerValue(): string {
-    if (this.isAddNewOwnerSelected()) {
-      return String(this.customOwnerName || '').trim();
-    }
     return String(this.plotModel.ownername || '').trim();
   }
 
   private getFinalDeveloperValue(): string {
-    if (this.isAddNewDeveloperSelected()) {
-      return String(this.customDeveloperName || '').trim();
-    }
     return String(this.plotModel.Developer || '').trim();
   }
 
@@ -862,14 +825,10 @@ export class PlotviewPlotDetailsComponent
 
     const comparableModel = {
       ...this.plotModel,
-      customOwnerName: this.customOwnerName,
-      customDeveloperName: this.customDeveloperName,
     };
 
     const comparableOriginal = {
       ...this.originalModel,
-      customOwnerName: this.originalModel?.customOwnerName ?? '',
-      customDeveloperName: this.originalModel?.customDeveloperName ?? '',
     };
 
     this.isDirty =
@@ -880,8 +839,6 @@ export class PlotviewPlotDetailsComponent
     this.originalModel = JSON.parse(
       JSON.stringify({
         ...this.plotModel,
-        customOwnerName: this.customOwnerName,
-        customDeveloperName: this.customDeveloperName,
       }),
     );
     this.isDirty = false;
@@ -910,16 +867,6 @@ export class PlotviewPlotDetailsComponent
     const finalOwnerName = this.getFinalOwnerValue();
     const finalDeveloperName = this.getFinalDeveloperValue();
     const finalDocNo = String(this.plotModel.doc_no || '').trim();
-
-    if (this.isAddNewOwnerSelected() && !finalOwnerName) {
-      alert('Please enter the new owner name.');
-      return;
-    }
-
-    if (this.isAddNewDeveloperSelected() && !finalDeveloperName) {
-      alert('Please enter the new developer name.');
-      return;
-    }
 
     const payload = {
       surveyId: Number(this.selectedSurvey?.id ?? this.surveyId ?? 0),
@@ -952,7 +899,7 @@ export class PlotviewPlotDetailsComponent
       }
 
       if (finalOwnerName && !this.ownersList.includes(finalOwnerName)) {
-        this.ownersList = this.withAddNewOption([
+        this.ownersList = this.cleanSuggestionList([
           ...this.ownersList,
           finalOwnerName,
         ]);
@@ -962,7 +909,7 @@ export class PlotviewPlotDetailsComponent
         finalDeveloperName &&
         !this.developersList.includes(finalDeveloperName)
       ) {
-        this.developersList = this.withAddNewOption([
+        this.developersList = this.cleanSuggestionList([
           ...this.developersList,
           finalDeveloperName,
         ]);
