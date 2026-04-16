@@ -118,6 +118,7 @@ export class PlotviewPlotDetailsComponent
     facing: '',
     ownername: '',
     Developer: '',
+    Sales_Consideration: '',
     priceMin: '',
     priceMax: '',
     priceUnit: 'Sq ft',
@@ -532,6 +533,7 @@ export class PlotviewPlotDetailsComponent
       facing: '',
       ownername: '',
       Developer: '',
+      Sales_Consideration: '',
       priceMin: '',
       priceMax: '',
       priceUnit: 'Sq ft',
@@ -578,6 +580,10 @@ export class PlotviewPlotDetailsComponent
       facing: getProp(['facing'], ''),
       ownername: getProp(['ownername', 'owner_name', 'owner'], ''),
       Developer: getProp(['Developer', 'developer', 'Devloper'], ''),
+      Sales_Consideration: getProp(
+  ['Sales_Consideration', 'sales_consideration', 'salesConsideration'],
+  ''
+),
       priceMin: priceMin || (rangeMatch ? rangeMatch[1] : ''),
       priceMax: priceMax || (rangeMatch ? rangeMatch[2] : ''),
       priceUnit: getProp(['priceUnit', 'price_unit'], 'Sq ft'),
@@ -598,6 +604,7 @@ export class PlotviewPlotDetailsComponent
     this.plotModel.salestatus = storageToUI(plot?.salestatus ?? 'Available');
     this.plotModel.ownername = ownerValue;
     this.plotModel.Developer = developerValue;
+    this.plotModel.Sales_Consideration = String(plot?.Sales_Consideration ?? '');
     this.plotModel.priceMin = String(plot?.priceMin ?? '');
     this.plotModel.priceMax = String(plot?.priceMax ?? '');
     this.plotModel.priceUnit = String(plot?.priceUnit ?? 'Sq ft');
@@ -867,6 +874,7 @@ export class PlotviewPlotDetailsComponent
     const finalOwnerName = this.getFinalOwnerValue();
     const finalDeveloperName = this.getFinalDeveloperValue();
     const finalDocNo = String(this.plotModel.doc_no || '').trim();
+    const finalSalesConsideration = String(this.plotModel.Sales_Consideration || '').trim();
 
     const payload = {
       surveyId: Number(this.selectedSurvey?.id ?? this.surveyId ?? 0),
@@ -878,6 +886,7 @@ export class PlotviewPlotDetailsComponent
       ownername: finalOwnerName,
       Developer: finalDeveloperName,
       doc_no: finalDocNo,
+      Sales_Consideration: finalSalesConsideration,
     };
 
     console.log('[PlotDetails] request payload →', payload);

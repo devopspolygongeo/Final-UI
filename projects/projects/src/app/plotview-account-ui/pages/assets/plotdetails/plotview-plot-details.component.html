@@ -58,6 +58,18 @@
           [disabled]="!isPlotSelected" />
       </div>
 
+            <!-- SALES CONSIDERATION -->
+<div class="form-group">
+  <label>Sales Consideration</label>
+  <input
+    class="form-control"
+    [(ngModel)]="plotModel.Sales_Consideration"
+    (ngModelChange)="markDirty()"
+    [disabled]="!isPlotSelected"
+    placeholder="Enter sales consideration"
+  />
+</div>
+
       <!-- SALE STATUS -->
       <div class="form-group">
         <label>Sale Status</label>
@@ -104,6 +116,8 @@
           <option *ngFor="let d of developersList" [value]="d"></option>
         </datalist>
       </div>
+
+
 
       <!-- PRICE -->
       <!-- <div class="form-group">
