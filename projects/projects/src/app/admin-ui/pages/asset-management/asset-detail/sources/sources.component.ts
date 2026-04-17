@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+
 import { AssetSelectionService } from '../../../../services/asset-selection.service';
 import { Source as DBSource } from '../../../../../core/models/geo/source.model';
 
@@ -17,11 +21,9 @@ interface UISource extends DBSource {
 @Component({
   selector: 'app-sources',
   templateUrl: './sources.component.html',
-  styleUrls: ['./sources.component.css']
+  styleUrls: ['./sources.component.css'],
 })
-
 export class SourcesComponent implements OnInit {
-
   sources: UISource[] = [];
   filteredSources: UISource[] = [];
   newSource!: UISource;
@@ -37,16 +39,17 @@ export class SourcesComponent implements OnInit {
   uploadName: string = '';
   uploadProgress = 0;
   disableNameAndLink = false;
-  uploadLink = ''; // holds the returned tileset
+  uploadLink = '';
 
-
-
-  sortConfig: { key: keyof UISource; direction: 'asc' | 'desc' } = { key: 'id', direction: 'asc' };
+  sortConfig: { key: keyof UISource; direction: 'asc' | 'desc' } = {
+    key: 'id',
+    direction: 'asc',
+  };
 
   constructor(
     private route: ActivatedRoute,
-    private assetService: AssetSelectionService
-  ) { }
+    private assetService: AssetSelectionService,
+  ) {}
 
   ngOnInit(): void {
     this.assetName = this.route.snapshot.paramMap.get('assetName') || '';
@@ -60,24 +63,22 @@ export class SourcesComponent implements OnInit {
   private getEmptySource(): UISource {
     return {
       id: 0,
-      surveyId: this.surveyId, // 👈 Auto-set here
+      surveyId: this.surveyId,
       dataType: '',
       name: '',
       link: '',
       priority: 1,
       visibility: false,
-      assetName: this.assetName
+      assetName: this.assetName,
     };
   }
-
 
   fetchSources(): void {
     this.assetService.getSources().subscribe((data: any[]) => {
       console.log('Fetched sources:', data);
       this.sources = data
-         .filter(src => Number(src.surveyId) === Number(this.surveyId))
+        .filter((src) => Number(src.surveyId) === Number(this.surveyId))
         .map((src) => ({
-
           id: src.id,
           surveyId: src.surveyId,
           dataType: src.dataType,
@@ -85,9 +86,9 @@ export class SourcesComponent implements OnInit {
           link: src.link,
           priority: src.priority,
           visibility: !!src.visibility,
-          assetName: this.assetName
-        })
-        );
+          assetName: this.assetName,
+        }));
+
       console.log('Mapped sources:', this.sources);
       this.filterSources();
     });
@@ -102,78 +103,19 @@ export class SourcesComponent implements OnInit {
   }
 
   deleteSource(source: UISource): void {
-    const confirmed = confirm(`Are you sure you want to delete source "${source.name}"?`);
+    const confirmed = confirm(
+      `Are you sure you want to delete source "${source.name}"?`,
+    );
     if (!confirmed) return;
 
     this.assetService.deleteSource(source.id).subscribe({
       next: () => this.fetchSources(),
-      error: err => {
+      error: (err) => {
         console.error('Failed to delete source:', err);
         alert('Deletion failed. Check console.');
-      }
+      },
     });
   }
-
-  // toggleSourceVisibility(source: UISource): void {
-  //   const updatedVisibility = !source.visibility;
-  //   const payload = { sourcevisibility: updatedVisibility ? 1 : 0 };
-
-  //   this.assetService.updateSource(source.id, payload).subscribe({
-  //     next: () => {
-  //       source.visibility = updatedVisibility;
-  //       this.filterSources();
-  //     },
-  //     error: err => {
-  //       console.error('Toggle visibility failed:', err);
-  //       alert('Toggle failed.');
-  //     }
-  //   });
-  // }
-
-  // submitNewSource(): void {
-  //   // 🚨 DEBUG: Log the form input before payload
-  //   console.log('🧾 Form Input:', this.newSource);
-
-  //   const payload = {
-  //     surveyid: this.surveyId, // Manually entered by user
-  //     datatype: this.newSource.dataType,
-  //     sourcename: this.newSource.name,
-  //     sourcelink: this.newSource.link,
-  //     sourcepriority: this.newSource.priority,
-  //     sourcevisibility: this.newSource.visibility ? 1 : 0
-  //   };
-
-  //   // 🚨 DEBUG: Log the payload
-  //   console.log('🚀 Payload being sent to backend:', payload);
-
-  //   if (this.newSource.id === 0) {
-  //     // CREATE NEW SOURCE
-  //     this.assetService.createSource(payload).subscribe({
-  //       next: (created: any) => {
-  //         console.log('✅ Source created:', created);
-  //         this.fetchSources(); // refresh list
-  //         this.newSource = this.getEmptySource(); // reset form
-  //       },
-  //       error: err => {
-  //         console.error('❌ Failed to create source:', err);
-  //         alert('Create failed. Check console for details.');
-  //       }
-  //     });
-  //   } else {
-  //     // UPDATE EXISTING SOURCE
-  //     this.assetService.updateSource(this.newSource.id, payload).subscribe({
-  //       next: () => {
-  //         console.log('✅ Source updated');
-  //         this.fetchSources();
-  //         this.newSource = this.getEmptySource();
-  //       },
-  //       error: err => {
-  //         console.error('❌ Failed to update source:', err);
-  //         alert('Update failed. Check console.');
-  //       }
-  //     });
-  //   }
-  // }
 
   toggleSourceVisibility(source: UISource): void {
     const updatedVisibility = !source.visibility;
@@ -184,20 +126,18 @@ export class SourcesComponent implements OnInit {
         source.visibility = updatedVisibility;
         this.filterSources();
       },
-      error: err => {
+      error: (err) => {
         console.error('Toggle visibility failed:', err);
         alert('Toggle failed.');
-      }
+      },
     });
   }
-  // Put this inside SourcesComponent
+
   private toBackendSourceDTO(ui: UISource): any {
-    // use route-derived surveyId as the source of truth
     const surveyid = Number(this.surveyId);
 
     return {
-      // backend expects these exact keys:
-      surveyid: Number.isFinite(surveyid) ? surveyid : 0, // never undefined
+      surveyid: Number.isFinite(surveyid) ? surveyid : 0,
       datatype: (ui.dataType ?? '').toString().trim(),
       sourcename: (ui.name ?? '').toString().trim(),
       sourcelink: (ui.link ?? '').toString().trim(),
@@ -206,44 +146,45 @@ export class SourcesComponent implements OnInit {
     };
   }
 
-
   submitNewSource(): void {
     console.log('🧾 Form Input:', this.newSource);
-    if (!this.newSource.surveyId) this.newSource.surveyId = this.surveyId;
+
+    if (!this.newSource.surveyId) {
+      this.newSource.surveyId = this.surveyId;
+    }
+
     const backendPayload = this.toBackendSourceDTO(this.newSource);
 
     console.log('🚀 Backend Payload (snake_case):', backendPayload);
-    console.log('🚀 Backend Payload:', backendPayload);
 
     if (this.newSource.id === 0) {
-      // CREATE
       this.assetService.createSource(backendPayload).subscribe({
         next: (created: any) => {
           console.log('✅ Source created:', created);
           this.fetchSources();
           this.newSource = this.getEmptySource();
         },
-        error: err => {
+        error: (err) => {
           console.error('❌ Create failed:', err);
           alert('Create failed.');
-        }
+        },
       });
     } else {
-      // UPDATE
-      this.assetService.updateSource(this.newSource.id, backendPayload).subscribe({
-        next: () => {
-          console.log('✅ Source updated');
-          this.fetchSources();
-          this.newSource = this.getEmptySource();
-        },
-        error: err => {
-          console.error('❌ Update failed:', err);
-          alert('Update failed.');
-        }
-      });
+      this.assetService
+        .updateSource(this.newSource.id, backendPayload)
+        .subscribe({
+          next: () => {
+            console.log('✅ Source updated');
+            this.fetchSources();
+            this.newSource = this.getEmptySource();
+          },
+          error: (err) => {
+            console.error('❌ Update failed:', err);
+            alert('Update failed.');
+          },
+        });
     }
   }
-
 
   resetForm(): void {
     this.newSource = this.getEmptySource();
@@ -260,10 +201,13 @@ export class SourcesComponent implements OnInit {
           : bVal.localeCompare(aVal);
       } else {
         return this.sortConfig.direction === 'asc'
-          ? (aVal as any) > (bVal as any) ? 1 : -1
-          : (aVal as any) < (bVal as any) ? 1 : -1;
+          ? (aVal as any) > (bVal as any)
+            ? 1
+            : -1
+          : (aVal as any) < (bVal as any)
+            ? 1
+            : -1;
       }
-
     });
 
     this.filteredSources = sorted;
@@ -271,15 +215,17 @@ export class SourcesComponent implements OnInit {
 
   sortBy(key: keyof UISource): void {
     if (this.sortConfig.key === key) {
-      this.sortConfig.direction = this.sortConfig.direction === 'asc' ? 'desc' : 'asc';
+      this.sortConfig.direction =
+        this.sortConfig.direction === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortConfig.key = key;
       this.sortConfig.direction = 'asc';
     }
+
     this.filterSources();
   }
 
-  getSortIcon(key: keyof UISource): string {
+  getSortIcon(_key: keyof UISource): string {
     return 'assets/admin-dashboard/admin-reorder.png';
   }
 
@@ -290,7 +236,9 @@ export class SourcesComponent implements OnInit {
   }
 
   getStartIndex(): number {
-    return this.getTotalFilteredItems() === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+    return this.getTotalFilteredItems() === 0
+      ? 0
+      : (this.currentPage - 1) * this.pageSize + 1;
   }
 
   getEndIndex(): number {
@@ -316,9 +264,12 @@ export class SourcesComponent implements OnInit {
     } else {
       pages.push(1);
       if (current > 4) pages.push('...');
+
       const start = Math.max(2, current - 1);
       const end = Math.min(totalPages - 1, current + 1);
+
       for (let i = start; i <= end; i++) pages.push(i);
+
       if (current < totalPages - 3) pages.push('...');
       if (!pages.includes(totalPages)) pages.push(totalPages);
     }
@@ -334,11 +285,17 @@ export class SourcesComponent implements OnInit {
   }
 
   openUploadModal(): void {
+    if (!this.newSource.dataType) {
+      alert('Please select datatype first.');
+      return;
+    }
+
     this.showUploadModal = true;
     this.uploadFile = null;
     this.uploadTileset = '';
     this.uploadName = '';
     this.uploadProgress = 0;
+    this.uploadLink = '';
   }
 
   closeUploadModal(): void {
@@ -347,52 +304,96 @@ export class SourcesComponent implements OnInit {
     this.uploadProgress = 0;
   }
 
-
   onFileChange(event: any): void {
-    this.uploadFile = event.target.files[0];
+    this.uploadFile = event.target.files?.[0] || null;
   }
 
-  uploadToMapbox(): void {
-  if (!this.uploadFile || !this.uploadTileset || !this.uploadName) {
-    alert('Please fill all fields and choose a file');
-    return;
-  }
+  async uploadToMapbox(): Promise<void> {
+    if (
+      !this.uploadFile ||
+      !this.uploadTileset ||
+      !this.uploadName ||
+      !this.newSource.dataType
+    ) {
+      alert('Please fill all fields and choose a file');
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append('file', this.uploadFile);
-  formData.append('tileset', this.uploadTileset);
-  formData.append('name', this.uploadName);
-  formData.append('surveyId', String(this.surveyId)); // 🔥 REQUIRED
+    try {
+      this.uploadProgress = 5;
 
-  this.uploadProgress = 10;
+      const credentialsResponse: any = await lastValueFrom(
+        this.assetService.getMapboxUploadCredentials({
+          tileset: this.uploadTileset,
+          name: this.uploadName,
+          surveyId: this.surveyId,
+          datatype: this.newSource.dataType,
+        }),
+      );
 
-  this.assetService.uploadToMapbox(formData).subscribe({
-    next: (res) => {
-      console.log('✅ Mapbox upload response:', res);
+      const creds = credentialsResponse?.credentials;
+
+      if (!creds?.bucket || !creds?.key || !creds?.url) {
+        throw new Error('Invalid upload credentials received from backend');
+      }
+
+      const s3 = new S3Client({
+        region: 'us-east-1',
+        credentials: {
+          accessKeyId: creds.accessKeyId,
+          secretAccessKey: creds.secretAccessKey,
+          sessionToken: creds.sessionToken,
+        },
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+        responseChecksumValidation: 'WHEN_REQUIRED',
+      });
+
+      const uploader = new Upload({
+        client: s3,
+        params: {
+          Bucket: creds.bucket,
+          Key: creds.key,
+          Body: this.uploadFile,
+        },
+        queueSize: 4,
+        partSize: 10 * 1024 * 1024,
+        leavePartsOnError: false,
+      });
+
+      uploader.on('httpUploadProgress', (progress: any) => {
+        if (progress?.loaded && progress?.total) {
+          const percent = Math.round((progress.loaded / progress.total) * 90);
+          this.uploadProgress = Math.max(10, percent);
+        }
+      });
+
+      await uploader.done();
+
+      const finalizeResponse: any = await lastValueFrom(
+        this.assetService.finalizeMapboxUpload({
+          tileset: this.uploadTileset,
+          name: this.uploadName,
+          surveyId: this.surveyId,
+          datatype: this.newSource.dataType,
+          s3Url: creds.url,
+          sourcepriority: 1,
+          sourcevisibility: 1,
+        }),
+      );
 
       this.uploadProgress = 100;
-
-      // Mapbox tileset id
-      const tilesetLink = res.tileset;
-
-      // Update UI
-      this.uploadLink = tilesetLink;
+      this.uploadLink = finalizeResponse.tileset;
       this.newSource.name = this.uploadName;
-      this.newSource.link = tilesetLink;
+      this.newSource.link = finalizeResponse.sourceLink;
       this.disableNameAndLink = true;
 
-      // 🔥 VERY IMPORTANT
-      // Backend should already insert into `sources` table
-      // Now refresh sources list
       this.fetchSources();
-    },
-    error: (err) => {
+    } catch (err: any) {
       console.error('❌ Upload failed:', err);
-      alert('Upload failed');
+      alert(err?.message || err?.error?.details || 'Upload failed');
       this.uploadProgress = 0;
     }
-  });
-}
+  }
 
   deleteFromMapbox(tilesetId: string): void {
     if (!tilesetId) {
@@ -400,19 +401,24 @@ export class SourcesComponent implements OnInit {
       return;
     }
 
-    const confirmDelete = confirm(`Are you sure you want to delete tileset "${tilesetId}" from Mapbox?`);
+    const confirmDelete = confirm(
+      `Are you sure you want to delete tileset "${tilesetId}" from Mapbox?`,
+    );
     if (!confirmDelete) return;
 
     this.assetService.deleteMapboxTileset(tilesetId).subscribe({
       next: (res) => {
         alert(`✅ ${res.message}`);
-        this.fetchSources(); // refresh source list if needed
+        this.fetchSources();
       },
       error: (err) => {
         console.error(err);
-        alert(`❌ Failed to delete tileset.\n${err?.error?.details?.message || err.message}`);
-      }
+        alert(
+          `❌ Failed to delete tileset.\n${
+            err?.error?.details?.message || err.message
+          }`,
+        );
+      },
     });
   }
-
 }

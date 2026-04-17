@@ -20,11 +20,7 @@
             </th> -->
             <th class="sortable-header" (click)="sortBy('dataType')">
               <span>Datatype</span>
-              <img
-                [src]="getSortIcon('dataType')"
-                alt="Sort"
-                class="sort-icon"
-              />
+              <img [src]="getSortIcon('dataType')" alt="Sort" class="sort-icon" />
             </th>
             <th class="sortable-header" (click)="sortBy('name')">
               <span>Source name</span>
@@ -36,11 +32,7 @@
             </th>
             <th class="sortable-header" (click)="sortBy('priority')">
               <span>Priority</span>
-              <img
-                [src]="getSortIcon('priority')"
-                alt="Sort"
-                class="sort-icon"
-              />
+              <img [src]="getSortIcon('priority')" alt="Sort" class="sort-icon" />
             </th>
             <th class="center-header">Visibility</th>
             <th class="center-header">Actions</th>
@@ -56,56 +48,25 @@
             <td class="text-center">{{ source.priority }}</td>
             <td class="text-center">
               <div class="toggle-container">
-                <input
-                  type="checkbox"
-                  [id]="'toggle-' + source.id"
-                  class="toggle-input"
-                  [checked]="source.visibility"
-                  (change)="toggleSourceVisibility(source)"
-                />
+                <input type="checkbox" [id]="'toggle-' + source.id" class="toggle-input" [checked]="source.visibility"
+                  (change)="toggleSourceVisibility(source)" />
                 <label [for]="'toggle-' + source.id" class="toggle-label">
-                  <img
-                    *ngIf="!source.visibility"
-                    src="assets/admin-dashboard/admin-toggle-inactive.png"
-                    alt="Inactive"
-                    class="toggle-icon"
-                  />
-                  <img
-                    *ngIf="source.visibility"
-                    src="assets/admin-dashboard/admin-toggle-active.png"
-                    alt="Active"
-                    class="toggle-icon"
-                  />
+                  <img *ngIf="!source.visibility" src="assets/admin-dashboard/admin-toggle-inactive.png" alt="Inactive"
+                    class="toggle-icon" />
+                  <img *ngIf="source.visibility" src="assets/admin-dashboard/admin-toggle-active.png" alt="Active"
+                    class="toggle-icon" />
                 </label>
               </div>
             </td>
             <td class="text-center">
               <div class="actions-container">
-                <button
-                  class="action-btn edit-btn"
-                  (click)="editSource(source)"
-                  title="Edit"
-                >
-                  <img
-                    src="assets/admin-dashboard/admin-client-edit.png"
-                    alt="Edit"
-                  />
+                <button class="action-btn edit-btn" (click)="editSource(source)" title="Edit">
+                  <img src="assets/admin-dashboard/admin-client-edit.png" alt="Edit" />
                 </button>
-                <button
-                  class="action-btn delete-btn"
-                  (click)="deleteSource(source)"
-                  title="Delete"
-                >
-                  <img
-                    src="assets/admin-dashboard/admin-delete.png"
-                    alt="Delete"
-                  />
+                <button class="action-btn delete-btn" (click)="deleteSource(source)" title="Delete">
+                  <img src="assets/admin-dashboard/admin-delete.png" alt="Delete" />
                 </button>
-                <button
-                  class="delete-mapbox-btn"
-                  title="Delete from Mapbox"
-                  (click)="deleteFromMapbox(source.link)"
-                >
+                <button class="delete-mapbox-btn" title="Delete from Mapbox" (click)="deleteFromMapbox(source.link)">
                   🗑️ Mapbox
                 </button>
               </div>
@@ -123,36 +84,23 @@
     <!-- Pagination -->
     <div class="pagination-container">
       <div class="pagination-info">
-        <span
-          >Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
-          {{ getTotalFilteredItems() }} entries</span
-        >
+        <span>
+          Showing {{ getStartIndex() }} to {{ getEndIndex() }} of
+          {{ getTotalFilteredItems() }} entries
+        </span>
       </div>
       <div class="pagination-controls">
-        <button
-          class="pagination-btn"
-          [disabled]="currentPage === 1"
-          (click)="goToPage(currentPage - 1)"
-        >
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
           ⏮
         </button>
 
-        <button
-          *ngFor="let page of getVisiblePages()"
-          class="pagination-btn page-number"
-          [class.active]="page === currentPage"
-          [class.dots]="page === '...'"
-          [disabled]="page === '...'"
-          (click)="page !== '...' && goToPage(+page)"
-        >
+        <button *ngFor="let page of getVisiblePages()" class="pagination-btn page-number"
+          [class.active]="page === currentPage" [class.dots]="page === '...'" [disabled]="page === '...'"
+          (click)="page !== '...' && goToPage(+page)">
           {{ page }}
         </button>
 
-        <button
-          class="pagination-btn"
-          [disabled]="currentPage === getTotalPages()"
-          (click)="goToPage(currentPage + 1)"
-        >
+        <button class="pagination-btn" [disabled]="currentPage === getTotalPages()" (click)="goToPage(currentPage + 1)">
           ⏭
         </button>
       </div>
@@ -169,70 +117,31 @@
     </div>
 
     <form class="source-form" (ngSubmit)="submitNewSource()">
-      <!-- <div class="form-group">
-        <label for="assetName">Asset Name</label>
-        <input
-          type="text"
-          id="assetName"
-          [(ngModel)]="newSource.assetName"
-          name="assetName"
-          placeholder="Sri Venkateswara Farms (Auto populate)"
-          readonly
-        />
-      </div> -->
-
       <div class="form-group">
         <label for="datatype">Datatype</label>
-        <select
-          id="datatype"
-          [(ngModel)]="newSource.dataType"
-          name="datatype"
-          required
-        >
+        <select id="datatype" [(ngModel)]="newSource.dataType" name="datatype" required>
           <option value="">Select datatype</option>
           <option value="vector">vector</option>
           <option value="raster">raster</option>
         </select>
       </div>
 
-      <!-- Source Name -->
       <div class="form-group">
         <label for="sourceName">Source Name</label>
-        <input
-          type="text"
-          id="sourceName"
-          [(ngModel)]="newSource.name"
-          name="sourceName"
-          [readonly]="true"
-          placeholder="Source Name will auto-fill after upload"
-          required
-        />
+        <input type="text" id="sourceName" [(ngModel)]="newSource.name" name="sourceName" [readonly]="true"
+          placeholder="Source Name will auto-fill after upload" required />
       </div>
 
       <div class="form-group">
         <label for="sourceLink">Source link</label>
-        <input
-          type="text"
-          id="sourceLink"
-          [(ngModel)]="newSource.link"
-          name="sourceLink"
-          [readonly]="true"
-          (click)="openUploadModal()"
-          placeholder="Click to upload"
-        />
+        <input type="text" id="sourceLink" [(ngModel)]="newSource.link" name="sourceLink" [readonly]="true"
+          (click)="openUploadModal()" placeholder="Click to upload" />
       </div>
 
       <div class="form-group">
         <label for="priority">Source Priority</label>
-        <input
-          type="number"
-          id="priority"
-          [(ngModel)]="newSource.priority"
-          name="priority"
-          placeholder="Source Priority"
-          min="1"
-          required
-        />
+        <input type="number" id="priority" [(ngModel)]="newSource.priority" name="priority"
+          placeholder="Source Priority" min="1" required />
       </div>
 
       <button type="submit" class="submit-btn">Submit</button>
@@ -252,22 +161,12 @@
 
     <div class="form-group">
       <label>Tileset ID</label>
-      <input
-        type="text"
-        class="styled-input"
-        [(ngModel)]="uploadTileset"
-        placeholder="tileset-id"
-      />
+      <input type="text" class="styled-input" [(ngModel)]="uploadTileset" placeholder="tileset-id" />
     </div>
 
     <div class="form-group">
       <label>Source Name</label>
-      <input
-        type="text"
-        class="styled-input"
-        [(ngModel)]="uploadName"
-        placeholder="Display Name"
-      />
+      <input type="text" class="styled-input" [(ngModel)]="uploadName" placeholder="Display Name" />
     </div>
 
     <div *ngIf="uploadProgress > 0" class="progress-bar-container">
@@ -279,21 +178,19 @@
     </div>
 
     <div class="modal-actions">
-      <!-- ✅ Show Upload + Cancel only before upload -->
       <ng-container *ngIf="!uploadLink">
-        <button
-          class="submit-btn"
-          [disabled]="
-            !uploadFile || !uploadTileset || !uploadName || uploadProgress > 0
-          "
-          (click)="uploadToMapbox()"
-        >
+        <button class="submit-btn" [disabled]="
+            !uploadFile ||
+            !uploadTileset ||
+            !uploadName ||
+            !newSource.dataType ||
+            uploadProgress > 0
+          " (click)="uploadToMapbox()">
           Upload
         </button>
         <button class="cancel-btn" (click)="closeUploadModal()">Cancel</button>
       </ng-container>
 
-      <!-- ✅ Show Done only after successful upload -->
       <ng-container *ngIf="uploadLink">
         <button class="submit-btn" (click)="closeUploadModal()">Done</button>
       </ng-container>
