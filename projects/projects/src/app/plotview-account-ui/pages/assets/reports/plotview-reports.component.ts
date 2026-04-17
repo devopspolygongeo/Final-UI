@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
   PlotStatusService,
   ParsedCsvDataRes,
@@ -185,6 +187,16 @@ export class PlotviewReportsComponent implements OnInit {
     }
 
     this.displayColumnKeys = this.displayColumns.map((col) => col.key);
+    console.log('reportName:', this.reportName);
+    console.log(
+      'normalizedReportKey:',
+      normalizeReportConfigKey(this.reportName),
+    );
+    console.log(
+      'config exists:',
+      REPORT_COLUMN_CONFIG[normalizeReportConfigKey(this.reportName)],
+    );
+    console.log('backend columns:', this.columns);
   }
 
   initializeColumnFilters(): void {
@@ -371,15 +383,156 @@ export class PlotviewReportsComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
+  downloadFilteredPdf(): void {
+    if (!this.displayColumns.length) {
+      return;
+    }
+
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'pt',
+      format: 'a4',
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 36;
+    const topY = 36;
+
+    const title = 'Survey Report';
+    const subtitle = this.reportName || 'Report';
+    const generatedAt = new Date().toLocaleString();
+
+    doc.setFillColor(25, 118, 210);
+    doc.rect(0, 0, pageWidth, 72, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text(title, marginX, 30);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`File: ${subtitle}`, marginX, 48);
+    doc.text(`Generated: ${generatedAt}`, marginX, 62);
+
+    doc.setTextColor(60, 60, 60);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+
+    const summaryY = 96;
+    doc.text(`Total Rows: ${this.rows.length}`, marginX, summaryY);
+    doc.text(
+      `Filtered Rows: ${this.filteredRows.length}`,
+      marginX + 110,
+      summaryY,
+    );
+    doc.text(
+      `Active Group Filters: ${this.getActiveGroupedFilterCount()}`,
+      marginX + 240,
+      summaryY,
+    );
+
+    const selectedFilterSummary = this.getSelectedFilterSummary();
+    if (selectedFilterSummary.length) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Applied Filters:', marginX, summaryY + 20);
+      doc.setFont('helvetica', 'normal');
+      doc.text(selectedFilterSummary.join(' | '), marginX + 80, summaryY + 20, {
+        maxWidth: pageWidth - marginX * 2 - 80,
+      });
+    }
+
+    const head = [['S. No', ...this.displayColumns.map((col) => col.label)]];
+    const body = this.filteredRows.map((row, index) => [
+      String(index + 1),
+      ...this.displayColumns.map((col) => this.safePdfCell(row[col.key])),
+    ]);
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: selectedFilterSummary.length ? 132 : 118,
+      margin: { left: marginX, right: marginX, bottom: 32 },
+      styles: {
+        font: 'helvetica',
+        fontSize: 8,
+        cellPadding: 6,
+        lineColor: [230, 230, 230],
+        lineWidth: 0.5,
+        textColor: [55, 65, 81],
+        overflow: 'linebreak',
+        valign: 'middle',
+      },
+      headStyles: {
+        fillColor: [248, 249, 250],
+        textColor: [33, 37, 41],
+        fontStyle: 'bold',
+        lineColor: [220, 226, 230],
+        lineWidth: 0.75,
+      },
+      bodyStyles: {
+        fillColor: [255, 255, 255],
+      },
+      alternateRowStyles: {
+        fillColor: [250, 252, 255],
+      },
+      didDrawPage: () => {
+        const currentPage = doc.getCurrentPageInfo().pageNumber;
+        doc.setFontSize(9);
+        doc.setTextColor(120, 120, 120);
+        doc.text(`Page ${currentPage}`, pageWidth - marginX, pageHeight - 14, {
+          align: 'right',
+        });
+      },
+    });
+
+    const safeFileName = (this.reportName || 'report')
+      .replace(/[^\w.\-]+/g, '_')
+      .replace(/_+/g, '_');
+
+    doc.save(`${safeFileName}_filtered.pdf`);
+  }
+
+  getSelectedFilterSummary(): string[] {
+    return this.filterGroups
+      .map((group) => {
+        const groupKey = this.getGroupSelectionKey(group);
+        const selectedValues = this.selectedFilterValues[groupKey] || [];
+
+        if (!selectedValues.length) {
+          return '';
+        }
+
+        const selectedLabels = group.items
+          .filter((item) => selectedValues.includes(this.normalize(item.value)))
+          .map((item) => item.label);
+
+        if (!selectedLabels.length) {
+          return '';
+        }
+
+        return `${group.name}: ${selectedLabels.join(', ')}`;
+      })
+      .filter((value) => !!value);
+  }
+
+  safePdfCell(value: any): string {
+    return value === null || value === undefined ? '' : String(value);
+  }
+
   buildCsvContent(rows: Record<string, any>[]): string {
-    const headerLine = this.displayColumns
-      .map((col) => this.escapeCsvValue(col.label))
+    const headerLine = ['S. No', ...this.displayColumns.map((col) => col.label)]
+      .map((value) => this.escapeCsvValue(value))
       .join(',');
 
-    const dataLines = rows.map((row) =>
-      this.displayColumnKeys
-        .map((colKey) => this.escapeCsvValue(row[colKey]))
-        .join(','),
+    const dataLines = rows.map((row, index) =>
+      [
+        this.escapeCsvValue(index + 1),
+        ...this.displayColumnKeys.map((colKey) =>
+          this.escapeCsvValue(row[colKey]),
+        ),
+      ].join(','),
     );
 
     return [headerLine, ...dataLines].join('\n');

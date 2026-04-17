@@ -11,6 +11,9 @@
       <button class="secondary-btn" (click)="clearAllFilters()">
         Clear Filters
       </button>
+      <button class="secondary-btn" (click)="downloadFilteredPdf()">
+        Download PDF
+      </button>
       <button class="primary-btn" (click)="downloadFilteredCsv()">
         Download CSV
       </button>
@@ -79,6 +82,7 @@
         <table class="reports-table">
           <thead>
             <tr>
+              <th class="serial-col">S. No</th>
               <th *ngFor="let col of displayColumns; trackBy: trackByColumn">
                 {{ col.label }}
               </th>
@@ -87,12 +91,13 @@
 
           <tbody>
             <tr *ngIf="!filteredRows.length">
-              <td class="no-results-cell" [attr.colspan]="displayColumnKeys.length">
+              <td class="no-results-cell" [attr.colspan]="displayColumnKeys.length + 1">
                 No matching rows found.
               </td>
             </tr>
 
-            <tr *ngFor="let row of filteredRows; trackBy: trackByIndex">
+            <tr *ngFor="let row of filteredRows; let i = index; trackBy: trackByIndex">
+              <td class="serial-col">{{ i + 1 }}</td>
               <td *ngFor="let col of displayColumns; trackBy: trackByColumn">
                 {{ row[col.key] }}
               </td>
