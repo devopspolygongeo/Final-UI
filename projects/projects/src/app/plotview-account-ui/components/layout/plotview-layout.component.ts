@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AssetSelectionService } from '../../../admin-ui/services/asset-selection.service';
-
+import { AuthService } from '../../../login/services/auth.service';
 
 @Component({
     selector: 'app-plotview-layout',
@@ -13,6 +13,7 @@ export class PlotviewLayoutComponent implements OnInit {
     dropdownOpen = false;
 
     constructor(
+       private authService: AuthService,
   private router: Router,
   private route: ActivatedRoute,
   private assetService: AssetSelectionService
@@ -69,5 +70,19 @@ ngOnInit(): void {
         this.dropdownOpen = false;
     }
 
-    
+    onLogout(): void {
+    console.log('[PLOTVIEW ACCOUNT SETTINGS] logout clicked');
+
+    this.authService.logout().subscribe({
+      next: () => {
+        console.log('[PLOTVIEW ACCOUNT SETTINGS] logout API success');
+        this.router.navigate(['/login'], {
+          queryParams: { returnUrl: '/plotview-account-ui' },
+        });
+      },
+      error: (err) => {
+        console.error('[PLOTVIEW ACCOUNT SETTINGS] logout API failed', err);
+      },
+    });
+  }
 }

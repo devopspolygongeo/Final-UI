@@ -1,3 +1,5 @@
+
+
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,7 +47,7 @@ export class DashboardComponent {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-  ) {}
+  ) { }
 
   ngOnInit() {
     // ✅ Detect share mode from route param (added)
@@ -149,7 +151,7 @@ export class DashboardComponent {
         const groupResult = await firstValueFrom(
           this.dashboardService.getGroups(survey.id),
         );
-        const layoutsResult = await firstValueFrom(
+        const layoutsResult: any = await firstValueFrom(
           this.dashboardService.getLayouts(survey.id),
         );
         const assetsResult = await firstValueFrom(
@@ -186,7 +188,15 @@ export class DashboardComponent {
 
         this.sources = sourceResult;
         this.groups = groupResult;
-        this.layouts = layoutsResult;
+        if (!layoutsResult) {
+          this.layouts = [];
+        } else if (Array.isArray(layoutsResult)) {
+          this.layouts = layoutsResult;
+        } else if (layoutsResult.id) {
+          this.layouts = [layoutsResult];
+        } else {
+          this.layouts = [];
+        }
         this.assets = assetsResult;
         this.landmarks = landmarksResult;
       } catch (error) {

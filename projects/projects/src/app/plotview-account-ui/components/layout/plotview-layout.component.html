@@ -61,10 +61,30 @@
           <span>My Account</span>
         </div>
       </div>
+
+      <div class="dropdown-menu" [class.show]="dropdownOpen" [class.hidden]="!dropdownOpen">
+
+  <div class="dropdown-item" (click)="goToAccount($event)">
+    <img
+      src="assets/admin-dashboard/admin-profile-active.png"
+      class="icon"
+    />
+    <span>My Account</span>
+  </div>
+
+  <!-- ✅ ADD LOGOUT HERE -->
+  <div class="dropdown-item" (click)="onLogout(); $event.stopPropagation()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+     
+    </svg>
+    <span>Logout</span>
+  </div>
+
+</div>
     </div>
   </div>
 </header>
-
+ 
 <!-- CONTENT OUTLET -->
 <div class="content-wrapper">
   <router-outlet></router-outlet>

@@ -399,7 +399,7 @@ export class PlotviewReportsComponent implements OnInit {
     const marginX = 36;
     const topY = 36;
 
-    const title = 'Survey Report';
+    const title = 'Status Report';
     const subtitle = this.reportName || 'Report';
     const generatedAt = new Date().toLocaleString();
 

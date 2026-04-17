@@ -92,7 +92,11 @@ export class AdminDataService {
   return this.http.get<any[]>(url);
 }
 
+getLayoutDetails(surveyId: number) {
+  return this.http.get(`${this.apiUrl}/layouts?surveyId=${surveyId}`);
+}
 
-
-
+saveLayoutDetails(data: any) {
+  return this.http.post(`${this.apiUrl}/layouts`, data);
+}
 }
