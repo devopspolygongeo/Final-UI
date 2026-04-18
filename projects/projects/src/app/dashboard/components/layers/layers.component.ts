@@ -1,3 +1,6 @@
+
+
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -54,6 +57,23 @@ export class LayersComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   constructor(readonly mapService: MapService) {}
 
+  // ✅ STORAGE FOR SECTION 1 ONLY
+private STORAGE_KEY = 'plot_layout_section1_state';
+
+private getSavedState() {
+  return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+}
+
+private saveState(toggle: Toggle) {
+  // ✅ ONLY SAVE SECTION 1 (FILTER)
+  if (toggle.metaData?.groupType !== this.CLASSIFY_BY_FILTER) return;
+
+  const state = this.getSavedState();
+  state[toggle.id] = toggle.checked;
+
+  localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+}
+
   // ✅ Normalize DB values like 0/1, "0"/"1", "true"/"false" into boolean
   private toBool(v: any): boolean {
     if (v === true || v === false) return v;
@@ -65,6 +85,7 @@ export class LayersComponent implements OnInit, OnDestroy {
     }
     return Boolean(v);
   }
+  
 
   ngOnInit() {
     this.subscriptions.push(
@@ -176,8 +197,20 @@ export class LayersComponent implements OnInit, OnDestroy {
                 false,
               );
 
-              const filterToggle = JSON.parse(JSON.stringify(toggleItem));
-              filterToggle.metaData.groupType = this.CLASSIFY_BY_FILTER;
+              const savedState = this.getSavedState();
+
+const filterToggle: Toggle = {
+  id: toggleItem.id,
+  name: toggleItem.name,
+  checked:
+    savedState[toggleItem.id] !== undefined
+      ? savedState[toggleItem.id]
+      : true, // ✅ default ON
+  metaData: {
+    layer: layer,
+    groupType: this.CLASSIFY_BY_FILTER,
+  },
+};
               this.addToToggleMap(
                 this.filterLayersToggleMap,
                 layer.group.name,
@@ -204,6 +237,7 @@ export class LayersComponent implements OnInit, OnDestroy {
   onLayerToggle(event: MatSlideToggleChange, toggle: Toggle) {
     toggle.checked = event.checked;
     this.layerToggleEv.emit([toggle]);
+    this.saveState(toggle);
 
     if (toggle.metaData?.groupType === this.CLASSIFY_BY_FILTER) {
       const paintProps = {
@@ -274,10 +308,14 @@ export class LayersComponent implements OnInit, OnDestroy {
           this.filterLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
 
-        allToggles.forEach(
-          (toggle) =>
-            (toggle.checked = this.toBool(toggle.metaData?.layer.visibility)),
-        );
+        const savedState = this.getSavedState();
+
+allToggles.forEach((toggle) => {
+  toggle.checked =
+    savedState[toggle.id] !== undefined
+      ? savedState[toggle.id]
+      : true; // default ON
+});
         this.layerToggleEv.emit(allToggles);
 
         const paintProps = allToggles.map((toggle) => {
@@ -301,17 +339,23 @@ export class LayersComponent implements OnInit, OnDestroy {
         );
         this.layerToggleEv.emit(Object.assign([], groupToggle.toggles));
 
-        if (groupType === this.CLASSIFY_BY_FILTER) {
-          const paintProps = groupToggle.toggles
-            .map((toggle) => toggle.metaData?.layer as Layer)
-            .map((layer) => {
-              return {
-                layer: layer,
-                color: event.checked ? '#3f51b5' : 'transparent',
-              } as PaintProperty;
-            });
-          this.layerPaintChangeEv.emit(paintProps);
-        }
+    if (groupType === this.CLASSIFY_BY_FILTER) {
+  groupToggle.toggles.forEach((toggleItem) => {
+    toggleItem.checked = event.checked;
+
+    // ✅ SAVE STATE
+    this.saveState(toggleItem);
+  });
+
+  this.layerToggleEv.emit([...groupToggle.toggles]);
+
+  const paintProps = groupToggle.toggles.map((toggle) => ({
+    layer: toggle.metaData?.layer as Layer,
+    color: event.checked ? '#3f51b5' : 'transparent',
+  }));
+
+  this.layerPaintChangeEv.emit(paintProps);
+}
       }
     }
   }
@@ -368,3 +412,18 @@ export class LayersComponent implements OnInit, OnDestroy {
     return a.metaData?.layer?.priority - b.metaData?.layer?.priority;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

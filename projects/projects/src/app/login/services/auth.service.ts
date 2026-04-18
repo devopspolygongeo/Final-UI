@@ -83,7 +83,7 @@ export class AuthService {
 
     getCurrentUser(): any {
         // Get user data from localStorage (assuming you store it after login)
-        const userStr = localStorage.getItem('currentUser');
+       const userStr = localStorage.getItem(StorageConstants.LS_USER);
         console.log(userStr);
         return userStr ? JSON.parse(userStr) : null;
     }

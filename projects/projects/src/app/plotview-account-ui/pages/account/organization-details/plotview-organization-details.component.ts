@@ -1,96 +1,141 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from 'projects/projects/src/app/login/services/auth.service';
+import { environment } from 'projects/projects/src/environments/environment';
 
 @Component({
-    selector: 'app-plotview-organization-details',
-    templateUrl: './plotview-organization-details.component.html',
-    styleUrls: ['./plotview-organization-details.component.css'],
+  selector: 'app-plotview-organization-details',
+  templateUrl: './plotview-organization-details.component.html',
+  styleUrls: ['./plotview-organization-details.component.css'],
 })
-export class PlotviewOrganizationDetailsComponent {
-    companyName = '';
-    billingContactName = '';
-    email = '';
-    gstDetails = '';
-    corporateAddress = '3-15/10/403 Newark, Street no 5, Next To Pizza Hut, Bangalore, Karnataka, 560003, India.';
-    billingAddress = '2-15A-12, Steriling Chambers, S Radhakrishnana Marg, J B Nagar, Andheri (west), Mumbai, Maharashtra';
+export class PlotviewOrganizationDetailsComponent implements OnInit {
+  companyName = '';
+  billingContactName = '';
+  email = '';
+  gstDetails = '';
+  corporateAddress = '';
+  billingAddress = '';
 
-    // Edit states
-    isBillingContactEditable = false;
-    isBillingAddressEditable = false;
+  isBillingContactEditable = false;
+  isBillingAddressEditable = false;
 
-    // Store original values for cancel functionality
-    private originalBillingContactName = '';
-    private originalBillingAddress = '';
+  private originalBillingContactName = '';
+  private originalBillingAddress = '';
 
-    toggleBillingContactEdit() {
-        if (!this.isBillingContactEditable) {
-            // Start editing - store original value
-            this.originalBillingContactName = this.billingContactName;
-            this.isBillingContactEditable = true;
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
-            // Focus the input after view update
-            setTimeout(() => {
-                const input = document.querySelector('input[readonly="false"]') as HTMLInputElement;
-                if (input) {
-                    input.focus();
-                    input.select();
-                }
-            }, 0);
-        } else {
-            // Stop editing - save changes
-            this.isBillingContactEditable = false;
-            console.log('Billing Contact Name updated:', this.billingContactName);
+  ngOnInit(): void {
+    this.loadOrganizationDetails();
+  }
+
+  loadOrganizationDetails() {
+    const user = this.authService.getCurrentUser();
+    const clientId = user?.clientId;
+
+    if (!clientId) {
+      console.error('Client ID not found');
+      return;
+    }
+
+    this.http.get<any>(`${environment.apiUrl}/clients/${clientId}`).subscribe({
+      next: (res) => {
+        console.log('Organization API response:', res);
+
+        this.companyName = res.companyName ?? '';
+        this.billingContactName = res.billingContactName ?? '';
+        this.email = user?.email ?? '';
+        this.gstDetails = res.gstDetails ?? '';
+        this.corporateAddress = res.corporateAddress ?? '';
+        this.billingAddress = res.billingAddress ?? '';
+      },
+      error: (err) => {
+        console.error('Failed to load organization details', err);
+      }
+    });
+  }
+
+  toggleBillingContactEdit() {
+    if (!this.isBillingContactEditable) {
+      this.originalBillingContactName = this.billingContactName;
+      this.isBillingContactEditable = true;
+
+      setTimeout(() => {
+        const input = document.querySelector('input[readonly="false"]') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          input.select();
         }
+      }, 0);
+    } else {
+      this.isBillingContactEditable = false;
+      console.log('Billing Contact Name updated:', this.billingContactName);
     }
+  }
 
-    toggleBillingAddressEdit() {
-        if (!this.isBillingAddressEditable) {
-            // Start editing - store original value
-            this.originalBillingAddress = this.billingAddress;
-            this.isBillingAddressEditable = true;
+  toggleBillingAddressEdit() {
+    if (!this.isBillingAddressEditable) {
+      this.originalBillingAddress = this.billingAddress;
+      this.isBillingAddressEditable = true;
 
-            // Focus the textarea after view update
-            setTimeout(() => {
-                const textarea = document.querySelector('.address-textarea') as HTMLTextAreaElement;
-                if (textarea) {
-                    textarea.focus();
-                    textarea.select();
-                }
-            }, 0);
-        } else {
-            // Stop editing - save changes
-            this.isBillingAddressEditable = false;
-            console.log('Billing Address updated:', this.billingAddress);
+      setTimeout(() => {
+        const textarea = document.querySelector('.address-textarea') as HTMLTextAreaElement;
+        if (textarea) {
+          textarea.focus();
+          textarea.select();
         }
+      }, 0);
+    } else {
+      this.isBillingAddressEditable = false;
+      console.log('Billing Address updated:', this.billingAddress);
     }
+  }
 
-    saveBillingAddress() {
-        // Called when textarea loses focus
-        this.isBillingAddressEditable = false;
-        console.log('Billing Address saved:', this.billingAddress);
-    }
+  saveBillingAddress() {
+    this.isBillingAddressEditable = false;
+    console.log('Billing Address saved:', this.billingAddress);
+  }
 
-    // Method to cancel editing (optional - can be called on Escape key)
-    cancelBillingContactEdit() {
-        this.billingContactName = this.originalBillingContactName;
-        this.isBillingContactEditable = false;
-    }
+  cancelBillingContactEdit() {
+    this.billingContactName = this.originalBillingContactName;
+    this.isBillingContactEditable = false;
+  }
 
-    cancelBillingAddressEdit() {
-        this.billingAddress = this.originalBillingAddress;
-        this.isBillingAddressEditable = false;
-    }
+  cancelBillingAddressEdit() {
+    this.billingAddress = this.originalBillingAddress;
+    this.isBillingAddressEditable = false;
+  }
 
-    onSaveChanges() {
-        console.log('Saving Organization Details', {
-            companyName: this.companyName,
-            billingContactName: this.billingContactName,
-            email: this.email,
-            gstDetails: this.gstDetails,
-            corporateAddress: this.corporateAddress,
-            billingAddress: this.billingAddress,
-        });
+ onSaveChanges() {
+  const user = this.authService.getCurrentUser();
+  const clientId = user?.clientId || user?.clientid;
 
-        // You can add your API call here to save the data
-        alert('Organization details saved successfully!');
-    }
+  if (!clientId) {
+    console.error('Client ID not found');
+    return;
+  }
+
+  const payload = {
+    companyName: this.companyName,
+    billingContactName: this.billingContactName,
+    corporateAddress: this.corporateAddress,
+    gstDetails: this.gstDetails,
+    billingAddress: this.billingAddress
+  };
+
+  console.log('Sending payload:', payload);
+
+  this.http.put(`${environment.apiUrl}/clients/${clientId}`, payload)
+    .subscribe({
+      next: (res) => {
+        console.log('Saved successfully', res);
+        alert('Saved to DB successfully');
+      },
+      error: (err) => {
+        console.error('Save failed', err);
+      }
+    });
+}
 }

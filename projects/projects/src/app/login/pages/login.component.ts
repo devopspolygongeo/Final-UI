@@ -50,7 +50,7 @@ export class LoginComponent {
     this.authService.login(event.userName, event.password).subscribe({
       next: (resp: UserResponse) => {
         if (resp) {
-          localStorage.setItem('currentUser', JSON.stringify(resp.user));
+          //localStorage.setItem('currentUser', JSON.stringify(resp.user));
 
           const roleBasedTarget = this.getDashboardUrlByRole(resp.user.role);
 
