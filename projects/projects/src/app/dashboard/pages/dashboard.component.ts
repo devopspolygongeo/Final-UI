@@ -211,7 +211,9 @@ export class DashboardComponent {
     if (this.isShareMode) return;
 
     if (isLoggedOut) {
-      this.authService.logout().subscribe(() => {
+
+       localStorage.removeItem('plot_layout_section1_state');
+      this.authService.logout().subscribe(() => { 
         sessionStorage.setItem('reloadLoginOnce', 'true');
         this.router.navigateByUrl(AppConstants.LOGIN_URL);
       });

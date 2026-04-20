@@ -296,12 +296,25 @@ export class PlotviewPlotDetailsComponent
         frequency: '',
       } as Project;
     }
+    
   }
 
   private normalizeStatus(s: any): 'Available' | 'In Progress' | 'Sold' {
     return uiToStorage(s);
   }
 
+  formatDeveloperName(value: string): string {
+    
+  if (!value) return '';
+
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+private normalizeDeveloperForSave(value: string): string {
+  return String(value || '').trim().toLowerCase();
+}
   private async resolveSurvey(
     projectId?: number,
     surveyId?: number,
@@ -364,19 +377,20 @@ export class PlotviewPlotDetailsComponent
       const developers = Array.isArray(res?.developers) ? res.developers : [];
 
       this.ownersList = this.cleanSuggestionList(owners);
-      this.developersList = this.cleanSuggestionList(developers);
+this.developersList = this.cleanSuggestionList(developers).map((d) =>
+  this.formatDeveloperName(d),
+);
     } catch (e) {
       console.error('[PlotDetails] Failed to fetch owners/developers', e);
       this.ownersList = [];
       this.developersList = [];
     }
   }
-
-  private cleanSuggestionList(values: string[]): string[] {
-    return Array.from(
-      new Set(values.map((v) => String(v || '').trim()).filter((v) => !!v)),
-    );
-  }
+private cleanSuggestionList(values: string[]): string[] {
+  return Array.from(
+    new Set(values.map((v) => String(v || '').trim()).filter((v) => !!v)),
+  );
+}
 
   private async loadSurveyDataAndBuildMap(survey: Survey): Promise<void> {
     if (!survey || !survey.id) {
@@ -603,7 +617,7 @@ export class PlotviewPlotDetailsComponent
     this.plotModel.facing = String(plot?.facing ?? '');
     this.plotModel.salestatus = storageToUI(plot?.salestatus ?? 'Available');
     this.plotModel.ownername = ownerValue;
-    this.plotModel.Developer = developerValue;
+  this.plotModel.Developer = this.formatDeveloperName(developerValue);
     this.plotModel.Sales_Consideration = String(plot?.Sales_Consideration ?? '');
     this.plotModel.priceMin = String(plot?.priceMin ?? '');
     this.plotModel.priceMax = String(plot?.priceMax ?? '');
@@ -731,9 +745,8 @@ export class PlotviewPlotDetailsComponent
   }
 
   private getFinalDeveloperValue(): string {
-    return String(this.plotModel.Developer || '').trim();
-  }
-
+  return this.normalizeDeveloperForSave(this.plotModel.Developer);
+}
   async onSearchPlot(): Promise<void> {
     const plotNo = String(this.searchPlotNo || '').trim();
 

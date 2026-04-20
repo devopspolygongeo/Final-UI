@@ -58,6 +58,8 @@ export class LayersComponent implements OnInit, OnDestroy {
   constructor(readonly mapService: MapService) {}
 
   // ✅ STORAGE FOR SECTION 1 ONLY
+
+  
 private STORAGE_KEY = 'plot_layout_section1_state';
 
 private getSavedState() {
