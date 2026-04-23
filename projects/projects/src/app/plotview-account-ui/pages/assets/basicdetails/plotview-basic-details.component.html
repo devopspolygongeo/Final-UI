@@ -117,42 +117,13 @@
       <div class="plot-attributes-section">
         <label>Plot attributes</label>
         <div class="dropdown-wrapper">
-          <div class="tags-container dropdown-tags" [class.active]="plotAttributesDropdownOpen"
-            (click)="togglePlotAttributesDropdown(); $event.stopPropagation()">
-            <div *ngFor="let attr of getSelectedPlotAttributes()" class="tag">
+          <div class="tags-container">
+            <div *ngFor="let attr of availablePlotAttributes" class="tag">
               {{ attr.label }}
-              <span class="tag-close" (click)="
-                  removePlotAttribute(attr.value); $event.stopPropagation()
-                ">×</span>
-            </div>
-            <span class="dropdown-arrow">▼</span>
-          </div>
-
-          <!-- Plot Attributes Dropdown Content -->
-          <div class="dropdown-menu" [class.show]="plotAttributesDropdownOpen">
-            <!-- Input Layer for new plot attribute -->
-            <div class="custom-size-entry" (click)="$event.stopPropagation()">
-              <input type="text" class="custom-size-input" [(ngModel)]="newPlotAttributeLabel"
-                placeholder="Enter new attribute" (click)="$event.stopPropagation()" />
-              <button (click)="addCustomPlotAttribute(); $event.stopPropagation()" class="add-btn">
-                Add
-              </button>
-            </div>
-
-            <div class="checkbox-grid">
-              <div *ngFor="let attr of availablePlotAttributes; let i = index" class="checkbox-item"
-                (click)="togglePlotAttribute(i); $event.stopPropagation()">
-                <div class="checkbox-wrapper">
-                  <img [src]="
-                      attr.selected
-                        ? 'assets/admin-dashboard/checkbox-checked.png'
-                        : 'assets/admin-dashboard/checkbox-unchecked.png'
-                    " class="checkbox-icon" alt="checkbox" />
-                  <span>{{ attr.label }}</span>
-                </div>
-              </div>
             </div>
           </div>
+
+
         </div>
       </div>
     </div>
@@ -244,4 +215,7 @@
     </div>
   </div>
 </div>
+
+
+
 

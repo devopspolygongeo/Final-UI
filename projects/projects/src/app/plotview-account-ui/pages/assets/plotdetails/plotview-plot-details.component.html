@@ -3,9 +3,16 @@
   <!-- LEFT -->
   <div class="left-section" #leftCol>
     <ng-container *ngIf="mapConfig; else noMap">
-      <app-map #mapCmp [mapConfig]="mapConfig" [showLandmarks]="false" [enableTerrain]="is3D"
-        (mapMouseEv)="onMapMouseEvents($event)">
-      </app-map>
+<app-map
+  #mapCmp
+  [mapConfig]="mapConfig"
+  [disableFilters]="true"
+  [plotviewMode]="true"
+  [showLandmarks]="false"
+  [enableTerrain]="is3D"
+  (mapMouseEv)="onMapMouseEvents($event)"
+>
+</app-map>
     </ng-container>
 
     <ng-template #noMap>
@@ -117,7 +124,7 @@
         </datalist>
       </div>
 
- 
+
 
       <!-- PRICE -->
       <!-- <div class="form-group">
@@ -146,3 +153,4 @@
     </div>
   </div>
 </div>
+

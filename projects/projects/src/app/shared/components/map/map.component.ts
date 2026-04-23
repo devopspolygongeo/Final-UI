@@ -63,6 +63,9 @@ export class MapComponent implements OnInit, OnChanges {
   @Input() terrainExaggeration: number = 1;
   @Input() enable25D: boolean = false;
   @Input() isMiningProject: boolean = false;
+  @Input() plotviewMode: boolean = false;
+  @Input() disableFilters: boolean = false;
+
 
   @Input() buildings3DConfig: {
     tilesetId: string;
@@ -104,9 +107,7 @@ export class MapComponent implements OnInit, OnChanges {
     }
     return Boolean(v);
   }
-private normalizeValue(value: any): string {
-  return String(value ?? '').trim().toLowerCase();
-}
+
   private reapplyUiStateToMap(): void {
     // If we are switching projects, do NOT reapply old UI states
     if (this.isProjectSwitching) return;
@@ -552,21 +553,20 @@ private normalizeValue(value: any): string {
                 });
                 this.interactionLayerNames.push(interactionLayerId);
 
-                const fillLayer: AnyLayer = {
-                  id: layerName,
-                  layout: {
-                    visibility: this.toBool(layer.visibility)
-                      ? 'visible'
-                      : 'none',
-                  },
-                  source: source.name,
-                  type: 'fill',
-                  'source-layer': source.name,
-                  paint: {
-                    'fill-opacity': parseFloat(layer.topography?.fillOpacity),
-                    'fill-color': this.getColor(layer),
-                  },
-                };
+const fillLayer: AnyLayer = {
+  id: layerName,
+  layout: {
+    visibility: this.toBool(layer.visibility) ? 'visible' : 'none',
+  },
+  source: source.name,
+  type: 'fill',
+  'source-layer': source.name,
+  paint: {
+    'fill-opacity': this.plotviewMode ? 0 : parseFloat(layer.topography?.fillOpacity),
+    'fill-color': this.plotviewMode ? '#000000' : this.getColor(layer),
+    'fill-outline-color': '#0000FF',
+  },
+};
                 vectorLayers.push({
                   priority: layer.priority,
                   layer: fillLayer,
@@ -645,68 +645,58 @@ private normalizeValue(value: any): string {
     else return layer.name;
   }
 
- removeFilters(map: mapboxgl.Map, mapConfig: MapConfig) {
-  const visibleLayers = mapConfig.sources
-    .flatMap((source) => source.layers || [])
-    .filter((layer) => {
-      if (
-        !layer ||
-        !layer.name ||
-        !layer.group ||
-        layer.group.type !== AppConstants.VIEW_BY_CLASSIFICATION
-      ) {
-        return false;
-      }
-
-      const mapLayer: any = map.getLayer(this.getLayerName(layer));
-      return mapLayer?.layout?.visibility === 'visible';
-    });
-
-  visibleLayers.forEach((layer) => {
-    this.map.setFilter(this.getLayerName(layer), undefined);
-  });
-}
-
-setFilters(map: mapboxgl.Map, mapConfig: MapConfig) {
-  const visibleLayers = mapConfig.sources
-    .flatMap((source) => source.layers || [])
-    .filter((layer) => {
-      if (
-        !layer ||
-        !layer.name ||
-        !layer.group ||
-        layer.group.type !== AppConstants.VIEW_BY_CLASSIFICATION
-      ) {
-        return false;
-      }
-
-      const mapLayer: any = map.getLayer(this.getLayerName(layer));
-      return mapLayer?.layout?.visibility === 'visible';
-    });
-
-  if (visibleLayers && visibleLayers.length) {
-    const attrMap = visibleLayers.reduce((group: Map<string, string[]>, layer) => {
-      const attr = String(layer.attribute || '').trim();
-      const value = this.normalizeValue(this.getLayerName(layer));
-
-      group.set(attr, [...(group.get(attr) || []), value]);
-      return group;
-    }, new Map<string, string[]>());
-
-    const filters: any[] = [
-      'all',
-      ...[...attrMap.entries()].map(([attr, values]) => [
-        'in',
-        ['downcase', ['to-string', ['coalesce', ['get', attr], '']]],
-        ['literal', values],
-      ]),
-    ];
+  removeFilters(map: mapboxgl.Map, mapConfig: MapConfig) {
+    let visibleLayers = mapConfig.sources
+      .flatMap((source) => source.layers || [])
+      .filter((layer) => {
+        return (
+          layer &&
+          layer.name &&
+          layer.group &&
+          layer.group.type === AppConstants.VIEW_BY_CLASSIFICATION &&
+          // @ts-ignore
+          map.getLayer(this.getLayerName(layer))?.visibility === 'visible'
+        );
+      });
 
     visibleLayers.forEach((layer) => {
-      this.map.setFilter(this.getLayerName(layer), filters as any);
+      this.map.setFilter(this.getLayerName(layer), undefined);
     });
   }
-}
+
+  setFilters(map: mapboxgl.Map, mapConfig: MapConfig) {
+    let visibleLayers = mapConfig.sources
+      .flatMap((source) => source.layers || [])
+      .filter((layer) => {
+        return (
+          layer &&
+          layer.name &&
+          layer.group &&
+          layer.group.type === AppConstants.VIEW_BY_CLASSIFICATION &&
+          // @ts-ignore
+          map.getLayer(this.getLayerName(layer))?.visibility === 'visible'
+        );
+      });
+
+    if (visibleLayers && visibleLayers.length) {
+      const attrMap = visibleLayers.reduce((group, layer) => {
+        group.set(layer.attribute, [
+          ...(group.get(layer.attribute) || []),
+          this.getLayerName(layer),
+        ]);
+        return group;
+      }, new Map());
+
+      const filters = [
+        'all',
+        ...[...attrMap.entries()].map((entry) => ['in', entry[0], ...entry[1]]),
+      ];
+
+      visibleLayers.forEach((layer) => {
+        this.map.setFilter(this.getLayerName(layer), filters as any);
+      });
+    }
+  }
 
   private toggleMarkersAndNavigation() {
     if (this.showLandmarks) {
@@ -955,18 +945,17 @@ setFilters(map: mapboxgl.Map, mapConfig: MapConfig) {
     });
   }
 
- private getColor(layer: Layer, color?: string): Expression {
-  const colorToBeApplied =
-    color || layer.topography?.color || layer.topography?.fillColor;
-
-  return [
-    'match',
-    ['downcase', ['to-string', ['coalesce', ['get', layer.attribute], '']]],
-    this.normalizeValue(this.getLayerName(layer)),
-    colorToBeApplied,
-    'transparent',
-  ];
-}
+  private getColor(layer: Layer, color?: string): Expression {
+    let colorToBeApplied =
+      color || layer.topography?.color || layer.topography?.fillColor;
+    return [
+      'match',
+      ['get', layer.attribute],
+      this.getLayerName(layer),
+      colorToBeApplied,
+      'transparent',
+    ];
+  }
 
   private reloadMap() {
     if (this.map && this.mapConfig) {
