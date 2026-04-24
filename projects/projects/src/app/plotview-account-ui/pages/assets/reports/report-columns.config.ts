@@ -16,7 +16,8 @@ export const REPORT_COLUMN_CONFIG: Record<string, ReportColumnConfigItem[]> = {
       label: 'Document No',
       keys: ['doc_no', 'docNo', 'document_no', 'documentNo'],
     },
-    { label: 'Remarks', keys: ['Sales_Consideration'] },
+    { label: 'Sales Consideration', keys: ['Sales_Consideration'] },
+    { label: 'Remarks', keys: ['Remarks'] },
   ],
 };
 

@@ -16,6 +16,7 @@ export interface PlotStatusUpdateReq {
   Developer?: string;
   doc_no?: string;
   Sales_Consideration?: string;
+  Remarks?: string;
 }
 
 export interface PlotDetails {
@@ -33,6 +34,7 @@ export interface PlotDetails {
   priceMax: string;
   priceUnit: string;
   Sales_Consideration?: string;
+  Remarks?: string;
 }
 
 export interface PlotStatusUpdateRes {

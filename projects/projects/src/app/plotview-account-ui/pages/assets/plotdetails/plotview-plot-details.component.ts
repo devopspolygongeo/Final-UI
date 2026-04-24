@@ -119,6 +119,7 @@ export class PlotviewPlotDetailsComponent
     ownername: '',
     Developer: '',
     Sales_Consideration: '',
+    Remarks: '',
     priceMin: '',
     priceMax: '',
     priceUnit: 'Sq ft',
@@ -296,7 +297,6 @@ export class PlotviewPlotDetailsComponent
         frequency: '',
       } as Project;
     }
-    
   }
 
   private normalizeStatus(s: any): 'Available' | 'In Progress' | 'Sold' {
@@ -304,17 +304,18 @@ export class PlotviewPlotDetailsComponent
   }
 
   formatDeveloperName(value: string): string {
-    
-  if (!value) return '';
+    if (!value) return '';
 
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
-private normalizeDeveloperForSave(value: string): string {
-  return String(value || '').trim().toLowerCase();
-}
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  private normalizeDeveloperForSave(value: string): string {
+    return String(value || '')
+      .trim()
+      .toLowerCase();
+  }
   private async resolveSurvey(
     projectId?: number,
     surveyId?: number,
@@ -377,20 +378,20 @@ private normalizeDeveloperForSave(value: string): string {
       const developers = Array.isArray(res?.developers) ? res.developers : [];
 
       this.ownersList = this.cleanSuggestionList(owners);
-this.developersList = this.cleanSuggestionList(developers).map((d) =>
-  this.formatDeveloperName(d),
-);
+      this.developersList = this.cleanSuggestionList(developers).map((d) =>
+        this.formatDeveloperName(d),
+      );
     } catch (e) {
       console.error('[PlotDetails] Failed to fetch owners/developers', e);
       this.ownersList = [];
       this.developersList = [];
     }
   }
-private cleanSuggestionList(values: string[]): string[] {
-  return Array.from(
-    new Set(values.map((v) => String(v || '').trim()).filter((v) => !!v)),
-  );
-}
+  private cleanSuggestionList(values: string[]): string[] {
+    return Array.from(
+      new Set(values.map((v) => String(v || '').trim()).filter((v) => !!v)),
+    );
+  }
 
   private async loadSurveyDataAndBuildMap(survey: Survey): Promise<void> {
     if (!survey || !survey.id) {
@@ -548,6 +549,7 @@ private cleanSuggestionList(values: string[]): string[] {
       ownername: '',
       Developer: '',
       Sales_Consideration: '',
+      Remarks: '',
       priceMin: '',
       priceMax: '',
       priceUnit: 'Sq ft',
@@ -595,9 +597,10 @@ private cleanSuggestionList(values: string[]): string[] {
       ownername: getProp(['ownername', 'owner_name', 'owner'], ''),
       Developer: getProp(['Developer', 'developer', 'Devloper'], ''),
       Sales_Consideration: getProp(
-  ['Sales_Consideration', 'sales_consideration', 'salesConsideration'],
-  ''
-),
+        ['Sales_Consideration', 'sales_consideration', 'salesConsideration'],
+        '',
+      ),
+      Remarks: getProp(['Remarks', 'remarks', 'remark'], ''),
       priceMin: priceMin || (rangeMatch ? rangeMatch[1] : ''),
       priceMax: priceMax || (rangeMatch ? rangeMatch[2] : ''),
       priceUnit: getProp(['priceUnit', 'price_unit'], 'Sq ft'),
@@ -617,8 +620,11 @@ private cleanSuggestionList(values: string[]): string[] {
     this.plotModel.facing = String(plot?.facing ?? '');
     this.plotModel.salestatus = storageToUI(plot?.salestatus ?? 'Available');
     this.plotModel.ownername = ownerValue;
-  this.plotModel.Developer = this.formatDeveloperName(developerValue);
-    this.plotModel.Sales_Consideration = String(plot?.Sales_Consideration ?? '');
+    this.plotModel.Developer = this.formatDeveloperName(developerValue);
+    this.plotModel.Sales_Consideration = String(
+      plot?.Sales_Consideration ?? '',
+    );
+    this.plotModel.Remarks = String((plot as any)?.Remarks ?? '');
     this.plotModel.priceMin = String(plot?.priceMin ?? '');
     this.plotModel.priceMax = String(plot?.priceMax ?? '');
     this.plotModel.priceUnit = String(plot?.priceUnit ?? 'Sq ft');
@@ -745,8 +751,8 @@ private cleanSuggestionList(values: string[]): string[] {
   }
 
   private getFinalDeveloperValue(): string {
-  return this.normalizeDeveloperForSave(this.plotModel.Developer);
-}
+    return this.normalizeDeveloperForSave(this.plotModel.Developer);
+  }
   async onSearchPlot(): Promise<void> {
     const plotNo = String(this.searchPlotNo || '').trim();
 
@@ -887,8 +893,10 @@ private cleanSuggestionList(values: string[]): string[] {
     const finalOwnerName = this.getFinalOwnerValue();
     const finalDeveloperName = this.getFinalDeveloperValue();
     const finalDocNo = String(this.plotModel.doc_no || '').trim();
-    const finalSalesConsideration = String(this.plotModel.Sales_Consideration || '').trim();
-
+    const finalSalesConsideration = String(
+      this.plotModel.Sales_Consideration || '',
+    ).trim();
+    const finalRemarks = String(this.plotModel.Remarks || '').trim();
     const payload = {
       surveyId: Number(this.selectedSurvey?.id ?? this.surveyId ?? 0),
       tilesetId: this.tilesetId,
@@ -900,6 +908,7 @@ private cleanSuggestionList(values: string[]): string[] {
       Developer: finalDeveloperName,
       doc_no: finalDocNo,
       Sales_Consideration: finalSalesConsideration,
+      Remarks: finalRemarks,
     };
 
     console.log('[PlotDetails] request payload →', payload);

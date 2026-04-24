@@ -3,16 +3,9 @@
   <!-- LEFT -->
   <div class="left-section" #leftCol>
     <ng-container *ngIf="mapConfig; else noMap">
-<app-map
-  #mapCmp
-  [mapConfig]="mapConfig"
-  [disableFilters]="true"
-  [plotviewMode]="true"
-  [showLandmarks]="false"
-  [enableTerrain]="is3D"
-  (mapMouseEv)="onMapMouseEvents($event)"
->
-</app-map>
+      <app-map #mapCmp [mapConfig]="mapConfig" [disableFilters]="true" [plotviewMode]="true" [showLandmarks]="false"
+        [enableTerrain]="is3D" (mapMouseEv)="onMapMouseEvents($event)">
+      </app-map>
     </ng-container>
 
     <ng-template #noMap>
@@ -65,17 +58,12 @@
           [disabled]="!isPlotSelected" />
       </div>
 
-            <!-- SALES CONSIDERATION -->
-<div class="form-group">
-  <label>Sales Consideration</label>
-  <input
-    class="form-control"
-    [(ngModel)]="plotModel.Sales_Consideration"
-    (ngModelChange)="markDirty()"
-    [disabled]="!isPlotSelected"
-    placeholder="Enter sales consideration"
-  />
-</div>
+      <!-- SALES CONSIDERATION -->
+      <div class="form-group">
+        <label>Sales Consideration</label>
+        <input class="form-control" [(ngModel)]="plotModel.Sales_Consideration" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" placeholder="Enter sales consideration" />
+      </div>
 
       <!-- SALE STATUS -->
       <div class="form-group">
@@ -124,6 +112,13 @@
         </datalist>
       </div>
 
+      <!-- REMARKS -->
+      <div class="form-group">
+        <label>Remarks</label>
+        <input class="form-control" [(ngModel)]="plotModel.Remarks" (ngModelChange)="markDirty()"
+          [disabled]="!isPlotSelected" placeholder="Enter remarks" />
+      </div>
+
 
 
       <!-- PRICE -->
@@ -153,4 +148,3 @@
     </div>
   </div>
 </div>
-
