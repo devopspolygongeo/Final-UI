@@ -79,11 +79,11 @@ export class PlotviewDashboardComponent implements OnInit {
           projectId: Number(p.id), // 👈 keep a copy to pass along
           name: p.name ?? 'Untitled Project',
           location: p.location ?? '—',
-          date: '09-Jan-2023', // static
+          date: '', // static
           url: this.buildProjectUrl(p.name),
           // static
           status: 'Active', // static
-          validTill: '12th June 2024', // static
+          validTill: '5th May 2026', // static
         }));
       },
       error: (err) => {
