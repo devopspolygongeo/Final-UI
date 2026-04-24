@@ -4,7 +4,7 @@ export interface ReportColumnConfigItem {
 }
 
 export const REPORT_COLUMN_CONFIG: Record<string, ReportColumnConfigItem[]> = {
-  wadakaplly_topo_16_04: [
+  wadakpally_21_04: [
     { label: 'Plot No', keys: ['plotNo', 'plot_no'] },
     { label: 'Extent', keys: ['area', 'Area'] },
     { label: 'Facing', keys: ['facing'] },
