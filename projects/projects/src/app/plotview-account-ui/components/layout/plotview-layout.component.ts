@@ -11,6 +11,7 @@ import { AuthService } from '../../../login/services/auth.service';
 export class PlotviewLayoutComponent implements OnInit {
 
     dropdownOpen = false;
+    userFirstName = '';
 
     constructor(
        private authService: AuthService,
@@ -19,6 +20,9 @@ export class PlotviewLayoutComponent implements OnInit {
   private assetService: AssetSelectionService
 ) {}
 ngOnInit(): void {
+  const user = this.authService.getUser();
+
+this.userFirstName = user?.firstName || '';
   this.route.paramMap.subscribe(params => {
     const projectName = params.get('projectName');
     if (!projectName) return;
