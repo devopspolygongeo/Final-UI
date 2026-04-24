@@ -78,7 +78,9 @@
   border-radius: 6px;
   font-size: 14px;
   background: #fff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .form-control:focus {
   outline: none;
@@ -101,7 +103,9 @@
   border-radius: 6px;
   font-size: 14px;
   background: #fff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .price-input:focus {
   outline: none;
@@ -121,16 +125,14 @@
   color: #495057;
 }
 
-/* === Hide floating map widgets on this page only === */
+/* === Hide floating custom map widgets on this page only === */
 :host ::ng-deep .map-toolbar,
 :host ::ng-deep .map-tools,
 :host ::ng-deep .basemap-toggle,
 :host ::ng-deep .terrain-toggle,
 :host ::ng-deep .plotview-hint,
 :host ::ng-deep .globe-button,
-:host ::ng-deep .reset-orientation,
-:host ::ng-deep .mapboxgl-ctrl-compass,
-:host ::ng-deep .mapboxgl-ctrl-group .mapboxgl-ctrl-icon {
+:host ::ng-deep .reset-orientation {
   display: none !important;
 }
 
@@ -178,7 +180,9 @@
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.15s ease, transform 0.05s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.05s ease;
 }
 .save-btn:hover {
   filter: brightness(1.03);
