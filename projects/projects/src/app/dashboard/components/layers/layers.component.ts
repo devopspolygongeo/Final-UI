@@ -207,7 +207,7 @@ const filterToggle: Toggle = {
   checked:
     savedState[toggleItem.id] !== undefined
       ? savedState[toggleItem.id]
-      : true, // ✅ default ON
+      : false, // ✅ default ON
   metaData: {
     layer: layer,
     groupType: this.CLASSIFY_BY_FILTER,
@@ -316,7 +316,7 @@ allToggles.forEach((toggle) => {
   toggle.checked =
     savedState[toggle.id] !== undefined
       ? savedState[toggle.id]
-      : true; // default ON
+      : false; // default ON
 });
         this.layerToggleEv.emit(allToggles);
 
