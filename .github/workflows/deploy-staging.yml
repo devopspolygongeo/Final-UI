@@ -23,6 +23,7 @@ jobs:
 
       - name: Create environment file
         run: |
+          mkdir -p projects/projects/src/environments
           cat > projects/projects/src/environments/environment.prod.ts << EOF
           export const environment = {
             production: true,
