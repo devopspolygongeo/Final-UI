@@ -1,0 +1,54 @@
+name: Deploy Frontend to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Build Angular app
+      - name: Build Angular app
+        run: nx build projects --prod --base-href='/projects/'
+
+      # 5. Setup SSH
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      # 6. Deploy to EC2
+      - name: Deploy to Staging EC2
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "rm -rf ${{ secrets.STAGING_FRONTEND_PATH }}/*"
+
+          scp -r dist/projects/* ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_FRONTEND_PATH }}
+
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
+            chmod 755 /home/ec2-user &&
+            chmod 755 /home/ec2-user/polygon-geo &&
+            chmod 755 /home/ec2-user/polygon-geo/ui &&
+            chmod 755 /home/ec2-user/polygon-geo/ui/projects &&
+            find /home/ec2-user/polygon-geo/ui/projects -type d -exec chmod 755 {} \; &&
+            find /home/ec2-user/polygon-geo/ui/projects -type f -exec chmod 644 {} \; &&
+            sudo systemctl reload nginx
+          "
