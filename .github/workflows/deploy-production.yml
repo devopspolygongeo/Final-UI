@@ -1,0 +1,85 @@
+name: Deploy Frontend to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create environment file
+        run: |
+          mkdir -p projects/projects/src/environments
+
+          cat > projects/projects/src/environments/environment.ts << EOF
+          export const environment = {
+            production: false,
+            apiUrl: 'https://projects.polygongeo.com/api/v1',
+            mapBox: {
+              directionsApiUrl: 'https://api.mapbox.com/directions/v5/mapbox',
+              searchApiUrl: 'https://api.mapbox.com/search/searchbox/v1',
+              accessToken: '${{ secrets.MAPBOX_PUBLIC_TOKEN }}',
+            },
+          };
+          EOF
+
+          cat > projects/projects/src/environments/environment.prod.ts << EOF
+          export const environment = {
+            production: true,
+            apiUrl: 'https://projects.polygongeo.com/api/v1',
+            mapBox: {
+              directionsApiUrl: 'https://api.mapbox.com/directions/v5/mapbox',
+              searchApiUrl: 'https://api.mapbox.com/search/searchbox/v1',
+              accessToken: '${{ secrets.MAPBOX_PUBLIC_TOKEN }}',
+            },
+          };
+          EOF
+
+      - name: Build Angular app
+        run: npx nx build projects --prod --base-href='/projects/' --skip-nx-cache
+        env:
+          NX_CLOUD_DISABLED: "true"
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Clear old frontend files
+        run: |
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} \
+            "rm -rf ${{ secrets.PROD_FRONTEND_PATH }}/*"
+
+      - name: Copy new build to EC2
+        run: |
+          scp -r dist/projects/* \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:${{ secrets.PROD_FRONTEND_PATH }}
+
+      - name: Fix permissions and reload Nginx
+        run: |
+          ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
+            chmod 755 /home/ec2-user &&
+            chmod 755 /home/ec2-user/polygon-geo &&
+            chmod 755 /home/ec2-user/polygon-geo/ui &&
+            chmod 755 /home/ec2-user/polygon-geo/ui/projects &&
+            find /home/ec2-user/polygon-geo/ui/projects -type d -exec chmod 755 {} \; &&
+            find /home/ec2-user/polygon-geo/ui/projects -type f -exec chmod 644 {} \; &&
+            sudo systemctl reload nginx
+          "
