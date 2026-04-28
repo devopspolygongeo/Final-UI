@@ -24,6 +24,19 @@ jobs:
       - name: Create environment file
         run: |
           mkdir -p projects/projects/src/environments
+
+          cat > projects/projects/src/environments/environment.ts << EOF
+          export const environment = {
+            production: false,
+            apiUrl: 'https://staging.projects.polygongeo.com/api/v1',
+            mapBox: {
+              directionsApiUrl: 'https://api.mapbox.com/directions/v5/mapbox',
+              searchApiUrl: 'https://api.mapbox.com/search/searchbox/v1',
+              accessToken: '${{ secrets.MAPBOX_PUBLIC_TOKEN }}',
+            },
+          };
+          EOF
+
           cat > projects/projects/src/environments/environment.prod.ts << EOF
           export const environment = {
             production: true,
