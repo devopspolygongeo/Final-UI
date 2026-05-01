@@ -985,6 +985,12 @@ const fillLayer: AnyLayer = {
     }
   }
 
+  // private addControls() {
+  //   if (!this.map.hasControl(NAVIGATION_CTRL)) {
+  //     this.map.addControl(NAVIGATION_CTRL);
+  //   }
+  // }
+
   private removeControls() {
     this.map.removeControl(NAVIGATION_CTRL);
   }
