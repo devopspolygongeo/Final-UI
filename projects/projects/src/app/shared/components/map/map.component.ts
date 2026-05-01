@@ -562,9 +562,9 @@ const fillLayer: AnyLayer = {
   type: 'fill',
   'source-layer': source.name,
   paint: {
-    'fill-opacity': this.plotviewMode ? 0 : parseFloat(layer.topography?.fillOpacity),
-    'fill-color': this.plotviewMode ? '#000000' : this.getColor(layer),
-    'fill-outline-color': '#0000FF',
+    'fill-opacity': parseFloat(layer.topography?.fillOpacity || '0.4'),
+    'fill-color': this.getColor(layer),
+    'fill-outline-color': this.getColor(layer),
   },
 };
                 vectorLayers.push({
