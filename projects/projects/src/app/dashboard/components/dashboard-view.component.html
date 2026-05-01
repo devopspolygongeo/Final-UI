@@ -57,12 +57,20 @@
     </div>
 
     <!-- ================= MAPBOX (BASE LAYER) ================= -->
-    <app-map *ngIf="mapConfig" [mapConfig]="mapConfig" [layerVisibility]="layerVisibility"
-      [layerPaintChange]="layerPaintChange" [showLandmarks]="showLandmarks" [directions]="directions"
-      [enableTerrain]="is3D" [enable25D]="is25D" (btnEv)="onMapBtnEvents($event)" (mapMouseEv)="mapMouseEvents($event)"
-      [isMiningProject]="isMiningProject">
-    </app-map>
-
+  <app-map
+  *ngIf="mapConfig"
+  [mapConfig]="mapConfig"
+  [layerVisibility]="layerVisibility"
+  [layerPaintChange]="layerPaintChange"
+  [showLandmarks]="showLandmarks"
+  [directions]="directions"
+  [enableTerrain]="is3D"
+  [enable25D]="is25D"
+ [searchPlotNo]="plotSearchTrigger"
+  (btnEv)="onMapBtnEvents($event)"
+  (mapMouseEv)="mapMouseEvents($event)"
+  [isMiningProject]="isMiningProject">
+</app-map>
 
     <!-- ================= POTREE OVERLAY ================= -->
     <div *ngIf="is3D && hasPointCloud" class="potree-overlay">
@@ -85,6 +93,19 @@
         <b>{{ hoverItem.name | titlecase }}:</b> {{ hoverItem.value }}
       </div>
     </div>
+
+    <div class="plot-search-box" *ngIf="selectedSurvey?.plotView">
+  <input
+    type="text"
+    placeholder="Search Plot No"
+    [(ngModel)]="plotSearchNo"
+    (keyup.enter)="searchPlot()"
+  />
+
+  <button type="button" (click)="searchPlot()">
+    Search
+  </button>
+</div>
 
     <mat-form-field class="glass-select select-modern" appearance="outline" floatLabel="always">
       <mat-label>Project</mat-label>

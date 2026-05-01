@@ -86,7 +86,8 @@ export class DashboardViewComponent implements OnChanges {
 
   public logoClass: string = 'logo';
   public userEmail: string = '';
-
+plotSearchNo: string = '';
+plotSearchTrigger: string = '';
   // ✅ Public share mode flag (added)
   public isPublicShare: boolean = false;
 
@@ -223,12 +224,18 @@ export class DashboardViewComponent implements OnChanges {
   onProjectChange(project: Project) {
     this.projectChangeEv.emit(project);
 
+      this.plotSearchNo = '';
+  this.plotSearchTrigger = '';
+
+
     // ✅ LOAD 2.5D DATA FOR PROJECT
     this.loadBuildings3D(project.id);
   }
 
   onSurveyChange(survey: Survey) {
     this.surveyChangeEv.emit(survey);
+     this.plotSearchNo = '';
+  this.plotSearchTrigger = '';
   }
 
   onLayerToggle(toggleItems: Toggle[]) {
@@ -353,6 +360,8 @@ export class DashboardViewComponent implements OnChanges {
     } else if (mapEvent.type === AppConstants.MAP_MOUSE_LEAVE_EVENT) {
       this.hoverDetails = [];
     } else if (mapEvent.type === AppConstants.MAP_MOUSE_LEFT_CLICK_EVENT) {
+      this.plotSearchNo = '';
+this.plotSearchTrigger = '';
       const clickAttributes = this.layouts.length
         ? this.layouts[0]?.clickAttributes?.split(',') || []
         : [];
@@ -442,4 +451,17 @@ export class DashboardViewComponent implements OnChanges {
       },
     });
   }
+
+ searchPlot(): void {
+  if (!this.selectedSurvey?.plotView) return;
+
+  const value = (this.plotSearchNo || '').trim();
+
+  if (!value) {
+    alert('Please enter plot number');
+    return;
+  }
+
+  this.plotSearchTrigger = value + '_' + Date.now();
+}
 }

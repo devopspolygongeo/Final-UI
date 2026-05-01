@@ -46,7 +46,8 @@ export class LayersComponent implements OnInit, OnDestroy {
   categoryLayersToggleMap: Map<string, GroupToggle> = new Map();
   filterLayersToggleMap: Map<string, GroupToggle> = new Map();
   selectedGroupToggle!: string;
-
+private currentProjectKey = '';
+private filterState: Record<string, boolean> = {};
   readonly GLOBAL = AppConstants.GLOBAL;
   readonly CLASSIC = AppConstants.CLASSIC;
   readonly CLASSIFY_BY_FILTER = AppConstants.CLASSIFY_BY_FILTER;
@@ -60,20 +61,13 @@ export class LayersComponent implements OnInit, OnDestroy {
   // ✅ STORAGE FOR SECTION 1 ONLY
 
   
-private STORAGE_KEY = 'plot_layout_section1_state';
-
-private getSavedState() {
-  return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+private getProjectKey(): string {
+  return this.sources?.map((s: any) => s.id || s.sourceId || s.name).join('|') || 'default';
 }
 
-private saveState(toggle: Toggle) {
-  // ✅ ONLY SAVE SECTION 1 (FILTER)
+private saveFilterState(toggle: Toggle) {
   if (toggle.metaData?.groupType !== this.CLASSIFY_BY_FILTER) return;
-
-  const state = this.getSavedState();
-  state[toggle.id] = toggle.checked;
-
-  localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+  this.filterState[toggle.id] = toggle.checked;
 }
 
   // ✅ Normalize DB values like 0/1, "0"/"1", "true"/"false" into boolean
@@ -112,14 +106,22 @@ private saveState(toggle: Toggle) {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (
-      changes['sources'] &&
-      changes['sources'].currentValue != changes['sources'].previousValue
-    ) {
-      this.loadLayers();
-      this.selectedGroupType = this.CLASSIFY_BY_CATEGORY;
+  if (
+    changes['sources'] &&
+    changes['sources'].currentValue != changes['sources'].previousValue
+  ) {
+    const newProjectKey = this.getProjectKey();
+
+    if (this.currentProjectKey && this.currentProjectKey !== newProjectKey) {
+      this.filterState = {}; // project changed, reset all filter states
     }
+
+    this.currentProjectKey = newProjectKey;
+
+    this.loadLayers();
+    this.selectedGroupType = this.CLASSIFY_BY_CATEGORY;
   }
+}
 
   ngOnDestroy() {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
@@ -199,15 +201,10 @@ private saveState(toggle: Toggle) {
                 false,
               );
 
-              const savedState = this.getSavedState();
-
-const filterToggle: Toggle = {
+ const filterToggle: Toggle = {
   id: toggleItem.id,
   name: toggleItem.name,
-  checked:
-    savedState[toggleItem.id] !== undefined
-      ? savedState[toggleItem.id]
-      : false, // ✅ default ON
+  checked: this.filterState[toggleItem.id] ?? false,
   metaData: {
     layer: layer,
     groupType: this.CLASSIFY_BY_FILTER,
@@ -239,7 +236,7 @@ const filterToggle: Toggle = {
   onLayerToggle(event: MatSlideToggleChange, toggle: Toggle) {
     toggle.checked = event.checked;
     this.layerToggleEv.emit([toggle]);
-    this.saveState(toggle);
+  this.saveFilterState(toggle);
 
     if (toggle.metaData?.groupType === this.CLASSIFY_BY_FILTER) {
       const paintProps = {
@@ -310,13 +307,8 @@ const filterToggle: Toggle = {
           this.filterLayersToggleMap.values(),
         ).flatMap((item) => item.toggles);
 
-        const savedState = this.getSavedState();
-
 allToggles.forEach((toggle) => {
-  toggle.checked =
-    savedState[toggle.id] !== undefined
-      ? savedState[toggle.id]
-      : false; // default ON
+  toggle.checked = this.filterState[toggle.id] ?? false;
 });
         this.layerToggleEv.emit(allToggles);
 
@@ -346,7 +338,7 @@ allToggles.forEach((toggle) => {
     toggleItem.checked = event.checked;
 
     // ✅ SAVE STATE
-    this.saveState(toggleItem);
+   this.saveFilterState(toggleItem);
   });
 
   this.layerToggleEv.emit([...groupToggle.toggles]);

@@ -32,6 +32,7 @@ import { VolumeService } from '../../services/volume.service';
 import { Feature, Polygon } from 'geojson';
 import { HttpClient } from '@angular/common/http';
 
+
 const DRAW_CTRL = new MapboxDraw({
   displayControlsDefault: false,
   controls: {
@@ -65,6 +66,8 @@ export class MapComponent implements OnInit, OnChanges {
   @Input() isMiningProject: boolean = false;
   @Input() plotviewMode: boolean = false;
   @Input() disableFilters: boolean = false;
+  @Input() searchPlotNo: string = '';
+  
 
 
   @Input() buildings3DConfig: {
@@ -92,7 +95,9 @@ export class MapComponent implements OnInit, OnChanges {
 
   // Flag to prevent state leakage between projects
   private isProjectSwitching: boolean = false;
-
+private searchedPlotFeatureId: string | number | null = null;
+private searchedPlotSourceId: string | null = null;
+private searchedPlotSourceLayer: string | undefined = undefined;
   volumeBaseHeight?: number;
   volumePolygonGeoJSON?: Feature<Polygon>;
   volumeResult: any;
@@ -183,6 +188,15 @@ export class MapComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+   if (changes['searchPlotNo']) {
+  if (this.searchPlotNo) {
+    const plotNo = String(this.searchPlotNo).split('_')[0];
+    this.zoomToPlotByNumber(plotNo);
+  } else {
+    this.clearSearchPlotHighlight();
+  }
+}
+
     if (
       changes['mapConfig'] &&
       changes['mapConfig'].currentValue != changes['mapConfig'].previousValue
@@ -562,9 +576,18 @@ const fillLayer: AnyLayer = {
   type: 'fill',
   'source-layer': source.name,
   paint: {
-    'fill-opacity': parseFloat(layer.topography?.fillOpacity || '0.4'),
-    'fill-color': this.getColor(layer),
-    'fill-outline-color': this.getColor(layer),
+    // plotview = no fill color, only outline
+    'fill-opacity': this.plotviewMode
+      ? 0
+      : parseFloat(layer.topography?.fillOpacity || '0.4'),
+
+    'fill-color': this.plotviewMode
+      ? 'transparent'
+      : this.getColor(layer),
+
+    'fill-outline-color': this.plotviewMode
+      ? '#555555'
+      : this.getColor(layer),
   },
 };
                 vectorLayers.push({
@@ -870,7 +893,12 @@ const fillLayer: AnyLayer = {
         this.map.setLayoutProperty(toggleItem.id, 'visibility', visibility);
       }
     });
-
+// Plotview: only show/hide layers.
+// Do not apply parcel label filters or classification filters.
+if (this.plotviewMode || this.disableFilters) {
+  this.removeFilters(this.map, this.mapConfig);
+  return;
+}
     const parcelLabelLayers = this.mapConfig.sources
       .flatMap((src) => src.layers || [])
       .filter((l) => {
@@ -907,11 +935,16 @@ const fillLayer: AnyLayer = {
         toggleItem.metaData?.groupType === AppConstants.CLASSIFY_BY_FILTER,
     );
 
-    if (isFilterToggle) {
-      this.setFilters(this.map, this.mapConfig);
-    } else {
-      this.removeFilters(this.map, this.mapConfig);
-    }
+    if (this.plotviewMode || this.disableFilters) {
+  this.removeFilters(this.map, this.mapConfig);
+  return;
+}
+
+if (isFilterToggle) {
+  this.setFilters(this.map, this.mapConfig);
+} else {
+  this.removeFilters(this.map, this.mapConfig);
+}
   }
 
   private changeLayerColor(paintProperties: PaintProperty[]) {
@@ -1358,4 +1391,181 @@ const fillLayer: AnyLayer = {
         },
       });
   }
+
+  private zoomToPlotByNumber(plotNo: string): void {
+  if (!this.map || !plotNo) return;
+
+  const searchValue = String(plotNo).trim().toLowerCase();
+
+  const features = this.map.queryRenderedFeatures();
+
+  const matchedFeature = features.find((feature: any) => {
+    const props = feature.properties || {};
+
+    const value =
+      props.plot_no ??
+      props.plotNo ??
+      props.Plot_No ??
+      props.PLOT_NO ??
+      props.plotnumber ??
+      props.plot_number ??
+      props.PlotNumber;
+
+    return String(value ?? '').trim().toLowerCase() === searchValue;
+  });
+
+  if (!matchedFeature) {
+    alert(`Plot ${plotNo} not found on current map`);
+    return;
+  }
+
+  const bbox = this.getFeatureBBox(matchedFeature.geometry);
+
+  if (!bbox) {
+    alert(`Plot ${plotNo} found, but geometry not available`);
+    return;
+  }
+
+this.showSearchPlotHighlight(matchedFeature);
+
+this.map.fitBounds(bbox, {
+  padding: 80,
+  maxZoom: 20,
+  duration: 1000,
+});
+}
+  private getFeatureBBox(geometry: any): [[number, number], [number, number]] | null {
+  if (!geometry) return null;
+
+  const coords: number[][] = [];
+
+  const extractCoords = (arr: any) => {
+    if (!Array.isArray(arr)) return;
+
+    if (
+      typeof arr[0] === 'number' &&
+      typeof arr[1] === 'number'
+    ) {
+      coords.push(arr);
+      return;
+    }
+
+    arr.forEach(extractCoords);
+  };
+
+  extractCoords(geometry.coordinates);
+
+  if (!coords.length) return null;
+
+  const lngs = coords.map(c => c[0]);
+  const lats = coords.map(c => c[1]);
+
+  return [
+    [Math.min(...lngs), Math.min(...lats)],
+    [Math.max(...lngs), Math.max(...lats)],
+  ];
+}
+
+private highlightSearchedPlot(feature: any): void {
+  if (!this.map || !feature) return;
+
+  // remove old highlight
+  if (this.searchedPlotSourceId && this.searchedPlotFeatureId !== null) {
+    this.map.setFeatureState(
+      {
+        source: this.searchedPlotSourceId,
+        sourceLayer: this.searchedPlotSourceLayer,
+        id: this.searchedPlotFeatureId,
+      },
+      { highlight: false }
+    );
+  }
+
+  const featureId =
+    feature.id ??
+    feature.properties?.id ??
+    feature.properties?.fid ??
+    feature.properties?.FID;
+
+  if (featureId === undefined || featureId === null) {
+    console.warn('Feature has no id, cannot highlight using feature-state');
+    return;
+  }
+
+  this.searchedPlotFeatureId = featureId;
+  this.searchedPlotSourceId = feature.source;
+  this.searchedPlotSourceLayer = feature.sourceLayer;
+
+  this.map.setFeatureState(
+    {
+      source: feature.source,
+      sourceLayer: feature.sourceLayer,
+      id: featureId,
+    },
+    { highlight: true }
+  );
+}
+
+private showSearchPlotHighlight(feature: any): void {
+  if (!this.map || !feature?.geometry) return;
+
+  const highlightSourceId = 'searched-plot-highlight-source';
+  const highlightFillLayerId = 'searched-plot-highlight-fill';
+  const highlightLineLayerId = 'searched-plot-highlight-line';
+
+  const geojson: any = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: feature.geometry,
+        properties: feature.properties || {},
+      },
+    ],
+  };
+
+  if (this.map.getSource(highlightSourceId)) {
+    const source = this.map.getSource(highlightSourceId) as mapboxgl.GeoJSONSource;
+    source.setData(geojson);
+  } else {
+    this.map.addSource(highlightSourceId, {
+      type: 'geojson',
+      data: geojson,
+    });
+
+    this.map.addLayer({
+      id: highlightFillLayerId,
+      type: 'fill',
+      source: highlightSourceId,
+      paint: {
+        'fill-color': '#000000',
+        'fill-opacity': 0.35,
+      },
+    });
+
+    this.map.addLayer({
+      id: highlightLineLayerId,
+      type: 'line',
+      source: highlightSourceId,
+      paint: {
+        'line-color': '#000000',
+        'line-width': 3,
+      },
+    });
+  }
+}
+private clearSearchPlotHighlight(): void {
+  if (!this.map) return;
+
+  const highlightSourceId = 'searched-plot-highlight-source';
+
+  const source = this.map.getSource(highlightSourceId) as mapboxgl.GeoJSONSource;
+
+  if (source) {
+    source.setData({
+      type: 'FeatureCollection',
+      features: [],
+    });
+  }
+}
 }
