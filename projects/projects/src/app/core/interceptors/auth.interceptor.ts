@@ -52,14 +52,17 @@ export class AuthInterceptor implements HttpInterceptor {
             });
 
             if (err.status === 401) {
-              console.log(
-                '[INTERCEPTOR] redirecting to login with returnUrl =',
-                this.router.url,
-              );
-              this.router.navigate(['/login'], {
-                queryParams: { returnUrl: this.router.url },
-              });
-            } else if (err.status === 403) {
+  const isPlotviewRoute = this.router.url.startsWith('/plotview-account-ui');
+
+  if (isPlotviewRoute && req.url.includes('/mapbox/plot-meta')) {
+    console.warn('[INTERCEPTOR] plot-meta unauthorized, not redirecting');
+    return;
+  }
+
+  this.router.navigate(['/login'], {
+    queryParams: { returnUrl: this.router.url },
+  });
+} else if (err.status === 403) {
               this.router.navigateByUrl('/forbidden');
             }
           },
