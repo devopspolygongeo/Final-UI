@@ -866,3 +866,32 @@ mat-label {
 
   pointer-events: auto; /* ✅ potree remains interactive */
 }
+.plot-search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.plot-search-box input {
+  width: 130px;
+  height: 34px;
+  border: 1px solid #696e70;
+  border-radius: 6px;
+  padding: 0 8px;
+  outline: none;
+}
+
+.plot-search-box button {
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+
+  background-color: #2563eb;   /* blue */
+  color: #ffffff;              /* white text */
+  font-weight: 500;
+}

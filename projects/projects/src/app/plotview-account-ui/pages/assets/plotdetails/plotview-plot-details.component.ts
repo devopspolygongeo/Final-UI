@@ -722,8 +722,13 @@ export class PlotviewPlotDetailsComponent
       }
 
       if (zoomToPlot && res?.bbox) {
-        this.zoomToBBox(res.bbox);
-      }
+  this.zoomToBBox(res.bbox);
+
+  // highlight searched plot after map finishes zooming
+  setTimeout(() => {
+    this.highlightSearchedPlotOnMap(String(this.selectedPlotNo || ''));
+  }, 1200);
+}
     } catch (e: any) {
       console.error(
         '[PlotDetails] Failed to fetch plot details from dataset',
@@ -789,6 +794,7 @@ export class PlotviewPlotDetailsComponent
 
   onMapMouseEvents(mapEvent: MapLayerMouseEvent | MapMouseEvent) {
     if (mapEvent.type === AppConstants.MAP_MOUSE_LEFT_CLICK_EVENT) {
+      this.clearSearchPlotHighlight();
       const clickAttributes = this.layouts.length
         ? this.layouts[0]?.clickAttributes?.split(',') || []
         : [];
@@ -963,4 +969,102 @@ export class PlotviewPlotDetailsComponent
       this.isSaving = false;
     }
   }
+
+  private highlightSearchedPlotOnMap(plotNo: string): void {
+  const map = this.getMapInstance();
+  if (!map || !plotNo) return;
+
+  const searchValue = String(plotNo).trim().toLowerCase();
+
+  const features = map.queryRenderedFeatures();
+
+  const matchedFeature = features.find((feature: any) => {
+    const p = feature.properties || {};
+
+    const value =
+      p.plot_no ??
+      p.plotNo ??
+      p.Plot_No ??
+      p.PLOT_NO ??
+      p.plot ??
+      p.plotid ??
+      p.plotId ??
+      p.name;
+
+    return String(value ?? '').trim().toLowerCase() === searchValue;
+  });
+
+  if (!matchedFeature?.geometry) {
+    console.warn('Searched plot found in dataset, but not rendered on map');
+    return;
+  }
+
+  this.showSearchPlotHighlight(matchedFeature);
+}
+
+private showSearchPlotHighlight(feature: any): void {
+  const map = this.getMapInstance();
+  if (!map || !feature?.geometry) return;
+
+  const sourceId = 'plot-details-search-highlight-source';
+  const fillLayerId = 'plot-details-search-highlight-fill';
+  const lineLayerId = 'plot-details-search-highlight-line';
+
+  const geojson: any = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: feature.geometry,
+        properties: feature.properties || {},
+      },
+    ],
+  };
+
+  if (map.getSource(sourceId)) {
+    map.getSource(sourceId).setData(geojson);
+    return;
+  }
+
+  map.addSource(sourceId, {
+    type: 'geojson',
+    data: geojson,
+  });
+
+  map.addLayer({
+    id: fillLayerId,
+    type: 'fill',
+    source: sourceId,
+    paint: {
+      'fill-color': '#000000',
+      'fill-opacity': 0.35,
+    },
+  });
+
+  map.addLayer({
+    id: lineLayerId,
+    type: 'line',
+    source: sourceId,
+    paint: {
+      'line-color': '#000000',
+      'line-width': 3,
+    },
+  });
+}
+
+private clearSearchPlotHighlight(): void {
+  const map = this.getMapInstance();
+  if (!map) return;
+
+  const sourceId = 'plot-details-search-highlight-source';
+
+  const source = map.getSource(sourceId);
+
+  if (source) {
+    source.setData({
+      type: 'FeatureCollection',
+      features: [],
+    });
+  }
+}
 }
